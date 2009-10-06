@@ -19,3 +19,4 @@ class Listing(models.Model):
     sell_date = models.DateTimeField('Date Sold')
     holder = models.ForeignKey(Student, related_name="purchase_item")
     hold_date = models.DateTimeField('Date Held')
+    price = models.DecimalField(max_digits=7, decimal_places=2)
