@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+    <link rel="stylesheet" href="cube.css" />
+    <title>{% block title %}The Cube Online{% endblock %}</title>
+</head>
+
+<body>
+    <div id="container">
+        <div id="header">
+            {% block header %}
+            <h1>{# TODO make it a link #}</h1>
+            {% endblock %}
+        </div>
+        <div id="navigation">
+            <ul>
+                {% block navigation %}
+                <li id="list" class="tab_active">
+                    <a class="tab_active" href="/"><span>List Books</span></a>
+                    {# TODO add the rest #}
+                </li>
+                {% endblock %}
+            </ul>
+
+        <div id="content">
+            {% block content %}
+            {# TODO will we need anything here? #}
+            {% endblock %}
+        </div>
+
+        <div id="footer">
+            {% block footer %}
+            <p>
+                Brought to you by
+                <a href="http://www.twusa.ca">TWUSA</a> and
+                <a href="http://www.twu.ca/GLC/">TWU Extension</a>
+            </p>
+            {% endblock %}
+        </div>
+    </div>
+</body>
+</html>

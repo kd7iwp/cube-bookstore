@@ -9,7 +9,6 @@ class Book(models.Model):
     author = models.CharField(max_length=70)
     barcode = models.CharField(max_length=50)
     edition = models.PositiveSmallIntegerField()
-    add_date = models.DateTimeField('Date Added')
 
     def __unicode__(self):
         return self.title

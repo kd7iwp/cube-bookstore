@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}The Cube Online - Book List{% endblock %}
+
+{% block content %}
+    {% if listings %}
+        <ul>
+        {% for listing in listings %}
+            <li>{{ listing.list_date }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>There are no book listings. </p>
+    {% endif %}
+{% endblock %}
