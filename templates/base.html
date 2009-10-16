@@ -1,43 +1,92 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://w3.org/1999/xhtml" xml:lang="en" lang="en">
-
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <link rel="stylesheet" href="cube.css" />
-    <title>{% block title %}The Cube Online{% endblock %}</title>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" /> 
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/cube.css" />
+    <title>{% block title %}The Cube Online}{% endblock %}</title>
 </head>
 
 <body>
     <div id="container">
         <div id="header">
             {% block header %}
-            <h1>{# TODO make it a link #}</h1>
+            <h1><a href="{% url list %}" title="Home">The Cube Online</a></h1>
             {% endblock %}
-        </div>
+        </div><!--End Header-->
+
         <div id="navigation">
             <ul>
                 {% block navigation %}
-                <li id="list" class="tab_active">
-                    <a class="tab_active" href="/"><span>List Books</span></a>
-                    {# TODO add the rest #}
+                {% spaceless %}
+                <li id="list">
+                    <a href="{% url list %}">
+                        <span>List Books</span>
+                    </a>
                 </li>
+                {% endspaceless %}
+                {% spaceless %}
+                <li id="my">
+                    <a href="{# url books.views.list #}">
+                        <span>My Books</span>
+                    </a>
+                </li>
+                {% endspaceless %}
+                {% spaceless %}
+                <li id="add">
+                    <a href="{# url books.views.list #}">
+                        <span>Add Books</span>
+                    </a>
+                </li>
+                {% endspaceless %}
+                {% spaceless %}
+                <li id="staff">
+                    <a href="{# url books.views.list #}">
+                        <span>Staff</span>
+                    </a>
+                </li>
+                {% endspaceless %}
+                {% spaceless %}
+                <li id="reports">
+                    <a href="{# url books.views.list #}">
+                        <span>Reports</span>
+                    </a>
+                </li>
+                {% endspaceless %}
+                {% spaceless %}
+                <li id="help">
+                    <a href="{# url books.views.list #}">
+                        <span>Help</span>
+                    </a>
+                </li>
+                {% endspaceless %}
+                {% spaceless %}
+                <li id="log">
+                    <a href="{# url books.views.list #}">
+                        <span>Log Off</span>
+                    </a>
+                </li>
+                {% endspaceless %}
                 {% endblock %}
             </ul>
+        </div><!--End Navigation-->
 
         <div id="content">
-            {% block content %}
-            {# TODO will we need anything here? #}
-            {% endblock %}
-        </div>
+            {% block content %}{# TODO we need anything here? #}{% endblock %}
+        </div><!--End Content-->
 
         <div id="footer">
             {% block footer %}
             <p>
                 Brought to you by
-                <a href="http://www.twusa.ca">TWUSA</a> and
-                <a href="http://www.twu.ca/GLC/">TWU Extension</a>
+                <a href="http://www.twusa.ca">TWUSA</a> <br />
+                Maintained by
+                <a href="http://www.twu.ca/GLC/">TWU Extension</a> <br />
+                Developed by the
+                <a href="http://www.csc.twu.ca/">CMPT</a> 237 class of Fall 2009
             </p>
             {% endblock %}
-        </div>
-    </div>
+        </div><!--End Footer-->
+    </div><!-- End Container-->
 </body>
 </html>
