@@ -9,11 +9,11 @@ admin.autodiscover()
 list_args = {
     'queryset' : Listing.objects.all(),
 }
-# TODO add paginate_by
+# TODO add paginate_by : 30
 
 urlpatterns = patterns('',
     url(r'^$', object_list, list_args, name="list"),
-    (r'^help/', direct_to_template, {'template' : 'help.html'}),
+    url(r'^help/', direct_to_template, {'template' : 'help.html'}, name="help"),
 
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     (r'^admin/(.*)', admin.site.root),
