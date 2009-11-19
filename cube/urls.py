@@ -14,6 +14,8 @@ list_args = {
 urlpatterns = patterns('',
     url(r'^$', object_list, list_args, name="list"),
     url(r'^help/', direct_to_template, {'template' : 'help.html'}, name="help"),
+    url(r'^myBooks/', 'cube.books.views.myBooksies', name="myBooks"),
+    # url(r'^myBooks/', direct_to_template, {'template' : 'myBooks.html'}, name="myBooks"),
 
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     (r'^admin/(.*)', admin.site.root),
