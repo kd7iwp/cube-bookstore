@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Course(models.Model):
     """
@@ -39,22 +40,8 @@ class Book(models.Model):
             course_list += "%s, " % course.code()
         # [:-2] takes off the trailing comma and space
         return course_list[:-2]
-
-class Student(models.Model):
-    """
-    Stores info on the student/user
-    the default id is used for the student number
-    """
-    # TODO this model will probably be replaced with django's User object
-    first_name = models.CharField(max_length=35)
-    last_name = models.CharField(max_length=35)
-    email = models.EmailField()
-
-    def __unicode__(self):
-        return self.name()
-
-    def name(self):
-        return "%s %s" % (self.first_name, self.last_name)
+    def title_list(self):
+        return self.author
 
 class Listing(models.Model):
     """
@@ -76,9 +63,9 @@ class Listing(models.Model):
 
     book = models.ForeignKey(Book)
     list_date = models.DateTimeField('Date Listed', auto_now_add=True)
-    seller = models.ForeignKey(Student, related_name="selling")
+    seller = models.ForeignKey(User, related_name="selling")
     sell_date = models.DateTimeField('Date Sold', blank=True, null=True)
-    holder = models.ForeignKey(Student, related_name="holding",
+    holder = models.ForeignKey(User, related_name="holding",
                                blank=True, null=True)
     hold_date = models.DateTimeField('Date Held', blank=True, null=True)
     doomed = models.BooleanField('Flagged for Deletion', default=False)
