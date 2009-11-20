@@ -59,6 +59,8 @@ class Listing(models.Model):
         (u'O', u'On Hold'),
         (u'P', u'Seller Paid'),
         (u'S', u'Sold'),
+        (u'T', u'To Be Deleted'),
+        (u'D', u'Deleted'),
     )
 
     book = models.ForeignKey(Book)
@@ -68,7 +70,6 @@ class Listing(models.Model):
     holder = models.ForeignKey(User, related_name="holding",
                                blank=True, null=True)
     hold_date = models.DateTimeField('Date Held', blank=True, null=True)
-    doomed = models.BooleanField('Flagged for Deletion', default=False)
     price = models.DecimalField(max_digits=7, decimal_places=2)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES)
 

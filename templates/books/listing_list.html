@@ -3,7 +3,7 @@
 {% block title %}The Cube Online - Book List{% endblock %}
 
 {% block content %}
-    {% if object_list %}
+    {% if listings %}
         <table cellspacing='0'>
             <thead>
                 <tr>
@@ -18,7 +18,7 @@
                 </tr>
             </thead>
             <tbody>
-            {% for listing in object_list %}
+            {% for listing in listings %}
                 <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
                     <td class='row_check'>
                         <input type='checkbox' />{# TODO name and value #}
