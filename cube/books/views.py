@@ -1,19 +1,46 @@
-from django.contrib.auth.decorators import login_required
 from cube.books.models import Book, Listing
-from django.views.generic.list_detail import object_list
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.http import HttpResponseRedirect, HttpResponse
-from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-# http://docs.djangoproject.com/en/dev/topics/auth/#handling-authorization-in-custom-backends
+
+PER_PAGE = '30'
+PAGE_NUM = '1'
+
+def get_number(list, key, default):
+    """
+    grabs a string from a list and converts it to a number
+    if it can't, then it returns the integer conversion of default
+    which is assumed to work
+    """
+    try:
+        number = int(list.get(key, default))
+    except ValueError:
+        number = int(default)
+    return number
 
 @login_required()
 def listings(request):
-    #if not request.user.is_authenticated():
-    #    return HttpResponseRedirect(LOGIN_URL)
-    #return object_list(*args, **kwargs)
+    """
+    Shows a list of all the books listed.
+    Does pagination, sorting and filtering.
+    """
     listings = Listing.objects.all()
-    return render_to_response('books/listing_list.html', {'listings': listings},
+    page_num = get_number(request.GET, 'page', PAGE_NUM)
+    listings_per_page = get_number(request.GET, 'per_page', PER_PAGE)
+
+    paginator = Paginator(listings, listings_per_page)
+    try:
+        page_of_listings = paginator.page(page_num)
+    except (EmptyPage, InvalidPage):
+        page_of_listings = paginator.page(paginator.num_pages)
+    vars = {
+        'listings': page_of_listings,
+        'per_page': listings_per_page,
+        'page': page_num
+    }
+    return render_to_response('books/listing_list.html', vars, 
                               context_instance=RequestContext(request))
 
 def myBooksies(request):

@@ -3,7 +3,27 @@
 {% block title %}The Cube Online - Book List{% endblock %}
 
 {% block content %}
-    {% if listings %}
+    {% if listings.object_list %}
+        {% if listings.has_other_pages %}
+            <div class="PageCounterNav">
+                <p>
+                {% if listings.has_previous %}
+                    <a href="?page={{ listings.previous_page_number }}&amp;per_page={{ per_page }}">
+                        <img src="{{ MEDIA_URL }}images/pagenav_prev.gif" alt="Previous Page" />
+                    </a>
+                {% else %}
+                    <img src="{{ MEDIA_URL }}images/pagenav_prev_faded.gif" alt="No Previous Page" />
+                {% endif %}
+                Pages: ({{ listings.number }} of {{listings.paginator.num_pages}})
+                {% if listings.has_next %}
+                    <a href="?page={{ listings.next_page_number }}&amp;per_page={{ per_page }}">
+                        <img src="{{ MEDIA_URL }}images/pagenav_next.gif" alt="Next Page" />
+                    </a>
+                {% else %}
+                    <img src="{{ MEDIA_URL }}images/pagenav_next_faded.gif" alt="No Next Page" />
+                {% endif %}
+            </div>
+        {% endif %}
         <table cellspacing='0'>
             <thead>
                 <tr>
@@ -18,7 +38,7 @@
                 </tr>
             </thead>
             <tbody>
-            {% for listing in listings %}
+            {% for listing in listings.object_list %}
                 <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
                     <td class='row_check'>
                         <input type='checkbox' />{# TODO name and value #}
