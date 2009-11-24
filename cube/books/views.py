@@ -26,6 +26,7 @@ def listings(request):
     Shows a list of all the books listed.
     Does pagination, sorting and filtering.
     """
+    #TODO sorting and filtering!
     listings = Listing.objects.all()
     page_num = get_number(request.GET, 'page', PAGE_NUM)
     listings_per_page = get_number(request.GET, 'per_page', PER_PAGE)
