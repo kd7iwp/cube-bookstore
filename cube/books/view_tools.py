@@ -33,7 +33,7 @@ def listing_filter(filter, field):
                 q = q & f(book__courses__number__icontains=word)
             except ValueError:
                 q = q & f(book__courses__division__icontains=word)
-        return q
+        return q.distinct()
 
     def ref(filter):
         try:
@@ -49,11 +49,12 @@ def listing_filter(filter, field):
 
     if field == "any_field":
         # do all the queries and merge them with the | operator
-        return author(filter) |\
-               author(filter) |\
-               course(filter) |\
-               ref(filter) |\
-               status(filter)
+        # all queries being |'d must be either distinct or non-distinct
+        return author(filter).distinct() |\
+               author(filter).distinct() |\
+               course(filter).distinct() |\
+               ref(filter).distinct() |\
+               status(filter).distinct()
     elif field == "title":
         return title(filter)
     elif field == "author":
