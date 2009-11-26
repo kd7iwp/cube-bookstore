@@ -4,7 +4,7 @@
 
 {% load selected %}
 {% block content %}
-    <form action="/david/books/" method="post">
+    <form action="/david/books/" method="get">
         <p id="booksearch">
             <input type="text" class="text" name="filter" value="{{ filter_text }}" />
             <select name="field" />
@@ -44,12 +44,24 @@
                 <tr>
                     {# TODO need to sort #}
                     <th>All</td>{# TODO click selects all..is this necessary? #}
-                    <th>Title</th>
-                    <th>Author</th>
-                    <th>Price</th>
-                    <th>Course Code</a>
-                    <th>Ref#</th>
-                    <th>Status</th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=book__title&amp;dir={{ dir }}">Title</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=book__author&amp;dir={{ dir }}">Author</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=price&amp;dir={{ dir }}">Price</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=book__courses&amp;dir={{ dir }}">Course Code</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=id&amp;dir={{ dir }}">Ref#</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=status&amp;dir={{ dir }}">Status</a>
+                    </th>
                 </tr>
             </thead>
             <tbody>

@@ -11,6 +11,9 @@ class Course(models.Model):
     number = models.CharField(max_length=4)
     title = models.CharField(max_length=250)
 
+    class Meta:
+        ordering = ('division', 'number')
+
     def code(self):
         return "%s %s" % (self.division, self.number)
 

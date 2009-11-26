@@ -67,3 +67,7 @@ def listing_filter(filter, field):
         return status(filter)
     else:
         return Listing.objects.all()
+
+def listing_sort(field, dir):
+    dir = '-' if dir == 'desc' else ''
+    return Listing.objects.order_by("%s%s" % (dir, field))

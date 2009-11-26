@@ -1,5 +1,5 @@
 from cube.books.models import Book, Listing
-from cube.books.view_tools import listing_filter, get_number
+from cube.books.view_tools import listing_filter, listing_sort, get_number
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.http import HttpResponseRedirect, HttpResponse
@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.template import RequestContext
 from django.contrib.auth.models import User
 
-
+# pagination defaults
 PER_PAGE = '30'
 PER_PAGE_STAFF = '20'
 PAGE_NUM = '1'
@@ -20,10 +20,11 @@ def listings(request):
     Does pagination, sorting and filtering.
     """
     #TODO sorting!
-    if request.method == "POST":
-        if request.POST.has_key("filter") and request.POST.has_key("field"):
-            # only run the filter if the POST args are there
-            listings = listing_filter(request.POST["filter"] , request.POST["field"])
+    if request.GET.has_key("filter") and request.GET.has_key("field"):
+        # only run the filter if the GET args are there
+        listings = listing_filter(request.GET["filter"] , request.GET["field"])
+    elif request.GET.has_key("sort_by") and request.GET.has_key("dir"):
+        listings = listing_sort(request.GET["sort_by"], request.GET["dir"])
     else:
         listings = Listing.objects.all()
 
@@ -39,8 +40,9 @@ def listings(request):
         'listings' : page_of_listings,
         'per_page' : listings_per_page,
         'page' : page_num,
-        'field' : request.POST.get('field', 'any_field'),
-        'filter_text' : request.POST.get('filter', '')
+        'field' : request.GET.get('field', 'any_field'),
+        'filter_text' : request.GET.get('filter', ''),
+        'dir' : 'desc' if request.GET.get('dir', '') == 'asc' else 'asc'
     }
     return render_to_response('books/listing_list.html', vars, 
                               context_instance=RequestContext(request))
@@ -76,7 +78,7 @@ def staff(request):
         'page': page_num
     }
     return render_to_response('staff/staff.html', vars, 
-    context_instance=RequestContext(request))
+                              context_instance=RequestContext(request))
 
 
 def staffedit(request):
@@ -97,4 +99,4 @@ def staffedit(request):
         'page': page_num
     }
     return render_to_response('staff/staffedit.html', vars, 
-    context_instance=RequestContext(request))
+                              context_instance=RequestContext(request))
