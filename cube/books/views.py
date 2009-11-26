@@ -4,9 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
+from django.contrib.auth.models import User
 from django.template import RequestContext
+from django.contrib.auth.models import User
+
 
 PER_PAGE = '30'
+PER_PAGE_STAFF = '20'
 PAGE_NUM = '1'
 
 @login_required()
@@ -52,3 +56,24 @@ def myBooksies(request):
         return HttpResponse(me)    
     else:
         return HttpResponse("No work")
+
+
+def staff(request):
+    """
+    Shows a list of all staff
+    """
+    listings = User.objects.filter(is_staff = True)
+    page_num = get_number(request.GET, 'page', PAGE_NUM)
+    listings_per_page = get_number(request.GET, 'per_page', PER_PAGE_STAFF)
+    paginator = Paginator(listings, listings_per_page)
+    try:
+        page_of_listings = paginator.page(page_num)
+    except (EmptyPage, InvalidPage):
+        page_of_listings = paginator.page(paginator.num_pages)
+    vars = {
+        'listings': page_of_listings,
+        'per_page': listings_per_page,
+        'page': page_num
+    }
+    return render_to_response('staff/staff.html', vars, 
+    context_instance=RequestContext(request))
