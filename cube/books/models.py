@@ -6,8 +6,9 @@ class Course(models.Model):
     Basic course data
     """
     #TODO NOTE: This model depends on how we end up grabbing course data
+    # one extra character each in the freak case that TWU changes its course code format
     division = models.CharField(max_length=5)
-    number = models.PositiveSmallIntegerField()
+    number = models.CharField(max_length=4)
     title = models.CharField(max_length=250)
 
     def code(self):

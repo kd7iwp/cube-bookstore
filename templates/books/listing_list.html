@@ -2,7 +2,22 @@
 
 {% block title %}The Cube Online - Book List{% endblock %}
 
+{% load selected %}
 {% block content %}
+    <form action="/david/books/" method="post">
+        <p id="booksearch">
+            <input type="text" class="text" name="filter" value="{{ filter_text }}" />
+            <select name="field" />
+                <option {% selected field "any_field" %}>In Any Field</option>
+                <option {% selected field "title" %}>Title</option> 
+                <option {% selected field "author" %}>Author</option> 
+                <option {% selected field "course_code" %}>Course Code</option> 
+                <option {% selected field "ref" %}>Ref #</option> 
+                <option {% selected field "status" %}>Status</option> 
+            </select>
+            <input type="submit" class="submit" value="Search" />
+        </p>
+    </form>
     {% if listings.object_list %}
         {% if listings.has_other_pages %}
             <div class="PageCounterNav">
@@ -66,6 +81,12 @@
             </tbody>
         </table>
     {% else %}
-        <p class='noresults'>There are no books available at this time.</p>
+        <p class='noresults'>
+        {% if filter_text %}
+            We could not find any results for "{{ filter_text }}".
+        {% else %}
+            There are no books available at this time.
+        {% endif %}
+        </p>
     {% endif %}
 {% endblock %}
