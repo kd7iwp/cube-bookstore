@@ -20,7 +20,7 @@ def listing_filter(filter, field):
     """
     def status(filter):
         for choice in Listing.STATUS_CHOICES:
-            if filter in choice[1]:
+            if filter.lower() in choice[1].lower():
                 return Listing.objects.filter(status=choice[0])
         return Listing.objects.none()
 
