@@ -12,7 +12,7 @@
     <div id="container">
         <div id="header">
             {% block header %}
-            <h1><a href="{% url list %}" title="Home">The Cube Online</a></h1>
+            <h1><a href="{% url list %}" title="Home">The Cube Online</a></h1> 
             {% endblock %}
         </div><!--End Header-->
 
@@ -32,12 +32,16 @@
                 {% endspaceless %}
                 {% spaceless %}
                 <li id="my">
-                    <a href="{# url books.views.list #}" class="{# tab_active request list_url #}">
+                    <a href="{% url myBooks %}" class="{# tab_active request list_url #}">
+                     
                         <span>My Books</span>
                     </a>
                 </li>
                 {% endspaceless %}
+
+                {% if user.is_staff%}
                 {% spaceless %}
+
                 <li id="add">
                     <a href="{# url books.views.list #}" class="{# tab_active request list_url #}">
                         <span>Add Books</span>
@@ -46,7 +50,7 @@
                 {% endspaceless %}
                 {% spaceless %}
                 <li id="staff">
-                    <a href="{# url books.views.list #}" class="{# tab_active request list_url #}">
+                    <a href="{% url staff %}" class="{# tab_active request list_url #}">
                         <span>Staff</span>
                     </a>
                 </li>
@@ -57,7 +61,10 @@
                         <span>Reports</span>
                     </a>
                 </li>
+
                 {% endspaceless %}
+                {% endif %}
+
                 {% spaceless %}
                 <li id="help">
                     <a href="{% url help %}" class="{% tab_active request help_url %}">

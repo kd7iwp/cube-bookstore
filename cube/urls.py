@@ -36,7 +36,7 @@ urlpatterns = patterns('',
     url(r'^myBooks/', 'cube.books.views.myBooksies', name="myBooks"),
 
     url(r'^staff/','cube.books.views.staff', name="staff"),
-    url(r'^staffedit/','cube.books.views.staff', name="staffedit"),
+    url(r'^staffedit/','cube.books.views.staffedit', name="staffedit"),
 
 
 

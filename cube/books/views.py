@@ -77,3 +77,24 @@ def staff(request):
     }
     return render_to_response('staff/staff.html', vars, 
     context_instance=RequestContext(request))
+
+
+def staffedit(request):
+    """
+    Shows a list of all staff
+    """
+    listings = User.objects.filter(is_staff = True)
+    page_num = get_number(request.GET, 'page', PAGE_NUM)
+    listings_per_page = get_number(request.GET, 'per_page', PER_PAGE_STAFF)
+    paginator = Paginator(listings, listings_per_page)
+    try:
+        page_of_listings = paginator.page(page_num)
+    except (EmptyPage, InvalidPage):
+        page_of_listings = paginator.page(paginator.num_pages)
+    vars = {
+        'listings': page_of_listings,
+        'per_page': listings_per_page,
+        'page': page_num
+    }
+    return render_to_response('staff/staffedit.html', vars, 
+    context_instance=RequestContext(request))
