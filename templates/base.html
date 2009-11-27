@@ -19,6 +19,7 @@
 
 {% url list as list_url %}
 {% url myBooks as myBooks_url %}
+{% url staff as staff_url %}
 {% url help as help_url %}
 
         <div id="navigation">
@@ -40,7 +41,7 @@
                 </li>
                 {% endspaceless %}
 
-                {% if user.is_staff%}
+                {% if user.is_staff %}
                 {% spaceless %}
 
                 <li id="add">
@@ -51,7 +52,7 @@
                 {% endspaceless %}
                 {% spaceless %}
                 <li id="staff">
-                    <a href="{% url staff %}" class="{# tab_active request list_url #}">
+                    <a href="{% url staff %}" class="{% tab_active request staff_url %}">
                         <span>Staff</span>
                     </a>
                 </li>

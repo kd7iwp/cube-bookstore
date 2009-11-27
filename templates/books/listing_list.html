@@ -58,12 +58,14 @@
                     <th>
                         <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=book__courses&amp;dir={{ dir }}">Course Code</a>
                     </th>
+                    {% if user.is_staff %}
                     <th>
                         <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=id&amp;dir={{ dir }}">Ref#</a>
                     </th>
                     <th>
                         <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=status&amp;dir={{ dir }}">Status</a>
                     </th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -84,25 +86,31 @@
                     <td class="row_coursecode">
                         {{ listing.book.course_codes }}
                     </td>
+                    {% if user.is_staff %}
                     <td class="row_refnum">
                         {{ listing.id }}
                     </td>
                     <td class="row_status">
                         {{ listing.get_status_display }}
                     </td>
+                    {% endif %}
                 </tr>
             {% endfor %}
             </tbody>
         </table>
         <p class="submit_options">
+        {% if user.is_staff %}
             <input type="submit" name="Action" value="Sold" />
             <input type="submit" name="Action" value="Missing" />
             <input type="submit" name="Action" value="Seller Paid" />
+        {% endif %}
             <input type="submit" name="Action" value="Place on Hold" />
+        {% if user.is_staff %}
             <input type="submit" name="Action" value="Remove Holds" />
             <input type="submit" name="Action" value="Edit" />
             <input type="submit" name="Action" value="To Be Deleted" />
             <input type="submit" name="Action" value="Delete" />
+        {% endif %}
         </p>
         </form>
     {% else %}
