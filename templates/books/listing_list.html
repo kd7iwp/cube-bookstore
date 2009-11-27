@@ -39,6 +39,7 @@
                 {% endif %}
             </div>
         {% endif %}
+        <form action="{# TODO #}" method="post" name="ListItems">
         <table cellspacing='0'>
             <thead>
                 <tr>
@@ -69,7 +70,7 @@
             {% for listing in listings.object_list %}
                 <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
                     <td class='row_check'>
-                        <input type='checkbox' />{# TODO name and value #}
+                        <input type='checkbox' name="idToEdit" value="{{ listing.id }}" />
                     </td>
                     <td class='row_title'>
                         {{ listing.book.title }}
@@ -93,6 +94,17 @@
             {% endfor %}
             </tbody>
         </table>
+        <p class="submit_options">
+            <input type="submit" name="Action" value="Sold" />
+            <input type="submit" name="Action" value="Missing" />
+            <input type="submit" name="Action" value="Seller Paid" />
+            <input type="submit" name="Action" value="Place on Hold" />
+            <input type="submit" name="Action" value="RemoveHolds" />
+            <input type="submit" name="Action" value="Edit" />
+            <input type="submit" name="Action" value="ToBeDeleted" />
+            <input type="submit" name="Action" value="Delete" />
+        </p>
+        </form>
     {% else %}
         <p class='noresults'>
         {% if filter_text %}
