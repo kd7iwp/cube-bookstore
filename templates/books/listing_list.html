@@ -7,7 +7,7 @@
     <form action="/david/books/" method="get">
         <p id="booksearch">
             <input type="text" class="text" name="filter" value="{{ filter_text }}" />
-            <select name="field" />
+            <select name="field">
                 <option {% selected field "any_field" %}>In Any Field</option>
                 <option {% selected field "title" %}>Title</option> 
                 <option {% selected field "author" %}>Author</option> 
@@ -42,8 +42,8 @@
         <table cellspacing='0'>
             <thead>
                 <tr>
-                    {# TODO need to sort #}
-                    <th>All</td>{# TODO click selects all..is this necessary? #}
+                    <th>
+                        <a href="javascript:void(0);" onClick="toggleCBTogether();">All</a>
                     <th>
                         <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=book__title&amp;dir={{ dir }}">Title</a>
                     </th>
