@@ -75,9 +75,6 @@ def update_data(request):
         if "idToEdit" in key:
             edit.append(Listing.objects.get(pk=int(value)))
             
-    #message = ""
-    #for x in edit:
-    #    message += str(x) + ", "
     if action == "Delete":
         set_statuses('D', edit)
         message = "%s deleted." % singlural(len(edit))
@@ -96,10 +93,13 @@ def update_data(request):
         # TODO add the bells and whistles
         set_statuses('P', edit)
         message = "%s set to Seller Paid" % singlural(len(edit))
-    elif action[:1] == "Place on Hold"[:4]:
+    elif action[:4] == "Place on Hold"[:4]:
         # apparently some browsers have issues passing spaces
         # TODO add the bells and whistles
         set_statuses('O', edit)
+        message = "Under Construction..."
+    #elif action == "Missing":
+
     vars = {
         'message' : message, 
     }
