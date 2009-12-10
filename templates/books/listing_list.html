@@ -39,7 +39,7 @@
                 {% endif %}
             </div>
         {% endif %}
-        <form action="{# TODO #}" method="post" name="ListItems">
+        <form action="{% url update_data %}" method="post" name="ListItems">
         <table cellspacing='0'>
             <thead>
                 <tr>
@@ -72,7 +72,7 @@
             {% for listing in listings.object_list %}
                 <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
                     <td class='row_check'>
-                        <input type='checkbox' name="idToEdit" value="{{ listing.id }}" />
+                        <input type='checkbox' name="idToEdit{{ forloop.counter }}" value="{{ listing.id }}" />
                     </td>
                     <td class='row_title'>
                         {{ listing.book.title }}

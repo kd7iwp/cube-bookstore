@@ -11,30 +11,16 @@ list_args = {
     'queryset' : Listing.objects.all(),
 }
 
-
-
-
-
-
-
-
-
-# TODO add paginate_by : 30
-
 urlpatterns = patterns('',
     (r'^$', 'cube.twupass.views.login_cube'),
     (r'^logout/', 'cube.twupass.views.logout_cube'),
-    url(r'^books/', 'cube.books.views.listings', name="list"),
-    #url(r'^$', 'cube.books.views.limited_object_list', list_args, name="list"),
+    url(r'^books/$', 'cube.books.views.listings', name="list"),
+    url(r'^books/update', 'cube.books.views.update_data', name="update_data"),
 
     url(r'^my/', direct_to_template, {'template' : 'books/mybooks.html'}, name="my"),
-
-  
     
     url(r'^help/', direct_to_template, {'template' : 'help.html'}, name="help"),
-   
     url(r'^myBooks/', 'cube.books.views.myBooksies', name="myBooks"),
-
     url(r'^staff/','cube.books.views.staff', name="staff"),
     url(r'^staffedit/','cube.books.views.staffedit', name="staffedit"),
 

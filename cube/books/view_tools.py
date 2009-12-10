@@ -13,7 +13,7 @@ def get_number(list, key, default):
         number = int(default)
     return number
 
-def listing_filter(filter, field):
+def listing_filter(filter, field, listings):
     """
     Returns a filtered list of Listing objects only if the field is valid
     otherwise it returns all of the listing objects
@@ -21,12 +21,12 @@ def listing_filter(filter, field):
     def status(filter):
         for choice in Listing.STATUS_CHOICES:
             if filter.lower() in choice[1].lower():
-                return Listing.objects.filter(status=choice[0])
+                return listings.filter(status=choice[0])
         return Listing.objects.none()
 
     def course(filter):
-        q = Listing.objects.all()
-        f = Listing.objects.filter
+        q = listings
+        f = listings.filter
         for word in filter.split():
             try:
                 x = int(word)
@@ -37,15 +37,15 @@ def listing_filter(filter, field):
 
     def ref(filter):
         try:
-            return Listing.objects.filter(pk=int(filter))
+            return listings.filter(pk=int(filter))
         except ValueError:
             return Listing.objects.none()
 
     def title(filter):
-        return Listing.objects.filter(book__title__icontains=filter)
+        return listings.filter(book__title__icontains=filter)
 
     def author(filter):
-        return Listing.objects.filter(book__author__icontains=filter)
+        return listings.filter(book__author__icontains=filter)
 
     if field == "any_field":
         # do all the queries and merge them with the | operator
@@ -66,7 +66,7 @@ def listing_filter(filter, field):
     elif field == "status":
         return status(filter)
     else:
-        return Listing.objects.all()
+        return listings
 
 def listing_sort(field, dir):
     dir = '-' if dir == 'desc' else ''

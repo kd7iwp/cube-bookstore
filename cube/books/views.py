@@ -19,10 +19,10 @@ def listings(request):
     Shows a list of all the books listed.
     Does pagination, sorting and filtering.
     """
-    #TODO sorting!
     if request.GET.has_key("filter") and request.GET.has_key("field"):
         # only run the filter if the GET args are there
-        listings = listing_filter(request.GET["filter"] , request.GET["field"])
+        listings = listing_filter(request.GET["filter"] , request.GET["field"],
+                                  Listing.objects.all())
     elif request.GET.has_key("sort_by") and request.GET.has_key("dir"):
         listings = listing_sort(request.GET["sort_by"], request.GET["dir"])
     else:
@@ -46,6 +46,65 @@ def listings(request):
     }
     return render_to_response('books/listing_list.html', vars, 
                               context_instance=RequestContext(request))
+@login_required()
+def update_data(request):
+    """
+    This view is used to update book data
+    """
+    def singlural(number):
+        """
+        Returns appropriate text depending on the singularity of the number
+        """
+        if number == 1: return "1 item has been"
+        return "%s items have been" % number
+
+    def set_statuses(status, listings):
+        """
+        Sets a status on all listings given and saves them
+        """
+        for listing in listings:
+            listing.status = status
+            listing.save()
+
+    edit = []
+    action = request.POST.get("Action", '')
+    singular = "item has been"
+    plural = "items have been"
+
+    for key, value in request.POST.items():
+        if "idToEdit" in key:
+            edit.append(Listing.objects.get(pk=int(value)))
+            
+    #message = ""
+    #for x in edit:
+    #    message += str(x) + ", "
+    if action == "Delete":
+        set_statuses('D', edit)
+        message = "%s deleted." % singlural(len(edit))
+    elif action[:1] == "To Be Deleted"[:1]:
+        # apparently some browsers have issues passing spaces
+        # TODO add bells and whistles
+        set_statuses('T', edit)
+        message = "%s marked as 'To Be Deleted'." % singlural(len(edit))
+    elif action == "Sold":
+        set_statuses('S', edit)
+        #TODO implement email and the bells and whistles
+        message = "%s set to Sold and the owners have been emailed " +\
+                  "and asked to come pickup the money." % singlural(len(edit))
+    elif action[:5] == "Seller Paid"[:5]:
+        # apparently some browsers have issues passing spaces
+        # TODO add the bells and whistles
+        set_statuses('P', edit)
+        message = "%s set to Seller Paid" % singlural(len(edit))
+    elif action[:1] == "Place on Hold"[:4]:
+        # apparently some browsers have issues passing spaces
+        # TODO add the bells and whistles
+        set_statuses('O', edit)
+    vars = {
+        'message' : message, 
+    }
+    return render_to_response('books/listing_edit.html', vars, 
+                              context_instance=RequestContext(request))
 
 def myBooksies(request):
     if request.user.is_authenticated():
@@ -58,7 +117,6 @@ def myBooksies(request):
         return HttpResponse(me)    
     else:
         return HttpResponse("No work")
-
 
 def staff(request):
     """
@@ -79,7 +137,6 @@ def staff(request):
     }
     return render_to_response('staff/staff.html', vars, 
                               context_instance=RequestContext(request))
-
 
 def staffedit(request):
     """
