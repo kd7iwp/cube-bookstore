@@ -97,9 +97,9 @@ def update_data(request):
         # apparently some browsers have issues passing spaces
         # TODO add the bells and whistles
         set_statuses('O', edit)
-        message = "Under Construction..."
+        message = "POH Under Construction..."
     #elif action == "Missing":
-
+    message = "Under Construction..."
     vars = {
         'message' : message, 
     }
