@@ -1,9 +1,13 @@
 from cube.settings import ADMINS as admin_emails
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.template import loader, Context
+import re
+
+def strip_html(value):
+    "Return the given HTML with all tags stripped."
+    return re.sub(r'<[^>]*?>', '', value)
 
 def send_missing_emails(listings):
-    email = admin_emails[0][1] #TODO this might not be the brightest idea
     t = loader.get_template('email/missing.html')
     missing = {}
     for listing in listings:
@@ -17,5 +21,12 @@ def send_missing_emails(listings):
             'num_listings' : len(listings),
             'book_titles' : map(lambda x: x.book.title, listings),
         })
-        send_mail('Your book went missing at The Cube', t.render(c), email,
-                  [owner.email])
+        subj = 'Your book went missing at the Cube'
+        #TODO using admin_email might not be the brightest idea
+        frm = "The Cube <%s>" % admin_emails[0][1] 
+        to = [owner.email]
+        html_content = t.render(c)
+        text_content = strip_html(html_content)
+        msg = EmailMultiAlternatives(subj, text_content, frm, to)
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()

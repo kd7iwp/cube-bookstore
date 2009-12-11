@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% block content %}
+<p>{{ num_missing }} item{{ num_missing|pluralize:" has,s have" }} been set to &quot;Missing&quot;{% ifequal num_missing 0 %}{% else %} and the owner{{ num_owners|pluralize:" has,s have" }} been notified via email{% endifequal %}.</p>
+{% endblock %}

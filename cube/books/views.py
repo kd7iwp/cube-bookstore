@@ -105,11 +105,14 @@ def update_data(request):
         bunch = filter(lambda x : x.status != 'M', bunch)
         set_bunch('status', 'M')
         send_missing_emails(bunch)
-        owners = set(map(lambda x: x.seller, bunch)) # unique owners
-        messages.append("%s set to Missing " % singlural(len(bunch)) +\
-                        "" if len(bunch) == 0 else\
-                        ("and the owner%s been notified via email." %\
-                        (" has" if len(owners) == 1 else "s have")))
+
+        vars = {
+            'num_owners' : len(set(map(lambda x: x.seller, bunch))),
+            'num_missing' : len(bunch),
+        }
+
+        return render_to_response('books/update_data/missing.html', vars, 
+                                  context_instance=RequestContext(request))
     elif action[:4] == "Place on Hold"[:4]:
         # apparently some browsers have issues passing spaces
         def hold_filter(x):
@@ -123,7 +126,7 @@ def update_data(request):
                 return x
             elif x.get_status_display() != 'For Sale':
                 messages.append('"%s"' % x.book.title +\
-                                'was marked %s ' % x.get_status_display() +\
+                                ' was marked %s ' % x.get_status_display() +\
                                 "just before you requested it.")
             else:
                 messages.append('"%s" has been reserved ' % x.book.title +\
@@ -133,9 +136,12 @@ def update_data(request):
         bunch = filter(hold_filter, bunch)
         set_bunch('status', 'O')
         set_bunch('hold_date', datetime.today())
-        messages.append("Total: $%s" % sum(map(lambda x: x.price, bunch)))
-        messages.append("Please pickup your Requested Books within the next" +\
-                        ' 24 hours from the "Cube" which is by the cafeteria.')
+        if bunch:
+            messages.append("Total: $%s" % sum(map(lambda x: x.price, bunch)))
+            messages.append("Please pickup your requested book" +\
+                            ("" if len(bunch) == 1 else "s") +\
+                            ' within the next 24 hours from the "Cube" ' +\
+                            'which is by the cafeteria.')
     elif action[:5] == "Remove Holds"[:5]:
         def rm_hold_filter(x):
             """ 

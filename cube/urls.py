@@ -7,10 +7,6 @@ from django.views.generic.simple import direct_to_template
 
 admin.autodiscover()
 
-list_args = {
-    'queryset' : Listing.objects.all(),
-}
-
 urlpatterns = patterns('',
     (r'^$', 'cube.twupass.views.login_cube'),
     (r'^logout/', 'cube.twupass.views.logout_cube'),
