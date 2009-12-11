@@ -12,8 +12,10 @@
                 <option {% selected field "title" %}>Title</option> 
                 <option {% selected field "author" %}>Author</option> 
                 <option {% selected field "course_code" %}>Course Code</option> 
-                <option {% selected field "ref" %}>Ref #</option> 
-                <option {% selected field "status" %}>Status</option> 
+                {% if user.is_staff %}
+                    <option {% selected field "ref" %}>Ref #</option> 
+                    <option {% selected field "status" %}>Status</option> 
+                {% endif %}
             </select>
             <input type="submit" class="submit" value="Search" />
         </p>
