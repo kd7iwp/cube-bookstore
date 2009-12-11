@@ -21,11 +21,11 @@ DATABASE_PORT = ''             # Set to empty string for default. Not used with 
 # although not all choices may be available on all operating systems.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Chicago'
+TIME_ZONE = 'America/Vancouver'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-CA'
 
 SITE_ID = 1
 
@@ -71,9 +71,27 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = ( 
+    "django.core.context_processors.request", 
+    "django.core.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media"
+)
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
+)
+
+LOGIN_URL = "" # The url where the login view can be accessed
+LOGIN_REDIRECT_URL = "" #Where the login view should send users by default after authentication
+
+AUTHENTICATION_BACKENDS = (
+    # This Site is written to work with TWUPass
+    # If you don't want to use TWUPass, it will take a little bit of decoupling
+    'cube.twupass.backend.TWUPassBackend',
+    'django.contrib.auth.backends.ModelBackend',
 )
