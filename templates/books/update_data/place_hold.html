@@ -1,3 +1,27 @@
-{% extends base.html %}
+{% extends "base.html" %}
 {% block content %}
+{% for listing in failed %}
+    {% if forloop.first %}
+        <h1>Failed</h1>
+    {% endif %}
+    <p>{{ listing.book.title }} was marked {{ listing.get_status_display }} just before you requested it.</p>
+{% endfor %}
+{% for listing in extended %}
+    {% if forloop.first %}
+        <h1>Extended</h1>
+        <p><em>The following book{{ extended|length|pluralize:" has,s have" }} been placed on hold for another 24 hours:</em></p>
+    {% endif %}
+    <p>{{ listing.book.title }} ${{ listing.price }}</p>
+{% endfor %}
+{% for listing in new_hold %}
+    {% if forloop.first %}
+        <h1>Reserved</h1>
+        <p><em>The following book{{ new_hold|length|pluralize:" has,s have" }} been reserved for you for 24 hours:</em></p>
+    {% endif %}
+    <p>{{ listing.book.title }} ${{ listing.price }}</p>
+{% endfor %}
+{% if num_held %}
+    <p><strong>Total</strong>: ${{ total_price }}</p>
+    <p>Please pickup your requested book{{ num_held|pluralize }} within the next 24 hours from the &quot;Cube&quot; which is by the cafeteria.</p>
+{% endif %}
 {% endblock %}

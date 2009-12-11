@@ -115,33 +115,28 @@ def update_data(request):
                                   context_instance=RequestContext(request))
     elif action[:4] == "Place on Hold"[:4]:
         # apparently some browsers have issues passing spaces
-        def hold_filter(x):
-            """
-            Only let listings which are For Sale or already On Hold
-            be Placed on Hold
-            """
-            if x.get_status_display() == 'On Hold' and x.holder == request.user:
-                messages.append('"%s" has been placed ' % x.book.title +\
-                                "on hold for another 24 hours. $%s" % x.price)
-                return x
-            elif x.get_status_display() != 'For Sale':
-                messages.append('"%s"' % x.book.title +\
-                                ' was marked %s ' % x.get_status_display() +\
-                                "just before you requested it.")
+        failed, extended, new_hold = [], [], []
+        for b in bunch:
+            if b.get_status_display() == 'On Hold' and b.holder == request.user:
+                b.hold_date = datetime.today()
+                extended.append(b)
+            elif b.get_status_display() != 'For Sale':
+                failed.append(b)
             else:
-                messages.append('"%s" has been reserved ' % x.book.title +\
-                                "for you for 24 hours. $%s" % x.price)
-                return x
-
-        bunch = filter(hold_filter, bunch)
-        set_bunch('status', 'O')
-        set_bunch('hold_date', datetime.today())
-        if bunch:
-            messages.append("Total: $%s" % sum(map(lambda x: x.price, bunch)))
-            messages.append("Please pickup your requested book" +\
-                            ("" if len(bunch) == 1 else "s") +\
-                            ' within the next 24 hours from the "Cube" ' +\
-                            'which is by the cafeteria.')
+                b.status = 'O' # set to "On Hold"
+                b.hold_date = datetime.today()
+                b.holder = request.user
+                b.save()
+                new_hold.append(b)
+        vars = {
+            'failed' : failed,
+            'extended' : extended,
+            'new_hold' : new_hold,
+            'num_held' : len(extended) + len(new_hold),
+            'total_price' : sum(map(lambda x: x.price, extended + new_hold))
+        }
+        return render_to_response('books/update_data/place_hold.html', vars, 
+                                  context_instance=RequestContext(request))
     elif action[:5] == "Remove Holds"[:5]:
         def rm_hold_filter(x):
             """ 
