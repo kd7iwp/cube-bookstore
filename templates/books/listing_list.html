@@ -3,6 +3,7 @@
 {% block title %}The Cube Online - Book List{% endblock %}
 
 {% load selected %}
+{% load humanize %}
 {% block content %}
     <form action="/david/books/" method="get">
         <p id="booksearch">
@@ -78,6 +79,9 @@
                     </td>
                     <td class='row_title'>
                         {{ listing.book.title }}
+                        {% ifnotequal listing.book.edition 1 %}
+                            ({{ listing.book.edition|ordinal }} ed.)
+                        {% endifnotequal %}
                     </td>
                     <td class="row_author">
                         {{ listing.book.author }}
