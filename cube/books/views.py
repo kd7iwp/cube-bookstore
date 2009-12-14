@@ -142,6 +142,7 @@ def update_data(request):
             """ 
             Filters listings through if the current user is staff
             or the holder is the current user and the status is 'On Hold'
+            (Staff can remove holds on items which are not their own)
             """
             if x.status == 'O':
                 if request.user.is_staff: return x
@@ -150,8 +151,8 @@ def update_data(request):
         bunch = filter(rm_hold_filter, bunch)
         set_bunch('status', 'F') # set to "For Sale"
         set_bunch('hold_date', None)
-        messages.append("%s hold%s been removed." % (len(bunch),
-            ' has' if len(bunch) == 1 else 's have'))
+        return render_to_response('books/update_data/remove_holds.html', 
+            {'removed' : len(bunch)}, context_instance=RequestContext(request))
     else:
         # TODO edit
         messages.append("Something went wrong... talk to whoever is in charge")

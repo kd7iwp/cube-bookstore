@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
+<p>{{ removed }} hold{{ removed|pluralize:" has,s have" }} been removed.</p>
+<p><a href='{% url myBooks %}'>Click here to see all the books you have on order</a></p> 
+{% endblock %}
