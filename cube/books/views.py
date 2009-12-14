@@ -24,6 +24,7 @@ def listings(request):
     Shows a list of all the books listed.
     Does pagination, sorting and filtering.
     """
+    # Filter for the search box
     if request.GET.has_key("filter") and request.GET.has_key("field"):
         # only run the filter if the GET args are there
         listings = listing_filter(request.GET["filter"] , request.GET["field"],
@@ -33,6 +34,12 @@ def listings(request):
     else:
         listings = Listing.objects.all()
 
+    # Filter according to permissions
+    if not request.user.is_staff:
+        # Non staff can only see listings which are for sale.
+        listings = filter(lambda x: x.status == 'F', listings)
+
+    # Pagination
     page_num = get_number(request.GET, 'page', PAGE_NUM)
     listings_per_page = get_number(request.GET, 'per_page', PER_PAGE)
 
@@ -41,6 +48,9 @@ def listings(request):
         page_of_listings = paginator.page(page_num)
     except (EmptyPage, InvalidPage):
         page_of_listings = paginator.page(paginator.num_pages)
+
+
+    # Template time
     vars = {
         'listings' : page_of_listings,
         'per_page' : listings_per_page,
