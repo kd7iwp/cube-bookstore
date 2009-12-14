@@ -11,7 +11,7 @@
 
             <h4>How do I reserve a Book?</h4> 
             <p class='answer'> 
-            Go to the "<a href='#'>List Books</a>" page 
+            Go to the "<a href='{% url list %} '>List Books</a>" page 
             and check off all the books you would like to put a hold on. 
             On the bottom of the page there is a button that says, "Request". 
             When you press that button those books will be put on hold for 
@@ -29,7 +29,7 @@
 
             <h4>How do I cancel a reservation of a Book?</h4> 
             <p class='answer'> 
-            Go to the "<a href="#">My Books</a>" page
+            Go to the "<a href="{% url myBooks %}">My Books</a>" page
             and check off all the books you no longer want under 
             "Books I have on Hold".  On the bottom of the page there is a 
             button that says, "Remove Hold".  When you press that button 
@@ -38,7 +38,7 @@
 
             <h4>How do I know if my book has been sold yet?</h4> 
             <p class='answer'> 
-            Go to the "<a href="#">My Books</a>" page
+            Go to the "<a href="{% url myBooks %}">My Books</a>" page
             and look under "Books I have for Sale".  If you have any books 
             at the "Cube" they will be listed there and beside each book it 
             will say the progress. "For Sale" means no one has bought it yet. 
