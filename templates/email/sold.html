@@ -1,0 +1,17 @@
+Dear {{name}},
+{# Unfortunately I can't use newlines otherwise they will end up in the email #}<br /><br />
+Your book{{ num_listings|pluralize }} {% for book_title in book_titles %}{% if not forloop.first %}, {% endif %}{% if forloop.last %}{% ifnotequal num_listings 1 %}and {% endifnotequal %}{% endif %}"{{ book_title }}"{% endfor %} ha{{ num_listings|pluralize:"s,ve" }} been sold. Please come to the TWUSA Office in the Douglas Centre to pick up your money.
+<br /><br />
+Hours to pick up are:
+<br /><br />
+Monday: 9:00-10:00, 4:00-5:00<br />
+Tuesday: 4:00-5:00<br />
+Wednesday: 9:00-10:00
+<br /><br />
+Questions?! <a href="mailto:{{ admin_email }}">{{ admin_email }}</a>
+<br /><br />{% load absurl %}
+{% if owner_selling %}To see the status of the other book{{ owner_selling|pluralize }} you have for sale please visit: {% absurl myBooks %}
+{% else %}To sell other books, come visit us at the Cube by the cafeteria.{% endif %}
+<br /><br />
+sincerely,<br />
+<a href="{% absurl list %} ">The Cube</a>

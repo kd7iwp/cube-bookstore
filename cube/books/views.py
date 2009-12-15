@@ -1,7 +1,7 @@
 # django imports
 from cube.books.models import Book, Listing
 from cube.books.view_tools import listing_filter, listing_sort, get_number
-from cube.books.email import send_missing_emails
+from cube.books.email import send_missing_emails, send_sold_emails
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.http import HttpResponseRedirect, HttpResponse
@@ -48,7 +48,6 @@ def listings(request):
         page_of_listings = paginator.page(page_num)
     except (EmptyPage, InvalidPage):
         page_of_listings = paginator.page(paginator.num_pages)
-
 
     # Template time
     vars = {
@@ -100,19 +99,30 @@ def update_data(request):
         set_bunch('status', 'T')
         messages.append("%s marked as 'To Be Deleted'." % singlural(len(bunch)))
     elif action == "Sold":
+        # Allow only if For Sale or On Hold
+        bunch = filter(lambda x: x.status in 'FO', bunch)
         set_bunch('status', 'S')
-        #TODO implement email and the bells and whistles
-        messages.append("%s set to Sold and the owners " %\
-                        singlural(len(bunch)) +\
-                        "have been emailed and asked to come pickup the money.")
+        send_sold_emails(bunch)
+        vars = {
+            'sold' : len(bunch),
+            'num_owners' : len(set(map(lambda x: x.seller, bunch))),
+        }
+        return render_to_response('books/update_data/sold.html', vars, 
+                                  context_instance=RequestContext(request))
     elif action[:5] == "Seller Paid"[:5]:
         # apparently some browsers have issues passing spaces
-        # TODO add the bells and whistles
+
+        # only staff can do this
+        if not request.user.is_staff: bunch = []
+        # if it's already seller paid, don't do it again
+        else: bunch = filter(lambda x: x.status != 'P', bunch)
+
         set_bunch('status', 'P')
-        messages.append("%s set to Seller Paid." % singlural(len(bunch)))
+        return render_to_response('books/update_data/seller_paid.html', 
+            {'paid' : len(bunch)}, context_instance=RequestContext(request))
     elif action == "Missing":
         # only non-missing ones can be set to missing
-        bunch = filter(lambda x : x.status != 'M', bunch)
+        bunch = filter(lambda x: x.status != 'M', bunch)
         set_bunch('status', 'M')
         send_missing_emails(bunch)
 

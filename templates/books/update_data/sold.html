@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+    <p>{{ sold }} item{{ sold|pluralize:" has,s have" }} been set to 'Sold'
+        and the owner{{ num_owners|pluralize:" has,s have" }} been emailed
+        and asked to come pickup the money.
+    </p>
+{% endblock %}
