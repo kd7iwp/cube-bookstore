@@ -81,14 +81,14 @@ def update_data(request):
             listing.save()
 
     messages = []
-    bunch = []
+    bunch = Listing.objects.none()
     action = request.POST.get("Action", '')
     singular = "item has been"
     plural = "items have been"
 
     for key, value in request.POST.items():
         if "idToEdit" in key:
-            bunch.append(Listing.objects.get(pk=int(value)))
+            bunch = bunch | Listing.objects.filter(pk=int(value))
             
     if action == "Delete":
         set_bunch('status', 'D')
@@ -97,82 +97,67 @@ def update_data(request):
         # apparently some browsers have issues passing spaces
         # TODO add bells and whistles
         set_bunch('status', 'T')
-        messages.append("%s marked as 'To Be Deleted'." % singlural(len(bunch)))
+        vars = {'num_doomed' : len(bunch)}
+        return render_to_response('books/update_data/to_be_deleted.html', vars, 
+                                  context_instance=RequestContext(request))
     elif action == "Sold":
         # Allow only if For Sale or On Hold
-        bunch = filter(lambda x: x.status in 'FO', bunch)
-        set_bunch('status', 'S')
-        send_sold_emails(bunch)
+        bunch = bunch.filter(status__in='FO')
+        send_sold_emails(list(bunch))
         vars = {
             'sold' : len(bunch),
             'num_owners' : len(set(map(lambda x: x.seller, bunch))),
         }
+        bunch.update(status='S', sell_date=datetime.today())
         return render_to_response('books/update_data/sold.html', vars, 
                                   context_instance=RequestContext(request))
     elif action[:5] == "Seller Paid"[:5]:
         # apparently some browsers have issues passing spaces
 
         # only staff can do this
-        if not request.user.is_staff: bunch = []
-        # if it's already seller paid, don't do it again
-        else: bunch = filter(lambda x: x.status != 'P', bunch)
+        if not request.user.is_staff: bunch = Listing.objects.none()
+        # A Seller can be paid only after the book was sold
+        else: bunch = bunch.filter(status='S')
 
-        set_bunch('status', 'P')
-        return render_to_response('books/update_data/seller_paid.html', 
-            {'paid' : len(bunch)}, context_instance=RequestContext(request))
+        vars = {'paid' : len(bunch)}
+        bunch.update(status='P')
+        return render_to_response('books/update_data/seller_paid.html', vars, 
+                                  context_instance=RequestContext(request))
     elif action == "Missing":
-        # only non-missing ones can be set to missing
-        bunch = filter(lambda x: x.status != 'M', bunch)
-        set_bunch('status', 'M')
+        # Must be For Sale, On Hold or To Be Deleted for it to go Missing
+        bunch = bunch.filter(status__in='FOT')
         send_missing_emails(bunch)
-
         vars = {
             'num_owners' : len(set(map(lambda x: x.seller, bunch))),
             'num_missing' : len(bunch),
         }
-
+        bunch.update(status='M')
         return render_to_response('books/update_data/missing.html', vars, 
                                   context_instance=RequestContext(request))
     elif action[:4] == "Place on Hold"[:4]:
         # apparently some browsers have issues passing spaces
-        failed, extended, new_hold = [], [], []
-        for b in bunch:
-            if b.get_status_display() == 'On Hold' and b.holder == request.user:
-                b.hold_date = datetime.today()
-                extended.append(b)
-            elif b.get_status_display() != 'For Sale':
-                failed.append(b)
-            else:
-                b.status = 'O' # set to "On Hold"
-                b.hold_date = datetime.today()
-                b.holder = request.user
-                b.save()
-                new_hold.append(b)
+        extended = bunch.filter(status='O', holder=request.user)
+        new_hold = bunch.filter(status='F')
+        failed = bunch.exclude(status__in='OF', holder=request.user)
+        held = extended | new_hold
         vars = {
             'failed' : failed,
             'extended' : extended,
             'new_hold' : new_hold,
-            'num_held' : len(extended) + len(new_hold),
-            'total_price' : sum(map(lambda x: x.price, extended + new_hold))
+            'num_held' : held.count(),
+            'total_price' : sum(map(lambda x: x.price, held)),
         }
+        extended.update(hold_date = datetime.today())
+        new_hold.update(status='O', hold_date=datetime.today(), holder=request.user)
         return render_to_response('books/update_data/place_hold.html', vars, 
                                   context_instance=RequestContext(request))
     elif action[:5] == "Remove Holds"[:5]:
-        def rm_hold_filter(x):
-            """ 
-            Filters listings through if the current user is staff
-            or the holder is the current user and the status is 'On Hold'
-            (Staff can remove holds on items which are not their own)
-            """
-            if x.status == 'O':
-                if request.user.is_staff: return x
-                if x.holder == request.user: return x
-        
-        bunch = filter(rm_hold_filter, bunch)
-        set_bunch('status', 'F') # set to "For Sale"
-        set_bunch('hold_date', None)
-        return render_to_response('books/update_data/remove_holds.html', 
-            {'removed' : len(bunch)}, context_instance=RequestContext(request))
+        bunch = bunch.filter(status='O')
+        if not request.user.is_staff: bunch = bunch.filter(holder=request.user)
+        vars = {'removed' : len(bunch)}
+        bunch.update(status='F', hold_date=None)
+        return render_to_response('books/update_data/remove_holds.html', vars,
+                                  context_instance=RequestContext(request))
     else:
         # TODO edit
         messages.append("Something went wrong... talk to whoever is in charge")
