@@ -10,6 +10,8 @@ from django.contrib.auth.models import User
 from django.template import RequestContext
 from django.contrib.auth.models import User
 
+
+
 #python imports
 from datetime import datetime
 
@@ -65,6 +67,21 @@ def update_data(request):
     """
     This view is used to update book data
     """
+    def singlural(number):
+        """
+        Returns appropriate text depending on the singularity of the number
+        """
+        if number == 1: return "1 item has been"
+        return "%s items have been" % number
+
+    def set_bunch(attr, value):
+        """
+        Sets a status on all listings given and saves them
+        """
+        for listing in bunch:
+            setattr(listing, attr, value)
+            listing.save()
+
     messages = []
     bunch = Listing.objects.none()
     action = request.POST.get("Action", '')
@@ -76,18 +93,13 @@ def update_data(request):
             bunch = bunch | Listing.objects.filter(pk=int(value))
             
     if action == "Delete":
-        bunch = bunch.exclude(status='D')
-        vars = {'num_deleted' : bunch.count()}
-        bunch.update(status='D')
-        return render_to_response('books/update_data/deleted.html', vars, 
-                                  context_instance=RequestContext(request))
+        set_bunch('status', 'D')
+        messages.append("%s deleted." % singlural(len(bunch)))
     elif action[:1] == "To Be Deleted"[:1]:
         # apparently some browsers have issues passing spaces
         # TODO add bells and whistles
-        # can't do this for Deleted, Seller Paid, and Sold Books
-        bunch = bunch.exclude(status__in='DPS')
-        vars = {'num_doomed' : bunch.count()}
-        bunch.update(status='T')
+        set_bunch('status', 'T')
+        vars = {'num_doomed' : len(bunch)}
         return render_to_response('books/update_data/to_be_deleted.html', vars, 
                                   context_instance=RequestContext(request))
     elif action == "Sold":
@@ -95,7 +107,7 @@ def update_data(request):
         bunch = bunch.filter(status__in='FO')
         send_sold_emails(list(bunch))
         vars = {
-            'sold' : bunch.count(),
+            'sold' : len(bunch),
             'num_owners' : len(set(map(lambda x: x.seller, bunch))),
         }
         bunch.update(status='S', sell_date=datetime.today())
@@ -109,7 +121,7 @@ def update_data(request):
         # A Seller can be paid only after the book was sold
         else: bunch = bunch.filter(status='S')
 
-        vars = {'paid' : bunch.count()}
+        vars = {'paid' : len(bunch)}
         bunch.update(status='P')
         return render_to_response('books/update_data/seller_paid.html', vars, 
                                   context_instance=RequestContext(request))
@@ -119,7 +131,7 @@ def update_data(request):
         send_missing_emails(bunch)
         vars = {
             'num_owners' : len(set(map(lambda x: x.seller, bunch))),
-            'num_missing' : bunch.count(),
+            'num_missing' : len(bunch),
         }
         bunch.update(status='M')
         return render_to_response('books/update_data/missing.html', vars, 
@@ -144,31 +156,72 @@ def update_data(request):
     elif action[:5] == "Remove Holds"[:5]:
         bunch = bunch.filter(status='O')
         if not request.user.is_staff: bunch = bunch.filter(holder=request.user)
-        vars = {'removed' : bunch.count()}
-        bunch.update(status='F', holder=None, hold_date=None)
+        vars = {'removed' : len(bunch)}
+        bunch.update(status='F', hold_date=None)
         return render_to_response('books/update_data/remove_holds.html', vars,
                                   context_instance=RequestContext(request))
-    elif action == "Edit":
+    else:
         # TODO edit
-        vars = {}
-        return render_to_response('books/update_data/edit.html', vars, 
-                                  context_instance=RequestContext(request))
-    else:
-        vars = {'action' : action}
-        return render_to_response('books/update_data/error.html', vars, 
-                                  context_instance=RequestContext(request))
+        messages.append("Something went wrong... talk to whoever is in charge")
+    vars = {
+        'messages' : messages, 
+    }
+    return render_to_response('books/listing_edit.html', vars, 
+                              context_instance=RequestContext(request))
 
+
+@login_required()
 def myBooksies(request):
-    if request.user.is_authenticated():
-        #john = request.user.last_name
-        
-        work = Listing.objects.filter(seller = request.user)
-        me = request.user
-	 
-        #need title, author, price, course code, ref#
-        return HttpResponse(me)    
-    else:
-        return HttpResponse("No work")
+    """
+    Displays books the user has on hold
+    and is selling, sorts by search box, filters, calculates total prices
+  
+    """
+    #gets users books
+    selling = Listing.objects.filter(seller = request.user)  
+    holding = Listing.objects.filter(holder = request.user)    
+    priceHold = 0
+    priceSell = 0
+    searched = False
+    #calculate totals for book
+    for listing in holding:
+        priceHold = listing.price + priceHold         
+    for listing in selling:
+        priceSell = listing.price + priceSell
+    
+  
+    # Filter for the search box
+    if request.GET.has_key("filter") and request.GET.has_key("field"):
+        # only run the filter if the GET args are there
+        selling = listing_filter(request.GET["filter"] , request.GET["field"],
+                                  selling)
+        holding = listing_filter(request.GET["filter"] , request.GET["field"],
+                                  holding)
+        searched = True
+    # Sorts results by request
+    elif request.GET.has_key("sort_by") and request.GET.has_key("dir"):
+        holding = listing_sort(request.GET["sort_by"], request.GET["dir"])
+        holding = holding.filter(holder = request.user)
+    elif request.GET.has_key("sort_with") and request.GET.has_key("dir"):
+        selling = listing_sort(request.GET["sort_with"], request.GET["dir"])
+        selling = selling.filter(seller = request.user)
+   
+
+    
+
+    vars = {
+         'sellP' : selling,
+         'holdP' : holding,
+         'priceH' : priceHold,
+         'priceS' : priceSell,
+         'field' : request.GET.get('field', 'any_field'),
+         'filter_text' : request.GET.get('filter', ''),
+         'search' : searched
+    }             
+    return render_to_response('myBooks.html', vars,
+                              context_instance=RequestContext(request))    
+    
+    
 
 def staff(request):
     """
@@ -209,3 +262,4 @@ def staffedit(request):
     }
     return render_to_response('staff/staffedit.html', vars, 
                               context_instance=RequestContext(request))
+
