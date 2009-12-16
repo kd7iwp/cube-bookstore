@@ -4,8 +4,10 @@
 
 
 {% block content %}
-                        
-<form action='{% url staffedit %}' action='post'  name='ListItems'>
+
+{% if user.is_staff%}                      
+	
+<form action='{% url staffedit  %}' method='post'  name='Action'>
 
     {% if listings.object_list %}
         {% if listings.has_other_pages %}
@@ -33,7 +35,7 @@
                 <tr>
                     {# TODO need to sort #}
                     <th>All</td>{# TODO click selects all..is this necessary? #}
-                    <th>USERNAME</th>
+                    <th>NAME</th>
                     <th>PERMISSION</th>
                 </tr>
             </thead>
@@ -41,10 +43,10 @@
             {% for listing in listings.object_list %}
                 <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
                     <td class='row_check'>
-                        <input type='checkbox' name="IdToEdit1" value='{{ listing}}'/>
+                        <input type='checkbox' name="Action" value='{{ listing}}'/>
                     </td>
                     <td class='row_username'>
-                        <a href='{% url staffedit %}?IdToEdit={{ listing}}'>{{ listing}}</a>
+                        {{listing.first_name}} {{listing.last_name}}  
                     </td>
                     
                     <td class="row_permission">
@@ -54,7 +56,6 @@
                              Staff
                         {% endif %}
                     </td>
-                    
                 </tr>
             {% endfor %}
             </tbody>
@@ -64,11 +65,17 @@
     {% endif %}
     {% if user.is_superuser%}
     <div class='submit_options'>
-        <input type='submit' name='ListEdit' class='submit' value='Edit' /> 
-        <input type='submit' name='ListDelete' class='submit' value='Delete' onclick="return confirm('This will permanently delete these items, are you sure?')" /> 
-        <input type='submit' name='AddItem' class='submit' value='Add New' /> 
+        <input type='submit' name='edit' class='submit' value='Edit' /> 
+        <input type='submit' name='Delete' class='submit' value='Delete' onclick="return confirm('This will permanently delete these items, are you sure?')" /> 
+        <input type='submit' name='addnew' class='submit' value='Add New' /> 
     </div>
+
+
     {% endif %}
 </form>
+
+{% else %}
+	
+{% endif %}
 
 {% endblock %}

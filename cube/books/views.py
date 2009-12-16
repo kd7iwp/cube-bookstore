@@ -209,7 +209,6 @@ def myBooksies(request):
         selling = listing_sort(request.GET["sort_with"], request.GET["dir"])
         selling = selling.filter(seller = request.user)
    
-
     vars = {
          'sellP' : selling,
          'holdP' : holding,
@@ -223,46 +222,102 @@ def myBooksies(request):
                               context_instance=RequestContext(request))    
     
     
-
 def staff(request):
-    """
-    Shows a list of all staff
-    """
     listings = User.objects.filter(is_staff = True)
     page_num = get_number(request.GET, 'page', PAGE_NUM)
-    listings_per_page = get_number(request.GET, 'per_page', PER_PAGE_STAFF)
+    listings_per_page = get_number(request.GET, 'per_page', PER_PAGE)
     paginator = Paginator(listings, listings_per_page)
     try:
         page_of_listings = paginator.page(page_num)
     except (EmptyPage, InvalidPage):
         page_of_listings = paginator.page(paginator.num_pages)
     vars = {
-        'listings': page_of_listings,
-        'per_page': listings_per_page,
-        'page': page_num
+        'listings' : page_of_listings,
+        'per_page' : listings_per_page,
+        'page' : page_num,
+        'field' : request.GET.get('field', 'any_field'),
+        'filter_text' : request.GET.get('filter', ''),
+        'dir' : 'desc' if request.GET.get('dir', '') == 'asc' else 'asc'
     }
-    return render_to_response('staff/staff.html', vars, 
-                              context_instance=RequestContext(request))
+    return render_to_response('books/staff.html', vars, 
+    context_instance=RequestContext(request))
+
 
 def staffedit(request):
-    """
-    Shows a list of all staff
-    """
-    listings = User.objects.filter(is_staff = True)
-    page_num = get_number(request.GET, 'page', PAGE_NUM)
-    listings_per_page = get_number(request.GET, 'per_page', PER_PAGE_STAFF)
-    paginator = Paginator(listings, listings_per_page)
-    try:
-        page_of_listings = paginator.page(page_num)
-    except (EmptyPage, InvalidPage):
-        page_of_listings = paginator.page(paginator.num_pages)
+    messages = []; 
+    first_name = "";
+    last_name = "";
+    student_id = "";
+    if request.user.is_authenticated():
+        student_id = request.POST.get("student_id", '')
+        #user is selected
+        if request.POST.get("Action", ''):
+            messages.append(request.POST.get("Action", ''))
+            listings = User.objects.get(username = messages[0])
+            
+            student_id = listings.id
+            first_name = listings.first_name
+            last_name = listings.last_name
+
+        #Delete User
+        if (request.POST.get("Delete", '')):
+            if student_id:
+                try:
+                    listings = User.objects.get(id = student_id)
+                    listings.is_superuser = False
+                    listings.is_staff = False
+                    listings.save()
+                    return HttpResponse("User Deleted")
+                except User.DoesNotExist:
+                    return HttpResponse("User does not Exist")
+
+            if len(messages) > 0:
+                try:
+                    listings = User.objects.get(id = messages[1])  
+                    listings.is_superuser = False
+                    listings.is_staff = False
+                    listings.save()
+                    return HttpResponse("User Deleted")
+                except listings.DoesNotExist:
+                    return HttpResponse("User does not Exist")
+
+        #Save New User
+        if (request.POST.get("Save", '')):
+            role = request.POST.get("role", '')
+            try:
+                listings = User.objects.get(id = student_id)
+                if request.POST.get("role", '') == "Administrator":
+                    listings.is_superuser = True
+                    listings.is_staff = True
+                    listings.save()
+                else:
+                    listings.is_superuser = False
+                    listings.is_staff = True
+                    listings.save()
+                
+            except:
+                return HttpResponse("Invalid Student ID")
+                 
     vars = {
-        'listings': page_of_listings,
-        'per_page': listings_per_page,
-        'page': page_num
+       'messages' : messages,
+       'first_name' : first_name,
+       'last_name' : last_name,
+       'student_id' : student_id
     }
-    return render_to_response('staff/staffedit.html', vars, 
-                              context_instance=RequestContext(request))
+    return render_to_response('books/staffedit.html', vars, 
+    context_instance=RequestContext(request))
+
+
+
+
+
+
+
+
+
+
+
+
 
 def addBooks(request):
     if request.POST.get("AltDBld") and request.POST.get("Price") and request.POST.get("BarCode"):
