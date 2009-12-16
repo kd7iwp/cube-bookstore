@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}The Cube Online - MyBooks List{% endblock %}
+{% load selected %}
+{% load until_hold_expiry %}
+{% block content %}
+        <form action="{% url myBooks %}" method="get">
+        <p id="booksearch">
+            <input type="text" class="text" name="filter" value="{{ filter_text }}" />
+            <select name="field">
+                <option {% selected field "any_field" %}>In Any Field</option>
+                <option {% selected field "title" %}>Title</option> 
+                <option {% selected field "author" %}>Author</option> 
+                <option {% selected field "course_code" %}>Course Code</option> 
+                {% if user.is_staff %}
+                    <option {% selected field "ref" %}>Ref #</option> 
+                    <option {% selected field "status" %}>Status</option> 
+                {% endif %}
+            </select>
+            <input type="submit" class="submit" value="Search" />
+        </p>
+        </form>
+       
+        {% if holdP %}
+        <h4>Books I have on Hold </h4>
+        <form action="{% url update_data %}" method="post" name="SortUpdate">
+        <table cellspacing='0'>
+            <thead>
+                <tr>
+                    <th>
+                        <a href="javascript:void(0);" onclick="toggleCBTogether();">All</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;sort_by=book__title&amp;dir={{dir}}">Title</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;sort_by=book__author&amp;dir={{ dir }}">Author</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;sort_by=price&amp;dir={{ dir }}">Price</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;sort_by=book__courses&amp;dir={{ dir }}">Course Code</a>
+                    </th>
+                    {% if user.is_staff %}
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;sort_by=id&amp;dir={{ dir }}">Ref#</a>
+                    </th>
+                    {% endif %}
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;sort_by=status&amp;dir={{ dir }}">Status </a>
+                    </th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+            {% for listing in holdP %}
+                <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
+                    <td class='row_check'>
+                        <input type='checkbox' name="idToEdit{{forloop.counter}}" value="{{listing.id}}"/>
+                    </td>
+                    <td class='row_title'>
+                        {{ listing.book.title }}
+                    </td>
+                    <td class="row_author">
+                        {{ listing.book.author }}
+                    </td>
+                    <td class="row_price">
+                        &#36;{{ listing.price }}
+                    </td>
+                    <td class="row_coursecode">
+                        {{ listing.book.course_codes }}
+                    </td>
+                    {% if user.is_staff %}
+                    <td class="row_refnum">
+                        {{ listing.id }}
+                    </td>
+                   {% endif %}
+                    <td class="row_status">
+			    {% until_hold_expiry listing.hold_date %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <p class = "price_total"> Total: $ {{priceH}} </p>
+        <p class = "submit_options"> 
+        <input type = "submit" name="Action" value="Place On Hold" /> 
+        <input type = "submit" name="Action" value="Remove Holds" />
+        </p> 
+        </form>
+        
+       {% else %}
+       {%if search %}
+       <p class='noresults'>We could not find results for "{{filter_text}}" among the books you have on hold. </p>
+       {% else %}
+       <p class='noresults'>You have no books on hold at this time.</p>
+       {% endif %}
+       {% endif %}
+       
+       {% if sellP %}
+       <h4>Books I have for Sale </h4>
+       <form action="{% url myBooks %}" method="post" name="SellSort"> 
+       <table cellspacing='0'>
+            <thead>
+                <tr>
+                     <th>
+                        <a href="javascript:void(0);" onclick="toggleCBTogether();">All</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;sort_with=book__title&amp;dir={{ dir }}">Title</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;sort_with=book__author&amp;dir={{ dir }}">Author</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;sort_with=price&amp;dir={{ dir }}">Price</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;sort_with=book__courses&amp;dir={{ dir }}">Course Code</a>
+                    </th>
+                    {% if user.is_staff %}
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;sort_with=id&amp;dir={{ dir }}">Ref#</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;sort_with=status&amp;dir={{ dir }}">Status</a>
+                    </th>
+		      {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for listing in sellP %}
+                <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
+                    <td class='row_check'>
+                        <input type='checkbox' />{# TODO name and value #}
+                    </td>
+                    <td class='row_title'>
+                        {{ listing.book.title }}
+                    </td>
+                    <td class="row_author">
+                        {{ listing.book.author }}
+                    </td>
+                    <td class="row_price">
+                        &#36;{{ listing.price }}
+                    </td>
+                    <td class="row_coursecode">
+                        {{ listing.book.course_codes }}
+                    </td>
+		      {% if user.is_staff %}
+                    <td class="row_refnum">
+                        {{ listing.id }}
+                    </td>
+                    <td class="row_status">
+                        {{ listing.get_status_display }}
+                    </td>
+                   {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </form>
+       <p class = "price_total"> Total: $ {{priceS}}  </p>
+      {% else %}
+        {%if search %}
+       <p class='noresults'>We could not find results for "{{filter_text}}" among the books you have for sale. </p>
+       {% else %}
+        <p class='noresults'>You have no books for sale at this time.  
+         If you would like to sell your books please bring your books
+        to the "Cube" by the cafeteria to put them up for sale.</p>
+        {% endif %}
+     {% endif %}
+{% endblock %}

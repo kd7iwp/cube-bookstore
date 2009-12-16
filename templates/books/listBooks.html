@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}The Cube Online - Book List{% endblock %}
+
+{% load humanize %}
+{% block content %}
+    {% if listings.object_list %}
+        {% if listings.has_other_pages %}
+            <div class="PageCounterNav">
+                <p>
+                {% if listings.has_previous %}
+                    <a href="?page={{ listings.previous_page_number }}&amp;per_page={{ per_page }}">
+                        <img src="{{ MEDIA_URL }}images/pagenav_prev.gif" alt="Previous Page" />
+                    </a>
+                {% else %}
+                    <img src="{{ MEDIA_URL }}images/pagenav_prev_faded.gif" alt="No Previous Page" />
+                {% endif %}
+                Pages: ({{ listings.number }} of {{listings.paginator.num_pages}})
+                {% if listings.has_next %}
+                    <a href="?page={{ listings.next_page_number }}&amp;per_page={{ per_page }}">
+                        <img src="{{ MEDIA_URL }}images/pagenav_next.gif" alt="Next Page" />
+                    </a>
+                {% else %}
+                    <img src="{{ MEDIA_URL }}images/pagenav_next_faded.gif" alt="No Next Page" />
+                {% endif %}
+            </div>
+        {% endif %}
+        <form action="{% url update_data %}" method="post" name="ListItems">
+        <table cellspacing='0'>
+            <thead>
+                <tr>
+                    <th>
+                        <a href="javascript:void(0);" onclick="toggleCBTogether();">All</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=book__title&amp;dir={{ dir }}">Title</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=book__author&amp;dir={{ dir }}">Author</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=price&amp;dir={{ dir }}">Price</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=book__courses&amp;dir={{ dir }}">Course Code</a>
+                    </th>
+                    {% if user.is_staff %}
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=id&amp;dir={{ dir }}">Ref#</a>
+                    </th>
+                    <th>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=status&amp;dir={{ dir }}">Status</a>
+                    </th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for listing in listings.object_list %}
+                <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
+                    <td class='row_check'>
+                        <input type='checkbox' name="idToEdit{{ forloop.counter }}" value="{{ listing.id }}" />
+                    </td>
+                    <td class='row_title'>
+                        {{ listing.book.title }}
+                        {% ifnotequal listing.book.edition 1 %}
+                            ({{ listing.book.edition|ordinal }} ed.)
+                        {% endifnotequal %}
+                    </td>
+                    <td class="row_author">
+                        {{ listing.book.author }}
+                    </td>
+                    <td class="row_price">
+                        &#36;{{ listing.price }}
+                    </td>
+                    <td class="row_coursecode">
+                        {{ listing.book.course_codes }}
+                    </td>
+                    {% if user.is_staff %}
+                    <td class="row_refnum">
+                        {{ listing.id }}
+                    </td>
+                    <td class="row_status">
+                        {{ listing.get_status_display }}
+                    </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <p class="submit_options">
+            <input type="submit" name="Action" value="Edit" />
+            <input type="submit" name="Action" value="Delete" />
+            <input type="submit" name="Action" value="Add New" />
+        </p>
+        </form>
+    {% endif %}
+{% endblock %}
