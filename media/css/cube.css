@@ -288,7 +288,7 @@ table.FormTable{
     width: 500px;
     border-right: 1px solid #C1DAD7;
     border-bottom: 1px solid #C1DAD7;
-    background: #fff url(../BuySellFormTableBG.gif) top right no-repeat;
+    background: #fff url(../images/buy_sell_form_table_bg.gif) top right no-repeat;
     }
 
 table.FormTable input{

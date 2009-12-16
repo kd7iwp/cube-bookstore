@@ -12,8 +12,11 @@ from django.contrib.auth.models import User
 
 
 
+
+
 #python imports
 from datetime import datetime
+from decimal import Decimal
 
 # pagination defaults
 PER_PAGE = '30'
@@ -207,8 +210,6 @@ def myBooksies(request):
         selling = selling.filter(seller = request.user)
    
 
-    
-
     vars = {
          'sellP' : selling,
          'holdP' : holding,
@@ -263,3 +264,61 @@ def staffedit(request):
     return render_to_response('staff/staffedit.html', vars, 
                               context_instance=RequestContext(request))
 
+def addBooks(request):
+    if request.POST.get("AltDBld") and request.POST.get("Price") and request.POST.get("BarCode"):
+        correct_BarCode = request.POST.get("BarCode")
+        studentID = int(request.POST.get("AltDBld"))
+        dec_price = Decimal(request.POST.get("Price"))
+        try:
+            booky = Book.objects.get(barcode=correct_BarCode)
+        except Book.DoesNotExist: 
+            return render_to_response('newBook.html', context_instance=RequestContext(request))
+        try:
+            selly = User.objects.get(id = studentID)
+        except User.DoesNotExist:
+            return HttpResponse("User does not exist")
+        newListing = Listing(list_date=datetime.now(), price=dec_price, status="F", book=booky, seller = selly)
+        newListing.save()
+        return HttpResponse("work")
+    if request.POST.get("Author"):
+# and request.POST.get("Title") and request.POST.get("Edition") and request.POST.get("Department") and request.POST.get("Course Number"):
+        course = request.POST.get("Department") + " " + request.POST.get("Course Number")
+        the_author = request.POST.get("Author")
+        the_title = request.POST.get("Title")
+        the_edition = request.POST.get("Edition")
+        new_book = Book(author = the_author, title = the_title, edition = the_edition, courses = course) 
+        new_book.save()
+        return HttpResponse("happy")
+    else:
+        return render_to_response('addBooks.html', context_instance=RequestContext(request))
+
+def listBooks(request):
+    if request.GET.has_key("sort_by") and request.GET.has_key("dir"):
+        books = listing_sort(request.GET["sort_by"], request.GET["dir"])
+    else:
+        books = Book.objects.all()
+
+    # Filter according to permissions
+    if not request.user.is_staff:
+        # Non staff can only see listings which are for sale.
+        books = filter(lambda x: x.status == 'F', books)
+
+    # Pagination
+    page_num = get_number(request.GET, 'page', PAGE_NUM)
+    books_per_page = get_number(request.GET, 'per_page', PER_PAGE)
+
+    paginator = Paginator(books, books_per_page)
+    try:
+        page_of_listings = paginator.page(page_num)
+    except (EmptyPage, InvalidPage):
+        page_of_listings = paginator.page(paginator.num_pages)
+
+    # Template time
+    vars = {
+        'listings' : page_of_listings,
+        'per_page' : books_per_page,
+        'page' : page_num,
+        'dir' : 'desc' if request.GET.get('dir', '') == 'asc' else 'asc'
+    }
+
+    return render_to_response('books/listBooks.html', vars, context_instance=RequestContext(request))
