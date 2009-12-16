@@ -9,10 +9,6 @@ from django.shortcuts import render_to_response
 from django.contrib.auth.models import User
 from django.template import RequestContext
 
-
-
-
-
 #python imports
 from datetime import datetime
 from decimal import Decimal
@@ -220,7 +216,7 @@ def myBooksies(request):
     return render_to_response('myBooks.html', vars,
                               context_instance=RequestContext(request))    
     
-    
+@login_required()    
 def staff(request):
     listings = User.objects.filter(is_staff = True)
     page_num = get_number(request.GET, 'page', PAGE_NUM)
@@ -241,7 +237,7 @@ def staff(request):
     return render_to_response('books/staff.html', vars, 
     context_instance=RequestContext(request))
 
-
+@login_required()
 def staffedit(request):
     messages = []; 
     first_name = "";
@@ -252,8 +248,7 @@ def staffedit(request):
         #user is selected
         if request.POST.get("Action", ''):
             messages.append(request.POST.get("Action", ''))
-            listings = User.objects.get(username = messages[0])
-            
+            listings = User.objects.get(username = messages[0])    
             student_id = listings.id
             first_name = listings.first_name
             last_name = listings.last_name
@@ -305,17 +300,6 @@ def staffedit(request):
     }
     return render_to_response('books/staffedit.html', vars, 
     context_instance=RequestContext(request))
-
-
-
-
-
-
-
-
-
-
-
 
 
 def addBooks(request):
