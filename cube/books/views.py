@@ -8,7 +8,6 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.contrib.auth.models import User
 from django.template import RequestContext
-from django.contrib.auth.models import User
 
 
 

@@ -23,7 +23,7 @@
        
         {% if holdP %}
         <h4>Books I have on Hold </h4>
-        <form action="{% url update_data %}" method="post" name="SortUpdate">
+        <form action="{% url update_data %}" method="post" name="Update Info">
         <table cellspacing='0'>
             <thead>
                 <tr>
@@ -82,14 +82,20 @@
                 </tr>
             {% endfor %}
             </tbody>
-        </table>
-        <p class = "price_total"> Total: $ {{priceH}} </p>
-        <p class = "submit_options"> 
-        <input type = "submit" name="Action" value="Place On Hold" /> 
-        <input type = "submit" name="Action" value="Remove Holds" />
-        </p> 
-        </form>
-        
+        </table> 
+       <p class = "price_total"> Total: $ {{priceH}} </p> 
+        <p class = "submit_options">
+	 {%if user.is_staff %}
+        <input type = "submit" name="Action" value="Sold" /> 
+	 <input type = "submit" name="Action" value="Missing" />
+        {% endif %}
+        <input type = "submit" name="Action" value="Place On Hold" />
+        {%if user.is_staff %}
+        <input type = "submit" name="Action" value="Remove Holds" /> 
+        <input type = "submit" name="Action" value="Edit" />
+        {% endif %}
+        </p>
+       </form>
        {% else %}
        {%if search %}
        <p class='noresults'>We could not find results for "{{filter_text}}" among the books you have on hold. </p>
@@ -99,8 +105,8 @@
        {% endif %}
        
        {% if sellP %}
-       <h4>Books I have for Sale </h4>
-       <form action="{% url myBooks %}" method="post" name="SellSort"> 
+       <h4>Books I have for Sale </h4> 
+       <form action="{% url update_data %}" method="post" name="Update Info">
        <table cellspacing='0'>
             <thead>
                 <tr>
@@ -159,8 +165,18 @@
             {% endfor %}
             </tbody>
         </table>
-        </form>
+        
        <p class = "price_total"> Total: $ {{priceS}}  </p>
+        {%if user.is_staff %}
+        <p class = "submit_options">
+	 <input type = "submit" name="Action" value="Sold" /> 
+	 <input type = "submit" name="Action" value="Missing" />
+        <input type = "submit" name="Action" value="Place On Hold" />
+        <input type = "submit" name="Action" value="Remove Holds" /> 
+        <input type = "submit" name="Action" value="Edit" />
+        </p>
+        {% endif %}
+       </form>
       {% else %}
         {%if search %}
        <p class='noresults'>We could not find results for "{{filter_text}}" among the books you have for sale. </p>

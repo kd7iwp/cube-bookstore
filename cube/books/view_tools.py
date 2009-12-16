@@ -1,6 +1,7 @@
 from cube.books.models import Listing
 from django.db.models.query import QuerySet
 
+
 def get_number(list, key, default):
     """
     grabs a string from a list and converts it to a number
@@ -71,3 +72,4 @@ def listing_filter(filter, field, listings):
 def listing_sort(field, dir):
     dir = '-' if dir == 'desc' else ''
     return Listing.objects.order_by("%s%s" % (dir, field))
+
