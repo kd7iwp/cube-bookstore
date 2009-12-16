@@ -90,8 +90,8 @@
 	 <input type = "submit" name="Action" value="Missing" />
         {% endif %}
         <input type = "submit" name="Action" value="Place On Hold" />
-        {%if user.is_staff %}
         <input type = "submit" name="Action" value="Remove Holds" /> 
+	 {%if user.is_staff %}
         <input type = "submit" name="Action" value="Edit" />
         {% endif %}
         </p>
