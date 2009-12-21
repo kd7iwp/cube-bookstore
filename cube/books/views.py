@@ -1,12 +1,13 @@
 # django imports
 from cube.books.models import Book, Listing
 from cube.books.view_tools import listing_filter, listing_sort, get_number
-from cube.books.email import send_missing_emails, send_sold_emails
+from cube.books.email import send_missing_emails, send_sold_emails,\
+                             send_tbd_emails
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
-from django.contrib.auth.models import User
 from django.template import RequestContext
 
 #python imports
@@ -96,9 +97,15 @@ def update_data(request):
     elif action[:1] == "To Be Deleted"[:1]:
         # apparently some browsers have issues passing spaces
         # TODO add bells and whistles
-        set_bunch('status', 'T')
-        vars = {'num_doomed' : len(bunch)}
-        return render_to_response('books/update_data/to_be_deleted.html', vars, 
+        # can't do this for Deleted, Seller Paid, and Sold Books
+        bunch = bunch.exclude(status__in='DPS')
+        send_tbd_emails(bunch)
+        vars = {
+            'num_doomed' : bunch.count(),
+            'num_owners' : len(set(map(lambda x: x.seller, bunch))),
+        }
+        bunch.update(status='T')
+        return render_to_response('books/update_data/to_be_deleted.html', vars,
                                   context_instance=RequestContext(request))
     elif action == "Sold":
         # Allow only if For Sale or On Hold
@@ -155,18 +162,56 @@ def update_data(request):
         bunch = bunch.filter(status='O')
         if not request.user.is_staff: bunch = bunch.filter(holder=request.user)
         vars = {'removed' : len(bunch)}
-        bunch.update(status='F', hold_date=None)
+        bunch.update(status='F', hold_date=None, holder=None)
         return render_to_response('books/update_data/remove_holds.html', vars,
                                   context_instance=RequestContext(request))
+    elif action == "Edit":
+        too_many = True if bunch.count() > 1 else False
+        item = bunch[0]
+        rows = [{'name' : 'Bar Code', 'value' : item.book.barcode},
+                {'name' : 'Student ID', 'value' : item.seller.id},
+                {'name' : 'Price', 'value' : item.price},
+                {'name' : 'Buyer Student ID', 'value' : item.holder.id}]
+        vars = {
+            'rows' : rows,
+            'too_many' : too_many,
+            'id' : item.id,
+        }
+        return render_to_response('books/update_data/edit.html', vars, 
+                                  context_instance=RequestContext(request))
     else:
-        # TODO edit
-        messages.append("Something went wrong... talk to whoever is in charge")
-    vars = {
-        'messages' : messages, 
-    }
-    return render_to_response('books/listing_edit.html', vars, 
-                              context_instance=RequestContext(request))
-
+        vars = {'action' : action}
+        return render_to_response('books/update_data/error.html', vars, 
+                                  context_instance=RequestContext(request))
+@login_required()
+def update_listing(request):
+    """
+    Applies changes to a listing.
+    If the barcode doesn't exist,
+    it makes the user create a Book object as well
+    """
+    if request.POST.has_key('IdToEdit'):
+        listing = Listing.objects.get(id=int(request.POST["IdToEdit"]))
+        g = request.POST.get
+        if g('bar-code', ''):
+            # there is a barcode
+            barcode = g('bar-code', '')
+            return HttpResponse("There is a barcode")
+            if Book.objects.filter(barcode=barcode):
+                # a book exists in the db with that barcode
+                return HttpResponse("A Book exists with that barcode")
+                listing.book =  Book.objects.get(barcode=barcode)
+            else:
+                # barcode doesn't exist in db, we have to make a book.
+                return HttpResponse("barcode doesn't exist in db, we have to make a book")
+        return HttpResponse('<p>Edit</p>')
+        # TODO finish this
+        listing.book = Book.objects.get(barcode=g('bar-code', listing.book.barcode))
+        listing.seller = User.objects.get(id=int(g('student-id', str(listing.seller.id))))
+        listing.price = Decimal(g('price', str(listing.price)))
+        listing.holder = User.objects.get(id=int(g('buyer-student-id', str(listing.holder.id))))
+    else:
+        return HttpResponse('<p>Bad</p>')
 
 @login_required()
 def myBooksies(request):

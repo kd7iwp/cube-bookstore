@@ -11,7 +11,11 @@ urlpatterns = patterns('',
     (r'^$', 'cube.twupass.views.login_cube'),
     (r'^logout/', 'cube.twupass.views.logout_cube'),
     url(r'^books/$', 'cube.books.views.listings', name="list"),
-    url(r'^books/update', 'cube.books.views.update_data', name="update_data"),    
+    url(r'^books/update/$', 'cube.books.views.update_data', name="update_data"),
+    url(r'books/update/listing', 'cube.books.views.update_listing', name="update_listing"),
+
+    url(r'^my/', direct_to_template, {'template' : 'books/mybooks.html'}, name="my"),
+    
     url(r'^addBooks/', 'cube.books.views.addBooks', name="addBooks"),
    
     url(r'^help/', direct_to_template, {'template' : 'help.html'}, name="help"),

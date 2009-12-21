@@ -1,4 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
-<p>David hasn't written this yet</p>
+<h4>Edit a Student's Book</h4>
+{% if too_many %}
+    <p><em>You selected more than one item to edit. You can only edit 1 item at a time.</em></p>
+{% endif %}
+<div id="admin_form">
+    <form method="post" action="{% url update_listing %}" {# onsubmit="return OnSubmit(this)" enctype="multipart/form-data" #}>
+        <div class="bgcolor_odd">{# seems hacky to me #}
+            {# <input type="hidden" name="ReferTo" value="http://ecourses.twu.ca/mytwu2/Modules/BuySell/index.php">#}
+            <input type="hidden" name="IdToEdit" value="{{ id }}" />
+            <table cellspacing='0' class='FormTable' id='FormFunctions'> 
+                <tbody>
+                    {% for row in rows %}
+                    <tr id='{{ row.name|slugify }}' class='form_text'> 
+                        <td class='TableLabel'> 
+                            <label for='{{ row.name|slugify }}'><span class='required'>{{ row.name }}:</span></label> 
+                        </td> 
+                        <td class='TableInput'> 
+                            <input type='text' id='{{ row.name|slugify }}' class='InputField' name='{{ row.name|slugify }}'  value='{{ row.value }}'  tabindex='1' /> 
+                        </td> 
+                    </tr> 
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p class="submit_options">
+                <input type="submit" value="Save" name="Action" />
+                <input type="submit" name="Action" value="Delete" onclick="DeleteButton='delete'; return confirm('This will permanently delete this item, are you sure?')" />
+            </p>
+        </div>
+    </form>
 {% endblock %}
