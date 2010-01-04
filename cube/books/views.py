@@ -66,22 +66,6 @@ def update_data(request):
     """
     This view is used to update book data
     """
-    def singlural(number):
-        """
-        Returns appropriate text depending on the singularity of the number
-        """
-        if number == 1: return "1 item has been"
-        return "%s items have been" % number
-
-    def set_bunch(attr, value):
-        """
-        Sets a status on all listings given and saves them
-        """
-        for listing in bunch:
-            setattr(listing, attr, value)
-            listing.save()
-
-    messages = []
     bunch = Listing.objects.none()
     action = request.POST.get("Action", '')
     singular = "item has been"
@@ -92,8 +76,11 @@ def update_data(request):
             bunch = bunch | Listing.objects.filter(pk=int(value))
             
     if action == "Delete":
-        set_bunch('status', 'D')
-        messages.append("%s deleted." % singlural(len(bunch)))
+        bunch = bunch.exclude(status='D')
+        vars = { 'num_deleted': bunch.count() }
+        bunch.update(status='D')
+        return render_to_response('books/update_data/deleted.html', vars,
+                                    context_instance=RequestContext(request))
     elif action[:1] == "To Be Deleted"[:1]:
         # apparently some browsers have issues passing spaces
         # TODO add bells and whistles
@@ -112,7 +99,7 @@ def update_data(request):
         bunch = bunch.filter(status__in='FO')
         send_sold_emails(list(bunch))
         vars = {
-            'sold' : len(bunch),
+            'sold' : bunch.count(),
             'num_owners' : len(set(map(lambda x: x.seller, bunch))),
         }
         bunch.update(status='S', sell_date=datetime.today())
@@ -126,7 +113,7 @@ def update_data(request):
         # A Seller can be paid only after the book was sold
         else: bunch = bunch.filter(status='S')
 
-        vars = {'paid' : len(bunch)}
+        vars = {'paid' : bunch.count()}
         bunch.update(status='P')
         return render_to_response('books/update_data/seller_paid.html', vars, 
                                   context_instance=RequestContext(request))
@@ -136,7 +123,7 @@ def update_data(request):
         send_missing_emails(bunch)
         vars = {
             'num_owners' : len(set(map(lambda x: x.seller, bunch))),
-            'num_missing' : len(bunch),
+            'num_missing' : bunch.count(),
         }
         bunch.update(status='M')
         return render_to_response('books/update_data/missing.html', vars, 
@@ -161,7 +148,7 @@ def update_data(request):
     elif action[:5] == "Remove Holds"[:5]:
         bunch = bunch.filter(status='O')
         if not request.user.is_staff: bunch = bunch.filter(holder=request.user)
-        vars = {'removed' : len(bunch)}
+        vars = {'removed' : bunch.count()}
         bunch.update(status='F', hold_date=None, holder=None)
         return render_to_response('books/update_data/remove_holds.html', vars,
                                   context_instance=RequestContext(request))
