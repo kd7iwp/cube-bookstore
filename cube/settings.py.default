@@ -81,6 +81,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 INSTALLED_APPS = (
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.humanize',
@@ -90,7 +91,7 @@ INSTALLED_APPS = (
 )
 
 LOGIN_URL = "" # The url where the login view can be accessed
-LOGIN_REDIRECT_URL = "" #Where the login view should send users by default after authentication
+LOGIN_REDIRECT_URL = "books" #Where the login view should send users by default after authentication
 
 AUTHENTICATION_BACKENDS = (
     # This Site is written to work with TWUPass
