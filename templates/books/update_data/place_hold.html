@@ -11,14 +11,14 @@
         <h1>Extended</h1>
         <p><em>The following book{{ extended|length|pluralize:" has,s have" }} been placed on hold for another 24 hours:</em></p>
     {% endif %}
-    <p>{{ listing.book.title }} ${{ listing.price }}</p>
+    <p>{{ listing.book.title }} ${{ listing.price|floatformat:2 }}</p>
 {% endfor %}
 {% for listing in new_hold %}
     {% if forloop.first %}
         <h1>Reserved</h1>
         <p><em>The following book{{ new_hold|length|pluralize:" has,s have" }} been reserved for you for 24 hours:</em></p>
     {% endif %}
-    <p>{{ listing.book.title }} ${{ listing.price }}</p>
+    <p>{{ listing.book.title }} ${{ listing.price|floatformat:2 }}</p>
 {% endfor %}
 {% if num_held %}
     <p><strong>Total</strong>: ${{ total_price }}</p>

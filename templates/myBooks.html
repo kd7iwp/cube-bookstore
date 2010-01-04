@@ -66,7 +66,7 @@
                         {{ listing.book.author }}
                     </td>
                     <td class="row_price">
-                        &#36;{{ listing.price }}
+                        &#36;{{ listing.price|floatformat:2 }}
                     </td>
                     <td class="row_coursecode">
                         {{ listing.book.course_codes }}
@@ -83,7 +83,7 @@
             {% endfor %}
             </tbody>
         </table> 
-       <p class = "price_total"> Total: $ {{priceH}} </p> 
+       <p class = "price_total"> Total: $ {{ priceH|floatformat:2 }} </p> 
         <p class = "submit_options">
 	 {%if user.is_staff %}
         <input type = "submit" name="Action" value="Sold" /> 
@@ -148,7 +148,7 @@
                         {{ listing.book.author }}
                     </td>
                     <td class="row_price">
-                        &#36;{{ listing.price }}
+                        &#36;{{ listing.price|floatformat:2 }}
                     </td>
                     <td class="row_coursecode">
                         {{ listing.book.course_codes }}
@@ -166,7 +166,7 @@
             </tbody>
         </table>
         
-       <p class = "price_total"> Total: $ {{priceS}}  </p>
+       <p class = "price_total"> Total: $ {{ priceS|floatformat:2 }}  </p>
         {%if user.is_staff %}
         <p class = "submit_options">
 	 <input type = "submit" name="Action" value="Sold" /> 
