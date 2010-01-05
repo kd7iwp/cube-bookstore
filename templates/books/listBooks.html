@@ -4,20 +4,20 @@
 
 {% load humanize %}
 {% block content %}
-    {% if listings.object_list %}
-        {% if listings.has_other_pages %}
+    {% if books.object_list %}
+        {% if books.has_other_pages %}
             <div class="PageCounterNav">
                 <p>
-                {% if listings.has_previous %}
-                    <a href="?page={{ listings.previous_page_number }}&amp;per_page={{ per_page }}">
+                {% if books.has_previous %}
+                    <a href="?page={{ books.previous_page_number }}&amp;per_page={{ per_page }}">
                         <img src="{{ MEDIA_URL }}images/pagenav_prev.gif" alt="Previous Page" />
                     </a>
                 {% else %}
                     <img src="{{ MEDIA_URL }}images/pagenav_prev_faded.gif" alt="No Previous Page" />
                 {% endif %}
-                Pages: ({{ listings.number }} of {{listings.paginator.num_pages}})
-                {% if listings.has_next %}
-                    <a href="?page={{ listings.next_page_number }}&amp;per_page={{ per_page }}">
+                Pages: ({{ books.number }} of {{ books.paginator.num_pages }})
+                {% if books.has_next %}
+                    <a href="?page={{ books.next_page_number }}&amp;per_page={{ per_page }}">
                         <img src="{{ MEDIA_URL }}images/pagenav_next.gif" alt="Next Page" />
                     </a>
                 {% else %}
@@ -33,56 +33,36 @@
                         <a href="javascript:void(0);" onclick="toggleCBTogether();">All</a>
                     </th>
                     <th>
-                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=book__title&amp;dir={{ dir }}">Title</a>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=author&amp;dir={{ dir }}">Author</a>
                     </th>
                     <th>
-                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=book__author&amp;dir={{ dir }}">Author</a>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=title&amp;dir={{ dir }}">Title</a>
                     </th>
                     <th>
-                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=price&amp;dir={{ dir }}">Price</a>
-                    </th>
-                    <th>
-                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=book__courses&amp;dir={{ dir }}">Course Code</a>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=courses&amp;dir={{ dir }}">Courses</a>
                     </th>
                     {% if user.is_staff %}
                     <th>
-                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=id&amp;dir={{ dir }}">Ref#</a>
-                    </th>
-                    <th>
-                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=status&amp;dir={{ dir }}">Status</a>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=barcode&amp;dir={{ dir }}">Barcode</a>
                     </th>
                     {% endif %}
                 </tr>
             </thead>
             <tbody>
-            {% for listing in listings.object_list %}
+            {% for book in books.object_list %}
                 <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
                     <td class='row_check'>
-                        <input type='checkbox' name="idToEdit{{ forloop.counter }}" value="{{ listing.id }}" />
+                        <input type='checkbox' name="idToEdit{{ forloop.counter }}" value="{{ book.id }}" />
                     </td>
-                    <td class='row_title'>
-                        {{ listing.book.title }}
-                        {% ifnotequal listing.book.edition 1 %}
-                            ({{ listing.book.edition|ordinal }} ed.)
+                    <td>{{ book.author }}</td>
+                    <td>
+                        {{ book.title }}
+                        {% ifnotequal book.edition 1 %}
+                            ({{ book.edition|ordinal }} ed.)
                         {% endifnotequal %}
                     </td>
-                    <td class="row_author">
-                        {{ listing.book.author }}
-                    </td>
-                    <td class="row_price">
-                        &#36;{{ listing.price|floatformat:2 }}
-                    </td>
-                    <td class="row_coursecode">
-                        {{ listing.book.course_codes }}
-                    </td>
-                    {% if user.is_staff %}
-                    <td class="row_refnum">
-                        {{ listing.id }}
-                    </td>
-                    <td class="row_status">
-                        {{ listing.get_status_display }}
-                    </td>
-                    {% endif %}
+                    <td>{{ book.course_codes }}</td>
+                    <td>{{ book.barcode }}</td>
                 </tr>
             {% endfor %}
             </tbody>

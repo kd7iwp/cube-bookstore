@@ -73,3 +73,6 @@ def listing_sort(field, dir):
     dir = '-' if dir == 'desc' else ''
     return Listing.objects.order_by("%s%s" % (dir, field))
 
+def book_sort(field, dir):
+    dir = '-' if dir == 'desc' else ''
+    return Book.objects.order_by("%s%s" % (dir, field))

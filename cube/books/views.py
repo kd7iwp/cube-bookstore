@@ -1,6 +1,7 @@
 # django imports
-from cube.books.models import Book, Listing
-from cube.books.view_tools import listing_filter, listing_sort, get_number
+from cube.books.models import Book, Listing, Log
+from cube.books.view_tools import book_sort, listing_filter,\
+                                  listing_sort, get_number
 from cube.books.email import send_missing_emails, send_sold_emails,\
                              send_tbd_emails
 from django.contrib.auth.decorators import login_required
@@ -363,15 +364,13 @@ def addBooks(request):
         return render_to_response('addBooks.html', context_instance=RequestContext(request))
 
 def listBooks(request):
+    """
+    List all books in the database
+    """
+    # TODO allow non-staff to view this?
     if request.GET.has_key("sort_by") and request.GET.has_key("dir"):
-        books = listing_sort(request.GET["sort_by"], request.GET["dir"])
-    else:
-        books = Book.objects.all()
-
-    # Filter according to permissions
-    if not request.user.is_staff:
-        # Non staff can only see listings which are for sale.
-        books = filter(lambda x: x.status == 'F', books)
+        books = book_sort(request.GET["sort_by"], request.GET["dir"])
+    else: books = Book.objects.all()
 
     # Pagination
     page_num = get_number(request.GET, 'page', PAGE_NUM)
@@ -379,16 +378,17 @@ def listBooks(request):
 
     paginator = Paginator(books, books_per_page)
     try:
-        page_of_listings = paginator.page(page_num)
+        page_of_books = paginator.page(page_num)
     except (EmptyPage, InvalidPage):
-        page_of_listings = paginator.page(paginator.num_pages)
+        page_of_books = paginator.page(paginator.num_pages)
 
     # Template time
     vars = {
-        'listings' : page_of_listings,
+        'books' : page_of_books,
         'per_page' : books_per_page,
         'page' : page_num,
         'dir' : 'desc' if request.GET.get('dir', '') == 'asc' else 'asc'
     }
 
-    return render_to_response('books/listBooks.html', vars, context_instance=RequestContext(request))
+    return render_to_response('books/listBooks.html', vars,
+                               context_instance=RequestContext(request))
