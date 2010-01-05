@@ -80,3 +80,19 @@ class Listing(models.Model):
     def __unicode__(self):
         return "%s by %s on %s" % (self.book, self.seller,
 	                           self.list_date.date())
+class Log(models.Model):
+    """
+    Keeps track of all actions taken on Listings
+    """
+    ACTION_CHOICES = (
+        (u'C', u'Created Listing'), # -> For Sale
+        (u'M', u'Marked as Missing'), # -> Missing
+        (u'H', u'Placed on Hold'), # -> On Hold
+        (u'P', u'Paid Seller'), # -> Seller Paid
+        (u'S', u'Sold'), # -> Sold
+        (u'T', u'Marked as To Be Deleted'), # -> To Be Deleted
+        (u'D', u'Deleted'), # -> Deleted
+    )
+    action = models.CharField(max_length=1, choices=ACTION_CHOICES)
+    when = models.DateTimeField(auto_now_add=True)
+    listing = models.ForeignKey(Listing, related_name="logs")
