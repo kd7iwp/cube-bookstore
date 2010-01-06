@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+    <p>{{ num_deleted }} user{{ num_deleted|pluralize:"'s,s'" }} permissions
+        have been removed.
+    </p>
+{% endblock %}

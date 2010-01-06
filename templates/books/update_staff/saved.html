@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+    <p>
+        {{ user_name }} is now 
+        {% if administrator %}
+            an administrator.
+        {% else %}
+            a staff member.
+        {% endif %}
+    </p>
+{% endblock %}

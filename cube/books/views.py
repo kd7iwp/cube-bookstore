@@ -65,12 +65,10 @@ def listings(request):
 @login_required()
 def update_data(request):
     """
-    This view is used to update book data
+    This view is used to update listing data
     """
     bunch = Listing.objects.none()
     action = request.POST.get("Action", '')
-    singular = "item has been"
-    plural = "items have been"
 
     for key, value in request.POST.items():
         if "idToEdit" in key:
@@ -206,7 +204,6 @@ def myBooksies(request):
     """
     Displays books the user has on hold
     and is selling, sorts by search box, filters, calculates total prices
-  
     """
     #gets users books
     selling = Listing.objects.filter(seller = request.user)  
@@ -251,90 +248,114 @@ def myBooksies(request):
     
 @login_required()    
 def staff(request):
-    listings = User.objects.filter(is_staff = True)
+    users = User.objects.filter(is_staff = True)
     page_num = get_number(request.GET, 'page', PAGE_NUM)
-    listings_per_page = get_number(request.GET, 'per_page', PER_PAGE)
-    paginator = Paginator(listings, listings_per_page)
+    users_per_page = get_number(request.GET, 'per_page', PER_PAGE_STAFF)
+    paginator = Paginator(users, users_per_page)
     try:
-        page_of_listings = paginator.page(page_num)
+        page_of_users = paginator.page(page_num)
     except (EmptyPage, InvalidPage):
-        page_of_listings = paginator.page(paginator.num_pages)
+        page_of_users = paginator.page(paginator.num_pages)
     vars = {
-        'listings' : page_of_listings,
-        'per_page' : listings_per_page,
+        'users' : page_of_users,
+        'per_page' : users_per_page,
         'page' : page_num,
         'field' : request.GET.get('field', 'any_field'),
         'filter_text' : request.GET.get('filter', ''),
         'dir' : 'desc' if request.GET.get('dir', '') == 'asc' else 'asc'
     }
     return render_to_response('books/staff.html', vars, 
-    context_instance=RequestContext(request))
+                              context_instance=RequestContext(request))
+
+@login_required()
+def update_staff(request):
+    # Delete User
+    student_id = request.POST.get("student_id", '')
+    if request.POST.get("Action", '') == "Delete" and student_id:
+        try:
+            user = User.objects.get(id = student_id)
+            user.is_superuser = False
+            user.is_staff = False
+            user.save()
+            vars = { 'num_deleted' : 1 }
+            return render_to_response('books/update_staff/deleted.html', vars, 
+                                      context_instance=RequestContext(request))
+        except User.DoesNotExist:
+            # TODO make an error page to pass messages to
+            return HttpResponse("User does not Exist")
+    elif request.POST.get("Action", '') == "Delete":
+        try:
+            num_deleted = 0
+            for key, value in request.POST.items():
+                if "idToEdit" in key:
+                    user = User.objects.get(id = value)  
+                    user.is_superuser = False
+                    user.is_staff = False
+                    user.save()
+                    num_deleted += 1
+            vars = { 'num_deleted' : num_deleted }
+            return render_to_response('books/update_staff/deleted.html', vars, 
+                                      context_instance=RequestContext(request))
+        except User.DoesNotExist:
+            # TODO make an error page to pass messages to
+            return HttpResponse("User does not Exist")
+
+    # Save New User
+    if request.POST.get("Action", '') == "Save":
+        role = request.POST.get("role", '')
+        try:
+            user = User.objects.get(id = student_id)
+            if request.POST.get("role", '') == "Administrator":
+                user.is_superuser = True
+                user.is_staff = True
+                user.save()
+            else:
+                user.is_superuser = False
+                user.is_staff = True
+                user.save()
+            vars = {
+                'user_name' : "%s %s" % (user.first_name, user.last_name),
+                'administrator' : user.is_superuser,
+            }
+            return render_to_response('books/update_staff/saved.html', vars, 
+                                      context_instance=RequestContext(request))
+        except User.DoesNotExist:
+            return HttpResponse("Invalid Student ID")
 
 @login_required()
 def staffedit(request):
-    messages = []; 
-    first_name = "";
-    last_name = "";
-    student_id = "";
-    if request.user.is_authenticated():
-        student_id = request.POST.get("student_id", '')
-        #user is selected
-        if request.POST.get("Action", ''):
-            messages.append(request.POST.get("Action", ''))
-            listings = User.objects.get(username = messages[0])    
-            student_id = listings.id
-            first_name = listings.first_name
-            last_name = listings.last_name
-
-        #Delete User
-        if (request.POST.get("Delete", '')):
-            if student_id:
-                try:
-                    listings = User.objects.get(id = student_id)
-                    listings.is_superuser = False
-                    listings.is_staff = False
-                    listings.save()
-                    return HttpResponse("User Deleted")
-                except User.DoesNotExist:
-                    return HttpResponse("User does not Exist")
-
-            if len(messages) > 0:
-                try:
-                    listings = User.objects.get(id = messages[1])  
-                    listings.is_superuser = False
-                    listings.is_staff = False
-                    listings.save()
-                    return HttpResponse("User Deleted")
-                except listings.DoesNotExist:
-                    return HttpResponse("User does not Exist")
-
-        #Save New User
-        if (request.POST.get("Save", '')):
-            role = request.POST.get("role", '')
-            try:
-                listings = User.objects.get(id = student_id)
-                if request.POST.get("role", '') == "Administrator":
-                    listings.is_superuser = True
-                    listings.is_staff = True
-                    listings.save()
-                else:
-                    listings.is_superuser = False
-                    listings.is_staff = True
-                    listings.save()
-                
-            except:
-                return HttpResponse("Invalid Student ID")
-                 
+    """
+    Displays an edit page for user permissions
+    If the data needs to be updated (e.g. delete or save)
+    then it passes the request on to update_staff
+    """
+    if request.POST.get('Action', '') == "Delete":
+        return update_staff(request)
+    users = []
+    if request.POST.get('Action', '')[:3] == "Add New"[:3]:
+        # Apparently some browsers have trouble POSTing spaces
+        edit = False
+        users.append(User())
+    else:
+        edit = True
+        for key, value in request.POST.items():
+            if "idToEdit" in key:
+                users.append(User.objects.get(id=value))
+        if len(users) == 0:
+            # They clicked edit without selecting any users. How silly.
+            return staff(request)
     vars = {
-       'messages' : messages,
-       'first_name' : first_name,
-       'last_name' : last_name,
-       'student_id' : student_id
+        'edit' : edit,
+        'too_many' : len(users) > 1,
+        'first_name' : users[0].first_name,
+        'last_name' : users[0].last_name,
+        'student_id' : users[0].id,
+        'current_role' : 'admin' if users[0].is_superuser else 'staff',
     }
     return render_to_response('books/staffedit.html', vars, 
     context_instance=RequestContext(request))
 
-
+@login_required()
 def addBooks(request):
     if request.POST.get("AltDBld") and request.POST.get("Price") and request.POST.get("BarCode"):
         correct_BarCode = request.POST.get("BarCode")
@@ -363,6 +384,7 @@ def addBooks(request):
     else:
         return render_to_response('addBooks.html', context_instance=RequestContext(request))
 
+@login_required()
 def listBooks(request):
     """
     List all books in the database
@@ -392,3 +414,40 @@ def listBooks(request):
 
     return render_to_response('books/listBooks.html', vars,
                                context_instance=RequestContext(request))
+@login_required()
+def update_books(request):
+    """
+    This view is used to update book data
+    """
+    bunch = Book.objects.none()
+    action = request.POST.get("Action", '')
+
+    for key, value in request.POST.items():
+        if "idToEdit" in key:
+            bunch = bunch | Book.objects.filter(pk=int(value))
+            
+    if action == "Delete":
+        bunch = bunch.exclude(status='D')
+        vars = { 'num_deleted': bunch.count() }
+        bunch.update(status='D')
+        return render_to_response('books/update_data/deleted.html', vars,
+                                    context_instance=RequestContext(request))
+    #elif action == "Edit":
+    #    too_many = True if bunch.count() > 1 else False
+    #    item = bunch[0]
+    #    rows = [{'name' : 'Bar Code', 'value' : item.book.barcode},
+    #            {'name' : 'Student ID', 'value' : item.seller.id},
+    #            {'name' : 'Price', 'value' : item.price},
+    #            {'name' : 'Buyer Student ID', 'value' : item.holder.id}]
+    #    vars = {
+    #        'rows' : rows,
+    #        'too_many' : too_many,
+    #        'id' : item.id,
+    #    }
+    #    return render_to_response('books/update_data/edit.html', vars, 
+    #                              context_instance=RequestContext(request))
+    else:
+        vars = {'action' : action}
+        return render_to_response('books/update_data/error.html', vars, 
+                                  context_instance=RequestContext(request))
+

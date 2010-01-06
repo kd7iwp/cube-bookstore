@@ -1,49 +1,48 @@
 {% extends "base.html" %}
 
-{% block title %} The Cube Online - Add Books {%endblock title %}
+{% block title %} The Cube Online - Add Books {% endblock title %}
 
+{% load selected %}
 {% block content %}
-<h4></h4>
-
-<form method ="post" action = "{% url staffedit %}">
+<h4>{% if edit %}Edit a{% else %}Add a New{% endif %} Staff Member</h4>
+<form method ="post" action = "{% url update_staff %}">
     <table cellspacing="0" class="FormTable" id="FormFunctions">
         <tbody>
-
-
-
-
-            <tr id="row_Student ID" class="form_text">
-                {% if messages %}
+        {% if edit %}
+            <tr>
                 <td>
-                        Name: {{first_name}} {{last_name}}<br />
-                        Student ID: {{student_id}}<br /><br />
-                        <input type="hidden" id="student_id" class="InputField" name="student_id" value="{{student_id}}" maxlength="10" tabindex="2" />
+                    Name:
                 </td>
-                {% else %} 
+                <td>
+                    {{first_name}} {{last_name}}
+                </td>
+            </tr>
+        {% endif %}
+            <tr>
                 <td class="TableLabel">
-			<label for="student_id">
-			    <span> Student ID: </span>
-			</label>
-		  </td>
-                <td class="TableInput">
-                        <input type="text" id="student_id" class="InputField" name="student_id" value="" maxlength="10" tabindex="2" />
+                    Student ID:
                 </td>
-                {%endif%}
-
+                <td>
+                    {% if edit %}{{student_id}}{% endif %}
+                    <input type="{% if edit %}hidden{% else %}text{% endif %}" id="student_id" class="InputField" name="student_id" value="{% if edit %}{{ student_id }}{% endif %}" maxlength="10" tabindex="2" />
+                </td>
+            </tr>
+            <tr>
+                <td class="TableLabel">
+                    Permission Level
+                </td>
                 <td class="role">
-                     <select name="role" />
-                           <option value = "Administrator">Administrator</option>
-                           <option value = "Staff" >Staff</option> 
-                     </select>
+                    <select name="role" />
+                        <option {% selected current_role "staff" %} value="Staff" >Staff</option> 
+                        <option {% selected current_role "adimn" %}value="Administrator">Administrator</option>
+                    </select>
                 </td>
-	     </tr>
-           
-
-	</tbody>
+	        </tr>
+        </tbody>
     </table>
     <p class="submit_options">
-        <input class="submit" type="submit" value="Save" name="Save" />
-        <input class="submit" type="submit" value="Delete" name="Delete" onclick="return confirm('This will permanently delete these items, are you sure?')"/>	
+        <input class="submit" type="submit" value="Save" name="Action" />
+        <input class="submit" type="submit" value="Delete" name="Action" onclick="return confirm('This will permanently delete these items, are you sure?')" />	
     </p>
 </form>
 {% endblock %} 

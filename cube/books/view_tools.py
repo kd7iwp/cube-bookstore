@@ -1,4 +1,4 @@
-from cube.books.models import Listing
+from cube.books.models import Listing, Book
 from django.db.models.query import QuerySet
 
 

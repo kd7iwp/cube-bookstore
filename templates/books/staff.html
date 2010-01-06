@@ -2,27 +2,23 @@
 
 {% block title %}The Cube Online - Staff{% endblock %}
 
-
 {% block content %}
-
-{% if user.is_staff%}                      
-	
-<form action='{% url staffedit  %}' method='post'  name='Action'>
-
-    {% if listings.object_list %}
-        {% if listings.has_other_pages %}
+{% if user.is_staff %} 
+<form action='{% url staffedit %}' method='post' name='Action'>
+    {% if users.object_list %}
+        {% if users.has_other_pages %}
             <div class="PageCounterNav">
                 <p>
-                {% if listings.has_previous %}
-                    <a href="?page={{ listings.previous_page_number }}&amp;per_page={{ per_page }}">
+                {% if users.has_previous %}
+                    <a href="?page={{ users.previous_page_number }}&amp;per_page={{ per_page }}">
                         <img src="{{ MEDIA_URL }}images/pagenav_prev.gif" alt="Previous Page" />
                     </a>
                 {% else %}
                     <img src="{{ MEDIA_URL }}images/pagenav_prev_faded.gif" alt="No Previous Page" />
                 {% endif %}
-                Pages: ({{ listings.number }} of {{listings.paginator.num_pages}})
-                {% if listings.has_next %}
-                    <a href="?page={{ listings.next_page_number }}&amp;per_page={{ per_page }}">
+                Pages: ({{ users.number }} of {{ users.paginator.num_pages }})
+                {% if users.has_next %}
+                    <a href="?page={{ users.next_page_number }}&amp;per_page={{ per_page }}">
                         <img src="{{ MEDIA_URL }}images/pagenav_next.gif" alt="Next Page" />
                     </a>
                 {% else %}
@@ -34,23 +30,23 @@
             <thead>
                 <tr>
                     {# TODO need to sort #}
-                    <th>All</td>{# TODO click selects all..is this necessary? #}
-                    <th>NAME</th>
-                    <th>PERMISSION</th>
+                    <th>All</th>
+                    <th>Name</th>
+                    <th>Permission</th>
                 </tr>
             </thead>
             <tbody>
-            {% for listing in listings.object_list %}
+            {% for user in users.object_list %}
                 <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
                     <td class='row_check'>
-                        <input type='checkbox' name="Action" value='{{ listing}}'/>
+                        <input type='checkbox' name="idToEdit{{ forloop.counter }}" value='{{ user.id }}'/>
                     </td>
                     <td class='row_username'>
-                        {{listing.first_name}} {{listing.last_name}}  
+                        {{ user.first_name }} {{ user.last_name }}
                     </td>
                     
                     <td class="row_permission">
-                        {% if listing.is_superuser %}
+                        {% if user.is_superuser %}
                              Administrator
                         {% else %}
                              Staff
@@ -63,14 +59,12 @@
     {% else %}
         <p class='noresults'>There are no staff.</p>
     {% endif %}
-    {% if user.is_superuser%}
+    {% if user.is_superuser %}
     <div class='submit_options'>
-        <input type='submit' name='edit' class='submit' value='Edit' /> 
-        <input type='submit' name='Delete' class='submit' value='Delete' onclick="return confirm('This will permanently delete these items, are you sure?')" /> 
-        <input type='submit' name='addnew' class='submit' value='Add New' /> 
+        <input type='submit' name='Action' class='submit' value='Edit' /> 
+        <input type='submit' name='Action' class='submit' value='Delete' onclick="return confirm('This will permanently delete these items, are you sure?')" /> 
+        <input type='submit' name='Action' class='submit' value='Add New' /> 
     </div>
-
-
     {% endif %}
 </form>
 
