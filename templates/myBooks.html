@@ -23,7 +23,7 @@
        
         {% if holdP %}
         <h4>Books I have on Hold </h4>
-        <form action="{% url update_data %}" method="post" name="Update Info">
+        <form action="{% url update_listing %}" method="post" name="Update Info">
         <table cellspacing='0'>
             <thead>
                 <tr>
@@ -106,7 +106,7 @@
        
        {% if sellP %}
        <h4>Books I have for Sale </h4> 
-       <form action="{% url update_data %}" method="post" name="Update Info">
+       <form action="{% url update_listing %}" method="post" name="Update Info">
        <table cellspacing='0'>
             <thead>
                 <tr>

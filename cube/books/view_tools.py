@@ -1,7 +1,6 @@
 from cube.books.models import Listing, Book
 from django.db.models.query import QuerySet
 
-
 def get_number(list, key, default):
     """
     grabs a string from a list and converts it to a number

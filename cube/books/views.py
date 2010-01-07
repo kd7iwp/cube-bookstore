@@ -1,5 +1,5 @@
 # django imports
-from cube.books.models import Book, Listing, Log
+from cube.books.models import Book, Course, Listing, Log
 from cube.books.view_tools import book_sort, listing_filter,\
                                   listing_sort, get_number
 from cube.books.email import send_missing_emails, send_sold_emails,\
@@ -63,7 +63,7 @@ def listings(request):
     return render_to_response('books/listing_list.html', vars, 
                               context_instance=RequestContext(request))
 @login_required()
-def update_data(request):
+def update_listing(request):
     """
     This view is used to update listing data
     """
@@ -78,7 +78,7 @@ def update_data(request):
         bunch = bunch.exclude(status='D')
         vars = { 'num_deleted': bunch.count() }
         bunch.update(status='D')
-        return render_to_response('books/update_data/deleted.html', vars,
+        return render_to_response('books/update_listing/deleted.html', vars,
                                     context_instance=RequestContext(request))
     elif action[:1] == "To Be Deleted"[:1]:
         # apparently some browsers have issues passing spaces
@@ -91,7 +91,7 @@ def update_data(request):
             'num_owners' : len(set(map(lambda x: x.seller, bunch))),
         }
         bunch.update(status='T')
-        return render_to_response('books/update_data/to_be_deleted.html', vars,
+        return render_to_response('books/update_listing/to_be_deleted.html', vars,
                                   context_instance=RequestContext(request))
     elif action == "Sold":
         # Allow only if For Sale or On Hold
@@ -102,7 +102,7 @@ def update_data(request):
             'num_owners' : len(set(map(lambda x: x.seller, bunch))),
         }
         bunch.update(status='S', sell_date=datetime.today())
-        return render_to_response('books/update_data/sold.html', vars, 
+        return render_to_response('books/update_listing/sold.html', vars, 
                                   context_instance=RequestContext(request))
     elif action[:5] == "Seller Paid"[:5]:
         # apparently some browsers have issues passing spaces
@@ -114,7 +114,7 @@ def update_data(request):
 
         vars = {'paid' : bunch.count()}
         bunch.update(status='P')
-        return render_to_response('books/update_data/seller_paid.html', vars, 
+        return render_to_response('books/update_listing/seller_paid.html', vars, 
                                   context_instance=RequestContext(request))
     elif action == "Missing":
         # Must be For Sale, On Hold or To Be Deleted for it to go Missing
@@ -125,7 +125,7 @@ def update_data(request):
             'num_missing' : bunch.count(),
         }
         bunch.update(status='M')
-        return render_to_response('books/update_data/missing.html', vars, 
+        return render_to_response('books/update_listing/missing.html', vars, 
                                   context_instance=RequestContext(request))
     elif action[:4] == "Place on Hold"[:4]:
         # apparently some browsers have issues passing spaces
@@ -142,14 +142,14 @@ def update_data(request):
         }
         extended.update(hold_date = datetime.today())
         new_hold.update(status='O', hold_date=datetime.today(), holder=request.user)
-        return render_to_response('books/update_data/place_hold.html', vars, 
+        return render_to_response('books/update_listing/place_hold.html', vars, 
                                   context_instance=RequestContext(request))
     elif action[:5] == "Remove Holds"[:5]:
         bunch = bunch.filter(status='O')
         if not request.user.is_staff: bunch = bunch.filter(holder=request.user)
         vars = {'removed' : bunch.count()}
         bunch.update(status='F', hold_date=None, holder=None)
-        return render_to_response('books/update_data/remove_holds.html', vars,
+        return render_to_response('books/update_listing/remove_holds.html', vars,
                                   context_instance=RequestContext(request))
     elif action == "Edit":
         too_many = True if bunch.count() > 1 else False
@@ -163,11 +163,11 @@ def update_data(request):
             'too_many' : too_many,
             'id' : item.id,
         }
-        return render_to_response('books/update_data/edit.html', vars, 
+        return render_to_response('books/update_listing/edit.html', vars, 
                                   context_instance=RequestContext(request))
     else:
         vars = {'action' : action}
-        return render_to_response('books/update_data/error.html', vars, 
+        return render_to_response('books/update_listing/error.html', vars, 
                                   context_instance=RequestContext(request))
 @login_required()
 def update_listing(request):
@@ -353,36 +353,77 @@ def staffedit(request):
         'current_role' : 'admin' if users[0].is_superuser else 'staff',
     }
     return render_to_response('books/staffedit.html', vars, 
-    context_instance=RequestContext(request))
+                              context_instance=RequestContext(request))
 
 @login_required()
-def addBooks(request):
-    if request.POST.get("AltDBld") and request.POST.get("Price") and request.POST.get("BarCode"):
-        correct_BarCode = request.POST.get("BarCode")
-        studentID = int(request.POST.get("AltDBld"))
-        dec_price = Decimal(request.POST.get("Price"))
+def add_books(request):
+    if request.POST.get("student_id") and request.POST.get("Price") and request.POST.get("BarCode"):
+        barcode = request.POST.get("BarCode")
+        student_id = int(request.POST.get("student_id"))
+        price = Decimal(request.POST.get("Price"))
         try:
-            booky = Book.objects.get(barcode=correct_BarCode)
+            book = Book.objects.get(barcode=barcode)
         except Book.DoesNotExist: 
-            return render_to_response('newBook.html', context_instance=RequestContext(request))
+            vars = {
+                'barcode' : barcode,
+                'student_id' : student_id,
+                'price' : price,
+                'edition_range' : range(1,51),
+            }
+            return render_to_response('newBook.html', vars,
+                                      context_instance=RequestContext(request))
         try:
-            selly = User.objects.get(id = studentID)
+            seller = User.objects.get(id=student_id)
         except User.DoesNotExist:
             return HttpResponse("User does not exist")
-        newListing = Listing(list_date=datetime.now(), price=dec_price, status="F", book=booky, seller = selly)
-        newListing.save()
-        return HttpResponse("work")
-    if request.POST.get("Author"):
-# and request.POST.get("Title") and request.POST.get("Edition") and request.POST.get("Department") and request.POST.get("Course Number"):
+        listing = Listing(list_date=datetime.now(), price=price, status="F",
+                          book=book, seller=seller)
+        listing.save()
+        vars = {
+            'title' : book.title,
+            'listing_id' : listing.id
+        }
+        return render_to_response('books/update_listing/added.html', vars, 
+                                  context_instance=RequestContext(request))
+    elif request.POST.get("Action", '') == 'Add':
+        # This came from the add_books view, and we need to
+        # create a book and a listing
+        g = lambda x: request.POST.get(x, '')
+        barcode, price, sid, author, title, ed, dept, course_num =\
+            g('barcode'), g('price'), int(g('student_id')), g('author'),\
+            g('title'), g('edition'), g('department'), g('course_num')
+        book = Book(barcode=barcode, author=author, title=title, edition=ed)
+        book.save()
+        course, created = Course.objects.get_or_create(division=dept,
+                                                       number=course_num)
+        book.courses.add(course)
+        book.save()
+        seller = User.objects.get(pk=sid)
+        listing = Listing(seller=seller, price=Decimal(price), book=book)
+        listing.status = 'F'
+        listing.save()
+
+        vars = {
+            'title' : book.title,
+            'author' : book.author,
+            'seller_name' : "%s %s" % (seller.first_name, seller.last_name),
+        }
+        return render_to_response('books/update_book/added.html', vars, 
+                                  context_instance=RequestContext(request))
+    elif request.POST.get("Author"):
+        # TODO what is this case for???
+        # and request.POST.get("Title") and request.POST.get("Edition") and request.POST.get("Department") and request.POST.get("Course Number"):
         course = request.POST.get("Department") + " " + request.POST.get("Course Number")
         the_author = request.POST.get("Author")
         the_title = request.POST.get("Title")
         the_edition = request.POST.get("Edition")
-        new_book = Book(author = the_author, title = the_title, edition = the_edition, courses = course) 
+        new_book = Book(author=the_author, title=the_title, edition=the_edition, courses=course) 
         new_book.save()
         return HttpResponse("happy")
     else:
-        return render_to_response('addBooks.html', context_instance=RequestContext(request))
+        # the user is hitting the page for the first time
+        return render_to_response('books/add_books.html',
+                                  context_instance=RequestContext(request))
 
 @login_required()
 def listBooks(request):
@@ -430,7 +471,7 @@ def update_books(request):
         bunch = bunch.exclude(status='D')
         vars = { 'num_deleted': bunch.count() }
         bunch.update(status='D')
-        return render_to_response('books/update_data/deleted.html', vars,
+        return render_to_response('books/update_listing/deleted.html', vars,
                                     context_instance=RequestContext(request))
     #elif action == "Edit":
     #    too_many = True if bunch.count() > 1 else False
@@ -444,10 +485,10 @@ def update_books(request):
     #        'too_many' : too_many,
     #        'id' : item.id,
     #    }
-    #    return render_to_response('books/update_data/edit.html', vars, 
+    #    return render_to_response('books/update_listing/edit.html', vars, 
     #                              context_instance=RequestContext(request))
     else:
         vars = {'action' : action}
-        return render_to_response('books/update_data/error.html', vars, 
+        return render_to_response('books/update_listing/error.html', vars, 
                                   context_instance=RequestContext(request))
 
