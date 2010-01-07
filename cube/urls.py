@@ -13,8 +13,6 @@ urlpatterns = patterns('',
 
     url(r'^books/$', 'cube.books.views.listings', name="list"),
     url(r'^books/update/$', 'cube.books.views.update_listing', name="update_listing"),
-    url(r'^books/update/listing/$', 'cube.books.views.update_listing',
-        name="update_listing"),
     url(r'books/update/book/$', 'cube.books.views.update_books',
         name="update_books"),
 

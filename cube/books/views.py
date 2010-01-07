@@ -157,7 +157,7 @@ def update_listing(request):
         rows = [{'name' : 'Bar Code', 'value' : item.book.barcode},
                 {'name' : 'Student ID', 'value' : item.seller.id},
                 {'name' : 'Price', 'value' : item.price},
-                {'name' : 'Buyer Student ID', 'value' : item.holder.id}]
+                {'name' : 'Buyer Student ID', 'value' : item.holder.id if item.holder else ''}]
         vars = {
             'rows' : rows,
             'too_many' : too_many,
@@ -169,36 +169,6 @@ def update_listing(request):
         vars = {'action' : action}
         return render_to_response('books/update_listing/error.html', vars, 
                                   context_instance=RequestContext(request))
-@login_required()
-def update_listing(request):
-    """
-    Applies changes to a listing.
-    If the barcode doesn't exist,
-    it makes the user create a Book object as well
-    """
-    if request.POST.has_key('IdToEdit'):
-        listing = Listing.objects.get(id=int(request.POST["IdToEdit"]))
-        g = request.POST.get
-        if g('bar-code', ''):
-            # there is a barcode
-            barcode = g('bar-code', '')
-            return HttpResponse("There is a barcode")
-            if Book.objects.filter(barcode=barcode):
-                # a book exists in the db with that barcode
-                return HttpResponse("A Book exists with that barcode")
-                listing.book =  Book.objects.get(barcode=barcode)
-            else:
-                # barcode doesn't exist in db, we have to make a book.
-                return HttpResponse("barcode doesn't exist in db, we have to make a book")
-        return HttpResponse('<p>Edit</p>')
-        # TODO finish this
-        listing.book = Book.objects.get(barcode=g('bar-code', listing.book.barcode))
-        listing.seller = User.objects.get(id=int(g('student-id', str(listing.seller.id))))
-        listing.price = Decimal(g('price', str(listing.price)))
-        listing.holder = User.objects.get(id=int(g('buyer-student-id', str(listing.holder.id))))
-    else:
-        return HttpResponse('<p>Bad</p>')
-
 @login_required()
 def myBooksies(request):
     """
@@ -375,7 +345,13 @@ def add_books(request):
         try:
             seller = User.objects.get(id=student_id)
         except User.DoesNotExist:
-            return HttpResponse("User does not exist")
+            from cube.twupass.backend import TWUPassBackend
+            seller = TWUPassBackend().import_user(student_id)
+            if seller == None:
+                message = "Invalid Student ID"
+                return render_to_response('error.html', {'message' : message },
+                                      context_instance=RequestContext(request))
+                
         listing = Listing(list_date=datetime.now(), price=price, status="F",
                           book=book, seller=seller)
         listing.save()
@@ -398,7 +374,15 @@ def add_books(request):
                                                        number=course_num)
         book.courses.add(course)
         book.save()
-        seller = User.objects.get(pk=sid)
+        try:
+            seller = User.objects.get(pk=sid)
+        except User.DoesNotExist:
+            from cube.twupass.backend import TWUPassBackend
+            seller = TWUPassBackend().import_user(sid)
+            if seller == None:
+                message = "Invalid Student ID"
+                return render_to_response('error.html', {'message' : message },
+                                      context_instance=RequestContext(request))
         listing = Listing(seller=seller, price=Decimal(price), book=book)
         listing.status = 'F'
         listing.save()
