@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %} The Cube Online - Add Book {% endblock title %}
+
+{% load humanize %}
+{% block content %}
+<h4>Add a Book to the list of Available Books</h4>
+<p class="ResultMessage">
+    "This Barcode for this text has not been added yet.  Please add details for this book."
+</p>
+<form method="post" action="{% if hidden_fields %}{% url attach_book %}{% else %}{% url add_book %}{% endif %}">
+    {% for key, value in hidden_fields.items %}
+        <input type="hidden" name="{{ key }}" value="{{ value }}" />
+    {% endfor %}
+    <table cellspacing="0" class="FormTable" id="FormFunctions">
+        <tbody>
+            <tr id="row_BarCode" class="form_text">
+                <td class="TableLabel">
+                    <label for="BarCode">
+                        <span class="required">BarCode: </span>
+                    </label>
+                </td>   
+                <td class="TableInput">
+                    <input type="text" id="BarCode" class="InputField" name="barcode" maxlength="20" tabindex="1" value="{{ barcode }}" />
+                </td>      
+            </tr>
+            <tr id="row_Student ID" class="form_text">
+                <td class="TableLabel">
+                    <label for="AltDBld">
+                        <span> Student ID: </span>
+                    </label>
+                </td>   
+                <td class="TableInput">
+                    <input type="text" id="AltDBld" class="InputField" name="student_id" value="{{ student_id }}" maxlength="10" tabindex="2" />
+                </td>
+            </tr>
+            <tr id="row_Price" class="form_text">
+                <td class="TableLabel">
+                    <label for="Price">
+                        <span>Price: </span>
+                    </label>
+                </td> 
+                <td class="TableInput">
+                    <input type="text" id="Price" class="InputField" name="price" value="{{ price }}" tabindex="3" />
+                </td>
+            </tr>
+            <tr id="row_Author" class="form_text">
+                <td class="TableLabel">
+                    <label for="Author">
+                        <span class="required">Author: </span>
+                    </label>
+                    <a onclick="ShowHide("AuthorInstructions","toggle")"title="What's this?" />
+                </td> 
+                <td class="TableInput">
+                    <input type="text" id="Author" class="InputField" name="author" maxlength="100" tabindex="4" />
+                </td>      
+            </tr>
+            <tr id="row_Title" class="form_text">
+                <td class="TableLabel">
+                    <label for="Title">
+                        <span class="required">Title: </span>
+                    </label>
+                </td> 
+                <td class="TableInput">
+                    <input type="text" id="Title" class="InputField" name="title" maxlength="255" tabindex="5" />
+                </td>
+            </tr>
+            <tr id='row_Edition' class='form_dropdown'> 
+                <td class='TableLabel'> 
+                    <label for='Edition'><span>Edition:</span></label> 
+                </td> 
+                <td class='TableInput'> 
+                    <select  id='Edition'  class='InputField' name='edition' size='1' tabindex='6' > 
+                    {% for edition in edition_range %}
+                        <option value='{{ edition }}' {% ifequal edition 1 %}selected='selected'{% endifequal %}>{{ edition|ordinal }}</option>
+                    {% endfor %}
+                    </select> 
+                </td> 
+            </tr> 
+            <tr id='row_Department' class='form_dropdown'> 
+                <td class='TableLabel'> 
+                    <label for='Department'><span class='required'>Department:</span></label> 
+                </td> 
+                <td class='TableInput'> 
+                    <select  id='Department' name='department' size='1' tabindex='7'> 
+                        <option value='' selected='selected'> ------ Please Choose One ------ </option> 
+                        <option value='AESL'>AESL - OLD ESLI COURSE CODE</option> 
+                        <option value='ALDR'>ALDR - MA Leadership</option> 
+                        <option value='ANTH'>ANTH - Anthropology</option> 
+                        <option value='ART'>ART - Art</option> 
+                        <option value='AV'>AV - Aviation</option> 
+                        <option value='AVIA'>AVIA - Aviation</option> 
+                        <option value='BIC'>BIC - Bible Exposition</option> 
+                        <option value='BIE'>BIE - Bible Exposition</option> 
+                        <option value='BIL'>BIL - Biblical Languages</option> 
+                        <option value='BIOL'>BIOL - Biology</option> 
+                        <option value='BOTA'>BOTA - Biology</option> 
+                        <option value='BUSI'>BUSI - Business</option> 
+                        <option value='CAP'>CAP - Contemporary Apologetics</option> 
+                        <option value='CARR'>CARR - Career Skills Courses</option> 
+                        <option value='CATH'>CATH - Catholicism</option> 
+                        <option value='CCM'>CCM - Cross Cultural Ministries</option> 
+                        <option value='CEC'>CEC - Christian Education</option> 
+                        <option value='CED'>CED - Christian Education</option> 
+                        <option value='CEI'>CEI - Christian Education</option> 
+                        <option value='CH'>CH - Church History</option> 
+                        <option value='CHED'>CHED - Christian Education</option> 
+                        <option value='CHEM'>CHEM - Chemistry</option> 
+                        <option value='CHIN'>CHIN - Chinese</option> 
+                        <option value='CHM'>CHM - Church Ministries</option> 
+                        <option value='CHP'>CHP - Chaplaincy</option> 
+                        <option value='CLC'>CLC - Counseling</option> 
+                        <option value='CLD'>CLD - Church Leadership</option> 
+                        <option value='CLG'>CLG - Counseling</option> 
+                        <option value='CMCC'>CMCC - Contemporary Music Centre CCCU</option> 
+                        <option value='CMPT'>CMPT - Computer Sciences</option> 
+                        <option value='COMM'>COMM - Communications</option> 
+                        <option value='COOP'>COOP - Cooperative Education</option> 
+                        <option value='CPL'>CPL - Church Planting</option> 
+                        <option value='CPNC'>CPNC - Counselling  Psyc Non Credit</option> 
+                        <option value='CPR'>CPR - CPR and First Aid Certificatio</option> 
+                        <option value='CPSY'>CPSY - Counseling Psychology</option> 
+                        <option value='DMN'>DMN - Doctor of Ministry</option> 
+                        <option value='DRAM'>DRAM - Drama</option> 
+                        <option value='DS'>DS - Unapproved Directed Study</option> 
+                        <option value='ECON'>ECON - Economics</option> 
+                        <option value='EDUC'>EDUC - Education</option> 
+                        <option value='ELCE'>ELCE - Office of the Dean</option> 
+                        <option value='ENGL'>ENGL - English</option> 
+                        <option value='ENVS'>ENVS - Environmental Studies</option> 
+                        <option value='ESLI'>ESLI - English as a Second Language</option> 
+                        <option value='ESNC'>ESNC - ESLI Non Credit</option> 
+                        <option value='FINE'>FINE - Fine Arts</option> 
+                        <option value='FREN'>FREN - French</option> 
+                        <option value='FSC'>FSC - Family &amp; Soc Science (Korean)</option> 
+                        <option value='FSUR'>FSUR - Geography</option> 
+                        <option value='GEOG'>GEOG - Geography</option> 
+                        <option value='GEOL'>GEOL - Geology</option> 
+                        <option value='GERM'>GERM - German</option> 
+                        <option value='GLNC'>GLNC - Global Learning Connections</option> 
+                        <option value='GREE'>GREE - Greek</option> 
+                        <option value='HEBR'>HEBR - Hebrew</option> 
+                        <option value='HIC'>HIC - Church History</option> 
+                        <option value='HIS'>HIS - Church History</option> 
+                        <option value='HIST'>HIST - History</option> 
+                        <option value='HKIN'>HKIN - Human Kinetics</option> 
+                        <option value='HSER'>HSER - Human Services</option> 
+                        <option value='HUMA'>HUMA - Humanities</option> 
+                        <option value='HUMN'>HUMN - Humanities and Social Services</option> 
+                        <option value='IDIS'>IDIS - Interdisciplinary Studies</option> 
+                        <option value='INT'>INT - Internship</option> 
+                        <option value='ISC'>ISC - Indepent Studies</option> 
+                        <option value='ISYS'>ISYS - Information Systems</option> 
+                        <option value='JAPA'>JAPA - Japanese</option> 
+                        <option value='LAST'>LAST - Latin American Studies (CCCU)</option> 
+                        <option value='LATI'>LATI - Religious Studies</option> 
+                        <option value='LATN'>LATN - Latin</option> 
+                        <option value='LBR'>LBR - Library</option> 
+                        <option value='LDC'>LDC - Leadership Studies</option> 
+                        <option value='LDR'>LDR - Leadership Studies</option> 
+                        <option value='LDRS'>LDRS - Leadership</option> 
+                        <option value='LIN'>LIN - Linguistics</option> 
+                        <option value='LING'>LING - Linguistics</option> 
+                        <option value='LLC'>LLC - Laurentian Leadership Centre</option> 
+                        <option value='MATH'>MATH - Mathematics</option> 
+                        <option value='MCS'>MCS - MA in Christian Studies</option> 
+                        <option value='MEST'>MEST - Middle East Studies (CCCU)</option> 
+                        <option value='MIC'>MIC - Missions</option> 
+                        <option value='MIS'>MIS - Missions</option> 
+                        <option value='MLE'>MLE - Master of Linguistics Exeges</option> 
+                        <option value='MM1'>MM1 - Master of Ministry One</option> 
+                        <option value='MM2'>MM2 - Master of Ministry Two</option> 
+                        <option value='MM3'>MM3 - Master of Ministry Three</option> 
+                        <option value='MMI'>MMI - Master of Ministry</option> 
+                        <option value='MNF'>MNF - Ministry Formation</option> 
+                        <option value='MRE'>MRE - Master of Religious Education</option> 
+                        <option value='MRP'>MRP - Ministry Research Project</option> 
+                        <option value='MTH'>MTH - Master of Theology</option> 
+                        <option value='MTS'>MTS - Master of Theological Studies</option> 
+                        <option value='MTSC'>MTSC - Master of Theo in Counseling</option> 
+                        <option value='MUSI'>MUSI - Music</option> 
+                        <option value='NATS'>NATS - Natural Science</option> 
+                        <option value='NURS'>NURS - Nursing</option> 
+                        <option value='OMC'>OMC - Outreach Ministries</option> 
+                        <option value='OMI'>OMI - Outreach Ministries</option> 
+                        <option value='OMT'>OMT - Outreach Ministries</option> 
+                        <option value='PDEV'>PDEV - Prof. Dev./Non Credit</option> 
+                        <option value='PDTC'>PDTC - Professional Development (GLC)</option> 
+                        <option value='PHED'>PHED - Physical Education</option> 
+                        <option value='PHIL'>PHIL - Philosophy</option> 
+                        <option value='PHYS'>PHYS - Physics</option> 
+                        <option value='POLS'>POLS - Political Science</option> 
+                        <option value='PREP'>PREP - Career Preparation</option> 
+                        <option value='PSYC'>PSYC - Psychology</option> 
+                        <option value='PTC'>PTC - Pastoral Theology</option> 
+                        <option value='PTH'>PTH - Pastoral Theology</option> 
+                        <option value='RCE'>RCE - Religion Culture and Ethics</option> 
+                        <option value='RCE5'>RCE5 - Religion Culture and Ethics</option> 
+                        <option value='RECR'>RECR - Recreation</option> 
+                        <option value='RELS'>RELS - Religious Studies</option> 
+                        <option value='RES'>RES - Research Studies</option> 
+                        <option value='RIST'>RIST - Roehampton Inst Studies (CCCU)</option> 
+                        <option value='RSHP'>RSHP - Relationships Non Credit</option> 
+                        <option value='RUSS'>RUSS - Russian</option> 
+                        <option value='RUST'>RUST - Russian Studies (CCCU)</option> 
+                        <option value='SCS'>SCS - Science Studies (Korean)</option> 
+                        <option value='SIJO'>SIJO - Sum Inst of Journalism (CCCU)</option> 
+                        <option value='SKLS'>SKLS - Study Skills</option> 
+                        <option value='SOCI'>SOCI - Sociology</option> 
+                        <option value='SOCS'>SOCS - Humanities and Soc Services</option> 
+                        <option value='SPAN'>SPAN - Spanish</option> 
+                        <option value='STUD'>STUD - Enrolment Services</option> 
+                        <option value='TENC'>TENC - TESL Non Credit</option> 
+                        <option value='TEST'>TEST - Test - Enrolment Services Only</option> 
+                        <option value='THC'>THC - Theological Studies</option> 
+                        <option value='THS'>THS - Theological Studies</option> 
+                        <option value='TNET'>TNET - Training Network</option> 
+                        <option value='TRAN'>TRAN - Transfer Credit - Unspecified</option> 
+                        <option value='TRVL'>TRVL - Enrolment Services</option> 
+                        <option value='UNIV'>UNIV - Student Life</option> 
+                        <option value='WLS'>WLS - Worship Leadership Studies</option> 
+                        <option value='WMS'>WMS - Womens Ministry Studies</option> 
+                        <option value='WSNC'>WSNC - Worship Studies Non Credit</option> 
+                        <option value='WSTU'>WSTU - Worship Studies</option> 
+                        <option value='WVS'>WVS - Worldview Studies (Korean)</option> 
+                        <option value='ZOOL'>ZOOL - Biology</option> 
+                    </select> 
+                </td> 
+            </tr> 
+            <tr id="row_CourseNumber" class="form_text">
+                <td class="TableLabel">
+                    <label for="CourseNumber">
+                        <span class="required">Course Number: </span>
+                    </label>
+                </td> 
+                <td class="TableInput">
+                    <input type="text" id="CourseNumber" class="InputField" name="course_num" maxlength="6" tabindex="8" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="submit_options">
+        <input class="submit" type="submit" value="Add" name="Action" />
+    </p>
+</form>
+{% endblock %} 

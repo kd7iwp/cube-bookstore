@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %} The Cube Online - Add Books {%endblock title %}
+{% block title %} The Cube Online - Edit Book {% endblock title %}
 
 {% load humanize %}
 {% block content %}
 <h4>Add a Book to the list of Available Books</h4>
 <p class="ResultMessage">
-    "This Barcode for this text has not been added yet.  Please add details for this book."
+    This Barcode does not exist.  Please add details for this book.
 </p>
-<form method="post" action="{% url add_books %}">
+<form method="post" action="{% url add_book %}">
+    <input type="hidden" name="listing_id" value="{{ listing_id }}" />
     <table cellspacing="0" class="FormTable" id="FormFunctions">
         <tbody>
             <tr id="row_BarCode" class="form_text">

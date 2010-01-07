@@ -5,19 +5,19 @@
     <p><em>You selected more than one item to edit. You can only edit 1 item at a time.</em></p>
 {% endif %}
 <div id="admin_form">
-    <form method="post" action="{% url update_listing %}" {# onsubmit="return OnSubmit(this)" enctype="multipart/form-data" #}>
+    <form method="post" action="{% url update_listing_edit %}" {# onsubmit="return OnSubmit(this)" enctype="multipart/form-data" #}>
         <div class="bgcolor_odd">{# seems hacky to me #}
             {# <input type="hidden" name="ReferTo" value="http://ecourses.twu.ca/mytwu2/Modules/BuySell/index.php">#}
             <input type="hidden" name="IdToEdit" value="{{ id }}" />
             <table cellspacing='0' class='FormTable' id='FormFunctions'> 
                 <tbody>
                     {% for row in rows %}
-                    <tr id='{{ row.name|slugify }}' class='form_text'> 
+                    <tr  class='form_text'> 
                         <td class='TableLabel'> 
                             <label for='{{ row.name|slugify }}'><span class='required'>{{ row.name }}:</span></label> 
                         </td> 
                         <td class='TableInput'> 
-                            <input type='text' id='{{ row.name|slugify }}' class='InputField' name='{{ row.name|slugify }}'  value='{{ row.value }}'  tabindex='1' /> 
+                            <input type='text' id='{{ row.name|slugify }}' class='InputField' name='{{ row.name|slugify }}'  value='{{ row.value }}' /> 
                         </td> 
                     </tr> 
                     {% endfor %}
@@ -29,4 +29,10 @@
             </p>
         </div>
     </form>
+    <p>History of this item</p>
+    <ol id="HistoryOfBook">
+    {% for log in logs %}
+        <li>{{ log.who.get_full_name }} '{{ log.get_action_display }}' on {{ log.when|date:"Y-m-d H:i:s" }}</li>
+    {% endfor %}
+    </ol>
 {% endblock %}
