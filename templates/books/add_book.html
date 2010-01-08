@@ -1,47 +1,15 @@
 {% extends "base.html" %}
-
-{% block title %} The Cube Online - Add Books {% endblock title %}
-
+{% block title %} The Cube Online - Add Book {% endblock title %}
 {% block content %}
-<h4>Add a Student's Book</h4>
-<form method ="post" action="{% url add_book %}">
-    <table cellspacing="0" class="FormTable" id="FormFunctions">
-        <tbody>
-            <tr id="row_Student ID" class="form_text">
-                <td class="TableLabel">
-                    <label for="studnet_id">
-                        <span class="required">Student ID: </span>
-                    </label>
-                </td> 
-                <td class="TableInput">
-                    <input type="text" id="student_id" class="InputField" name="student_id" maxlength="10" tabindex="1" />
-                </td>      
-            </tr>
-            <tr id="row_Price" class="form_text">
-                <td class="TableLabel">
-                    <label for="Price">
-                        <span class="required">Price: </span>
-                    </label>
-                </td> 
-                <td class="TableInput">
-                    <input type="text" id="Price" class="InputField" name="Price" tabindex="2" />
-                </td>
-            </tr>
-            <tr id="row_Bar Code" class="form_text">
-                <td class="TableLabel">
-                    <label for="BarCode">
-                        <span class="required">Bar Code:</span>
-                    </label>
-                </td> 
-                <td class="TableInput">
-                    <input type="text" id="BarCode" class="InputField" name="BarCode" tabindex="3" />
-                </td>
-            </tr>
-        </tbody>
-    </table>
+<h4>Add a Book to the list of Available Books</h4>
+<p>
+    This Barcode for this text has not been added yet.
+    Please add details for this book.
+</p>
+<form method="post" action="{% if attach %}{% url attach_book %}{% else %}{% url add_book %}{% endif %}">
+    {% include "form.html" %}
     <p class="submit_options">
         <input class="submit" type="submit" value="Add" name="Action" />
-         <a href = "{% url list_books %}"><input class="submit" type="submit" value="List Bar Codes" name="Action" /></a>
     </p>
 </form>
 {% endblock %} 

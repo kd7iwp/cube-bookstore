@@ -42,7 +42,7 @@
                         <input type='checkbox' name="idToEdit{{ forloop.counter }}" value='{{ user.id }}'/>
                     </td>
                     <td class='row_username'>
-                        {{ user.first_name }} {{ user.last_name }}
+                        {{ user.get_full_name }}
                     </td>
                     
                     <td class="row_permission">

@@ -1,0 +1,13 @@
+{% for field in form.hidden_fields %}
+    {{ field }}
+{% endfor %}
+<table cellspacing="0" class="FormTable">
+    <tbody>
+        {% for field in form.visible_fields %}
+            <tr>
+                <td>{{ field.label_tag }}:</td>
+                <td>{{ field }}{{ field.errors }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

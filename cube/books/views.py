@@ -1,6 +1,6 @@
 # django imports
 from cube.books.models import Book, Course, Listing, Log
-from cube.books.forms import BookAndListingForm
+from cube.books.forms import BookAndListingForm, BookForm
 from cube.books.view_tools import book_sort, listing_filter,\
                                   listing_sort, get_number, tidy_error,\
                                   import_user
@@ -9,9 +9,10 @@ from cube.books.email import send_missing_emails, send_sold_emails,\
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
-from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.http import HttpResponseRedirect, HttpResponse,\
+                        HttpResponseNotAllowed
+from django.shortcuts import render_to_response as rtr
+from django.template import RequestContext as RC
 
 #python imports
 from datetime import datetime
@@ -62,8 +63,7 @@ def listings(request):
         'filter_text' : request.GET.get('filter', ''),
         'dir' : 'desc' if request.GET.get('dir', '') == 'asc' else 'asc'
     }
-    return render_to_response('books/listing_list.html', vars, 
-                              context_instance=RequestContext(request))
+    return rtr('books/listing_list.html', vars, context_instance=RC(request))
 @login_required()
 def update_listing(request):
     """
@@ -82,8 +82,8 @@ def update_listing(request):
             Log(action='D', listing=listing, who=request.user).save()
         vars = { 'num_deleted': bunch.count() }
         bunch.update(status='D')
-        return render_to_response('books/update_listing/deleted.html', vars,
-                                    context_instance=RequestContext(request))
+        template = 'books/update_listing/deleted.html'
+        return rtr(template, vars, context_instance=RC(request))
     elif action[:1] == "To Be Deleted"[:1]:
         # apparently some browsers have issues passing spaces
         # TODO add bells and whistles
@@ -97,8 +97,8 @@ def update_listing(request):
             'num_owners' : len(set(map(lambda x: x.seller, bunch))),
         }
         bunch.update(status='T')
-        return render_to_response('books/update_listing/to_be_deleted.html', vars,
-                                  context_instance=RequestContext(request))
+        template = 'books/update_listing/to_be_deleted.html'
+        return rtr(template, vars, context_instance=RC(request))
     elif action == "Sold":
         # Allow only if For Sale or On Hold
         bunch = bunch.filter(status__in='FO')
@@ -110,8 +110,8 @@ def update_listing(request):
             'num_owners' : len(set(map(lambda x: x.seller, bunch))),
         }
         bunch.update(status='S', sell_date=datetime.today())
-        return render_to_response('books/update_listing/sold.html', vars, 
-                                  context_instance=RequestContext(request))
+        template = 'books/update_listing/sold.html'
+        return rtr(template, vars, context_instance=RC(request))
     elif action[:5] == "Seller Paid"[:5]:
         # apparently some browsers have issues passing spaces
         # only staff can do this
@@ -123,8 +123,8 @@ def update_listing(request):
             Log(action='P', listing=listing, who=request.user).save()
         vars = {'paid' : bunch.count()}
         bunch.update(status='P')
-        return render_to_response('books/update_listing/seller_paid.html', vars, 
-                                  context_instance=RequestContext(request))
+        template = 'books/update_listing/seller_paid.html'
+        return rtr(template, vars, context_instance=RC(request))
     elif action == "Missing":
         # Must be For Sale, On Hold or To Be Deleted for it to go Missing
         bunch = bunch.filter(status__in='FOT')
@@ -136,8 +136,8 @@ def update_listing(request):
             'num_missing' : bunch.count(),
         }
         bunch.update(status='M')
-        return render_to_response('books/update_listing/missing.html', vars, 
-                                  context_instance=RequestContext(request))
+        template = 'books/update_listing/missing.html'
+        return rtr(template, vars,  context_instance=RC(request))
     elif action[:4] == "Place on Hold"[:4]:
         # apparently some browsers have issues passing spaces
         extended = bunch.filter(status='O', holder=request.user)
@@ -157,8 +157,8 @@ def update_listing(request):
         }
         extended.update(hold_date = datetime.today())
         new_hold.update(status='O', hold_date=datetime.today(), holder=request.user)
-        return render_to_response('books/update_listing/place_hold.html', vars, 
-                                  context_instance=RequestContext(request))
+        template = 'books/update_listing/place_hold.html'
+        return rtr(template, vars, context_instance=RC(request))
     elif action[:5] == "Remove Holds"[:5]:
         bunch = bunch.filter(status='O')
         if not request.user.is_staff: bunch = bunch.filter(holder=request.user)
@@ -166,8 +166,8 @@ def update_listing(request):
             Log(action='R', listing=listing, who=request.user).save()
         vars = {'removed' : bunch.count()}
         bunch.update(status='F', hold_date=None, holder=None)
-        return render_to_response('books/update_listing/remove_holds.html', vars,
-                                  context_instance=RequestContext(request))
+        template = 'books/update_listing/remove_holds.html'
+        return rtr(template, vars, context_instance=RC(request))
     elif action == "Edit":
         too_many = True if bunch.count() > 1 else False
         item = bunch[0]
@@ -181,12 +181,12 @@ def update_listing(request):
             'id' : item.id,
             'logs' : logs,
         }
-        return render_to_response('books/update_listing/edit.html', vars, 
-                                  context_instance=RequestContext(request))
+        template = 'books/update_listing/edit.html'
+        return rtr(template, vars, context_instance=RC(request))
     else:
         vars = {'action' : action}
-        return render_to_response('books/update_listing/error.html', vars, 
-                                  context_instance=RequestContext(request))
+        template = 'books/update_listing/error.html'
+        return rtr(template, vars, context_instance=RC(request))
 @login_required()
 def update_listing_edit(request):
     """
@@ -205,39 +205,73 @@ def update_listing_edit(request):
                 listing.book = Book.objects.get(barcode=barcode)
             else:
                 # barcode doesn't exist in db, we have to make a book.
-                vars = {
-                    'barcode' : barcode,
-                    'student_id' : g('seller-student-id', str(listing.seller.id)),
+                initial={
+                    'barcode': barcode,
+                    'seller' : g('seller-student-id', str(listing.seller.id)),
                     'price' : g('price', str(listing.price)),
-                    'edition_range' : range(1,51),
-                    'hidden_fields' : {'listing_id' : listing.id },
+                    'listing_id' : listing.id
                 }
-                return render_to_response('books/new_book.html', vars,
-                                          context_instance=RequestContext(request))
+                form = BookAndListingForm(initial=initial)
+                vars = {
+                    'form' : form,
+                    'attach' : True,
+                }
+                template = 'books/add_book.html'
+                return rtr(template, vars, context_instance=RC(request))
         else:
-            message = "There was no barcode"
-            return render_to_response('error.html', {'message' : message },
-                                  context_instance=RequestContext(request))
+            vars = {'message' : "There was no barcode"}
+            template = 'error.html'
+            return rtr(template, vars, context_instance=RC(request))
         listing.book = Book.objects.get(barcode=g('bar-code', listing.book.barcode))
-        listing.seller = User.objects.get(id=int(g('seller-student-id', str(listing.seller.id))))
+        try:
+            id = g('seller-student-id', str(listing.seller.id))
+            listing.seller = User.objects.get(id=id)
+        except User.DoesNotExist:
+            user = import_user(id)
+            if user == None:
+                message = "Invalid Student ID: %s" % id
+                return tidy_error(request, message)
+            listing.seller = user
         listing.price = Decimal(g('price', str(listing.price)))
         listing.save()
         Log(who=request.user, action='E', listing=listing).save()
         vars = {'listing' : listing}
-        return render_to_response('books/update_listing/edited.html', vars,
-                              context_instance=RequestContext(request))
+        template = 'books/update_listing/edited.html'
+        return rtr(template, vars, context_instance=RC(request))
     else:
         message = "There was no IdToEdit"
-        return render_to_response('error.html', {'message' : message},
-                              context_instance=RequestContext(request))
+        template = 'error.html'
+        return rtr(template, {'message' : message}, context_instance=RC(request))
 
 @login_required()
 def attach_book(request):
     if request.method == 'POST':
         form = BookAndListingForm(request.POST)
         if form.is_valid():
-            return HttpResponse("Valid Form: Forms work!!!")
-        return HttpResposne("method was post, but form wasn't valid")
+            # shorten our code line lengths below
+            goc = Course.objects.get_or_create
+            cd = form.cleaned_data
+
+            # Get the course if it exists, otherwise create it.
+            tpl = goc(department=cd['department'], number=cd['course_number'])
+            course = tpl[0]
+
+            book = Book()
+            book.title = form.cleaned_data['title']
+            book.author = form.cleaned_data['author']
+            book.barcode = form.cleaned_data['barcode']
+            book.edition = form.cleaned_data['edition']
+            book.save()
+            book.courses.add(course)
+            book.save()
+
+            listing = Listing.objects.get(pk=form.cleaned_data['listing_id'])
+            listing.book = book
+            listing.save()
+            vars = {'listing' : listing}
+            template = 'books/attached.html'
+            return rtr(template, vars, context_instance=RC(request))
+        return HttpResponse("method was post, but form wasn't valid")
     return HttpResponse("method wasn't even post")
 
 @login_required()
@@ -284,8 +318,8 @@ def my_books(request):
          'filter_text' : request.GET.get('filter', ''),
          'search' : searched
     }             
-    return render_to_response('books/my_books.html', vars,
-                              context_instance=RequestContext(request))    
+    template = 'books/my_books.html'
+    return rtr(template, vars, context_instance=RC(request))    
     
 @login_required()    
 def staff(request):
@@ -305,8 +339,8 @@ def staff(request):
         'filter_text' : request.GET.get('filter', ''),
         'dir' : 'desc' if request.GET.get('dir', '') == 'asc' else 'asc'
     }
-    return render_to_response('books/staff.html', vars, 
-                              context_instance=RequestContext(request))
+    template = 'books/staff.html'
+    return rtr(template, vars,  context_instance=RC(request))
 
 @login_required()
 def update_staff(request):
@@ -320,8 +354,8 @@ def update_staff(request):
             user.is_staff = False
             user.save()
             vars = { 'num_deleted' : 1 }
-            return render_to_response('books/update_staff/deleted.html', vars, 
-                                      context_instance=RequestContext(request))
+            template = 'books/update_staff/deleted.html'
+            return rtr(template, vars,  context_instance=RC(request))
         except User.DoesNotExist:
             return tidy_error(request, "Invalid Student ID: %s" % student_id)
     elif request.POST.get("Action", '') == "Delete":
@@ -336,8 +370,8 @@ def update_staff(request):
                     user.save()
                     num_deleted += 1
             vars = { 'num_deleted' : num_deleted }
-            return render_to_response('books/update_staff/deleted.html', vars, 
-                                      context_instance=RequestContext(request))
+            template = 'books/update_staff/deleted.html'
+            return rtr(template, vars,  context_instance=RC(request))
         except User.DoesNotExist:
             message = "Only %d user" % num_deleted +\
                       (" was" if num_deleted == 1 else "s were") +\
@@ -366,8 +400,8 @@ def update_staff(request):
             'user_name' : user.get_full_name(),
             'administrator' : user.is_superuser,
         }
-        return render_to_response('books/update_staff/saved.html', vars, 
-                                  context_instance=RequestContext(request))
+        template = 'books/update_staff/saved.html'
+        return rtr(template, vars, context_instance=RC(request))
 
 @login_required()
 def staffedit(request):
@@ -398,8 +432,8 @@ def staffedit(request):
         'student_id' : users[0].id,
         'current_role' : 'admin' if users[0].is_superuser else 'staff',
     }
-    return render_to_response('books/staffedit.html', vars, 
-                              context_instance=RequestContext(request))
+    template = 'books/staffedit.html'
+    return rtr(template, vars, context_instance=RC(request))
 
 @login_required()
 def add_book(request):
@@ -410,15 +444,18 @@ def add_book(request):
         try:
             book = Book.objects.get(barcode=barcode)
         except Book.DoesNotExist: 
-            vars = {
+            initial = {
                 'barcode' : barcode,
-                'student_id' : student_id,
-                'price' : price,
-                'edition_range' : range(1,51),
-                'hidden_fields' : {},
+                'seller' : student_id,
+                'price' : price
             }
-            return render_to_response('books/new_book.html', vars,
-                                      context_instance=RequestContext(request))
+            form = BookAndListingForm(initial=initial)
+            vars = {
+                'form' : form,
+                'attach' : False,
+            }
+            template = 'books/add_book.html'
+            return rtr(template, vars, context_instance=RC(request))
         try:
             seller = User.objects.get(id=student_id)
         except User.DoesNotExist:
@@ -429,13 +466,13 @@ def add_book(request):
         listing = Listing(list_date=datetime.now(), price=price, status="F",
                           book=book, seller=seller)
         listing.save()
-        Log(listing=listing, who=request.user, action="C").save()
+        Log(listing=listing, who=request.user, action='A').save()
         vars = {
             'title' : book.title,
             'listing_id' : listing.id
         }
-        return render_to_response('books/update_listing/added.html', vars, 
-                                  context_instance=RequestContext(request))
+        template = 'books/update_listing/added.html'
+        return rtr(template, vars, context_instance=RC(request))
     elif request.POST.get("Action", '') == 'Add':
         # This came from the add_book view, and we need to
         # create a book and a listing
@@ -445,8 +482,8 @@ def add_book(request):
             g('title'), g('edition'), g('department'), g('course_number')
         book = Book(barcode=barcode, author=author, title=title, edition=ed)
         book.save()
-        course, created = Course.objects.get_or_create(division=dept,
-                                                       number=course_num)
+        goc = Course.objects.get_or_create
+        course, created = goc(department=dept, number=course_num)
         book.courses.add(course)
         book.save()
         try:
@@ -466,12 +503,12 @@ def add_book(request):
             'author' : book.author,
             'seller_name' : seller.get_full_name()
         }
-        return render_to_response('books/update_book/added.html', vars, 
-                                  context_instance=RequestContext(request))
+        template = 'books/update_book/added.html'
+        return rtr(template, vars, context_instance=RC(request))
     else:
         # the user is hitting the page for the first time
-        return render_to_response('books/add_book.html',
-                                  context_instance=RequestContext(request))
+        template = 'books/add_listing.html'
+        return rtr(template, context_instance=RC(request))
 
 @login_required()
 def list_books(request):
@@ -501,15 +538,18 @@ def list_books(request):
         'dir' : 'desc' if request.GET.get('dir', '') == 'asc' else 'asc'
     }
 
-    return render_to_response('books/list_books.html', vars,
-                               context_instance=RequestContext(request))
+    template = 'books/list_books.html'
+    return rtr(template, vars, context_instance=RC(request))
 @login_required()
 def update_books(request):
     """
     This view is used to update book data
     """
     bunch = Book.objects.none()
-    action = request.POST.get("Action", '')
+    if request.method == "POST":
+        action = request.POST.get("Action", '')
+    else:
+        return HttpResponseNotAllowed(["POST"])
 
     for key, value in request.POST.items():
         if "idToEdit" in key:
@@ -517,25 +557,38 @@ def update_books(request):
             
     if action == "Delete":
         bunch = bunch.exclude(status='D')
-        vars = { 'num_deleted': bunch.count() }
+        vars = {'num_deleted': bunch.count()}
         bunch.update(status='D')
-        return render_to_response('books/update_listing/deleted.html', vars,
-                                    context_instance=RequestContext(request))
-    #elif action == "Edit":
-    #    too_many = True if bunch.count() > 1 else False
-    #    item = bunch[0]
-    #    rows = [{'name' : 'Bar Code', 'value' : item.book.barcode},
-    #            {'name' : 'Student ID', 'value' : item.seller.id},
-    #            {'name' : 'Price', 'value' : item.price},
-    #    vars = {
-    #        'rows' : rows,
-    #        'too_many' : too_many,
-    #        'id' : item.id,
-    #    }
-    #    return render_to_response('books/update_listing/edit.html', vars, 
-    #                              context_instance=RequestContext(request))
+        template = 'books/update_listing/deleted.html'
+        return rtr(template, vars, context_instance=RC(request))
+    elif action == "Edit":
+        too_many = True if bunch.count() > 1 else False
+        item = bunch[0]
+        form = BookForm(instance=item)
+        vars = {
+            'form' : form,
+            'book_id' : item.id,
+        }
+        template = 'books/edit_book.html'
+        return rtr(template, vars, context_instance=RC(request))
+    elif action == "Save":
+        book_id = request.POST.get('book_id', '')
+        book = Book.objects.get(pk=book_id)
+        form = BookForm(request.POST, instance=book)
+        if form.is_valid():
+            form.save()
+            vars={'book': book}
+            template = 'books/update_book/saved.html'
+            return rtr(template, vars, context_instance=RC(request))
+        vars = {'form' : form}
+        template = 'books/edit_book.html'
+        return rtr(template, vars, context_instance=RC(request))
+    elif action[:3] == "Add New"[:3]:
+        vars = {'form' : BookForm()}
+        template = 'books/edit_book.html'
+        return rtr(template, vars, context_instance=RC(request))
     else:
         vars = {'action' : action}
-        return render_to_response('books/update_listing/error.html', vars, 
-                                  context_instance=RequestContext(request))
+        template = 'books/update_listing/error.html'
+        return rtr(template, vars, context_instance=RC(request))
 

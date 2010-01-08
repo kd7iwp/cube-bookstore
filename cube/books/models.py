@@ -1,21 +1,159 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+DEPARTMENT_CHOICES = (
+    ('ALDR', 'MA Leadership'),
+    ('ANTH', 'Anthropology'),
+    ('ART', 'Art'),
+    ('AV', 'Aviation'),
+    ('AVIA', 'Aviation'),
+    ('BIC', 'Bible Exposition'),
+    ('BIE', 'Bible Exposition'),
+    ('BIL', 'Biblical Languages'),
+    ('BIOL', 'Biology'),
+    ('BOTA', 'Biology'),
+    ('BUSI', 'Business'),
+    ('CAP', 'Contemporary Apologetics'),
+    ('CARR', 'Career Skills Courses'),
+    ('CATH', 'Catholicism'),
+    ('CCM', 'Cross Cultural Ministries'),
+    ('CEC', 'Christian Education'),
+    ('CED', 'Christian Education'),
+    ('CEI', 'Christian Education'),
+    ('CH', 'Church History'),
+    ('CHED', 'Christian Education'),
+    ('CHEM', 'Chemistry'),
+    ('CHIN', 'Chinese'),
+    ('CHM', 'Church Ministries'),
+    ('CHP', 'Chaplaincy'),
+    ('CLC', 'Counseling'),
+    ('CLD', 'Church Leadership'),
+    ('CLG', 'Counseling'),
+    ('CMCC', 'Contemporary Music Centre CCCU'),
+    ('CMPT', 'Computer Sciences'),
+    ('COMM', 'Communications'),
+    ('COOP', 'Cooperative Education'),
+    ('CPL', 'Church Planting'),
+    ('CPNC', 'Counselling  Psyc Non Credit'),
+    ('CPR', 'CPR and First Aid Certificatio'),
+    ('CPSY', 'Counseling Psychology'),
+    ('DMN', 'Doctor of Ministry'),
+    ('DRAM', 'Drama'),
+    ('DS', 'Unapproved Directed Study'),
+    ('ECON', 'Economics'),
+    ('EDUC', 'Education'),
+    ('ELCE', 'Office of the Dean'),
+    ('ENGL', 'English'),
+    ('ENVS', 'Environmental Studies'),
+    ('ESLI', 'English as a Second Language'),
+    ('ESNC', 'ESLI Non Credit'),
+    ('FINE', 'Fine Arts'),
+    ('FREN', 'French'),
+    ('FSC', 'Family & Soc Science (Korean)'),
+    ('FSUR', 'Geography'),
+    ('GEOG', 'Geography'),
+    ('GEOL', 'Geology'),
+    ('GERM', 'German'),
+    ('GLNC', 'Global Learning Connections'),
+    ('GREE', 'Greek'),
+    ('HEBR', 'Hebrew'),
+    ('HIC', 'Church History'),
+    ('HIS', 'Church History'),
+    ('HIST', 'History'),
+    ('HKIN', 'Human Kinetics'),
+    ('HSER', 'Human Services'),
+    ('HUMA', 'Humanities'),
+    ('HUMN', 'Humanities and Social Services'),
+    ('IDIS', 'Interdisciplinary Studies'),
+    ('INT', 'Internship'),
+    ('ISC', 'Indepent Studies'),
+    ('ISYS', 'Information Systems'),
+    ('JAPA', 'Japanese'),
+    ('LAST', 'Latin American Studies (CCCU)'),
+    ('LATI', 'Religious Studies'),
+    ('LATN', 'Latin'),
+    ('LBR', 'Library'),
+    ('LDC', 'Leadership Studies'),
+    ('LDR', 'Leadership Studies'),
+    ('LDRS', 'Leadership'),
+    ('LIN', 'Linguistics'),
+    ('LING', 'Linguistics'),
+    ('LLC', 'Laurentian Leadership Centre'),
+    ('MATH', 'Mathematics'),
+    ('MCS', 'MA in Christian Studies'),
+    ('MEST', 'Middle East Studies (CCCU)'),
+    ('MIC', 'Missions'),
+    ('MIS', 'Missions'),
+    ('MLE', 'Master of Linguistics Exeges'),
+    ('MM1', 'Master of Ministry One'),
+    ('MM2', 'Master of Ministry Two'),
+    ('MM3', 'Master of Ministry Three'),
+    ('MMI', 'Master of Ministry'),
+    ('MNF', 'Ministry Formation'),
+    ('MRE', 'Master of Religious Education'),
+    ('MRP', 'Ministry Research Project'),
+    ('MTH', 'Master of Theology'),
+    ('MTS', 'Master of Theological Studies'),
+    ('MTSC', 'Master of Theo in Counseling'),
+    ('MUSI', 'Music'),
+    ('NATS', 'Natural Science'),
+    ('NURS', 'Nursing'),
+    ('OMC', 'Outreach Ministries'),
+    ('OMI', 'Outreach Ministries'),
+    ('OMT', 'Outreach Ministries'),
+    ('PDEV', 'Prof. Dev./Non Credit'),
+    ('PDTC', 'Professional Development (GLC)'),
+    ('PHED', 'Physical Education'),
+    ('PHIL', 'Philosophy'),
+    ('PHYS', 'Physics'),
+    ('POLS', 'Political Science'),
+    ('PREP', 'Career Preparation'),
+    ('PSYC', 'Psychology'),
+    ('PTC', 'Pastoral Theology'),
+    ('PTH', 'Pastoral Theology'),
+    ('RCE', 'Religion Culture and Ethics'),
+    ('RCE5', 'Religion Culture and Ethics'),
+    ('RECR', 'Recreation'),
+    ('RELS', 'Religious Studies'),
+    ('RES', 'Research Studies'),
+    ('RIST', 'Roehampton Inst Studies (CCCU)'),
+    ('RSHP', 'Relationships Non Credit'),
+    ('RUSS', 'Russian'),
+    ('RUST', 'Russian Studies (CCCU)'),
+    ('SCS', 'Science Studies (Korean)'),
+    ('SIJO', 'Sum Inst of Journalism (CCCU)'),
+    ('SKLS', 'Study Skills'),
+    ('SOCI', 'Sociology'),
+    ('SOCS', 'Humanities and Soc Services'),
+    ('SPAN', 'Spanish'),
+    ('STUD', 'Enrolment Services'),
+    ('TENC', 'TESL Non Credit'),
+    ('TEST', 'Test - Enrolment Services Only'),
+    ('THC', 'Theological Studies'),
+    ('THS', 'Theological Studies'),
+    ('TNET', 'Training Network'),
+    ('TRAN', 'Transfer Credit - Unspecified'),
+    ('TRVL', 'Enrolment Services'),
+    ('UNIV', 'Student Life'),
+    ('WLS', 'Worship Leadership Studies'),
+    ('WMS', 'Womens Ministry Studies'),
+    ('WSNC', 'Worship Studies Non Credit'),
+    ('WSTU', 'Worship Studies'),
+    ('WVS', 'Worldview Studies (Korean)'),
+    ('ZOOL', 'Biology'),
+)
 class Course(models.Model):
     """
     Basic course data
     """
-    #TODO NOTE: This model depends on how we end up grabbing course data
-    # one extra character each in the freak case that TWU changes its course code format
-    division = models.CharField(max_length=5)
-    number = models.CharField(max_length=4)
-    title = models.CharField(max_length=250)
+    department = models.CharField(max_length=4, choices=DEPARTMENT_CHOICES)
+    number = models.CharField(max_length=3)
 
     class Meta:
-        ordering = ('division', 'number')
+        ordering = ('department', 'number')
 
     def code(self):
-        return "%s %s" % (self.division, self.number)
+        return "%s %s" % (self.department, self.number)
 
     def __unicode__(self):
         return self.code()
@@ -75,7 +213,7 @@ class Listing(models.Model):
                                blank=True, null=True)
     hold_date = models.DateTimeField('Date Held', blank=True, null=True)
     price = models.DecimalField(max_digits=7, decimal_places=2)
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='F')
 
     def __unicode__(self):
         return "%s by %s on %s" % (self.book, self.seller,
@@ -100,3 +238,6 @@ class Log(models.Model):
     when = models.DateTimeField(auto_now_add=True)
     listing = models.ForeignKey(Listing, related_name="logs")
     who = models.ForeignKey(User, related_name="actions")
+
+    def __unicode__(self):
+        return "%s %s" % (self.who.get_full_name(), self.when)

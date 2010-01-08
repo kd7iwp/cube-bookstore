@@ -48,7 +48,7 @@ def listing_filter(filter, field, listings):
                 x = int(word)
                 q = q & f(book__courses__number__icontains=word)
             except ValueError:
-                q = q & f(book__courses__division__icontains=word)
+                q = q & f(book__courses__department__icontains=word)
         return q.distinct()
 
     def ref(filter):

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+{% load humanize %}
+<p>
+    Book changes were successfully saved.
+</p>
+<p>
+    <ul>
+        <li>Title: {{ book.title }}</li>
+        <li>Author: {{ book.author }}</li>
+        <li>Barcode: {{ book.barcode }}</li>
+        <li>Edition: {{ book.edition|ordinal }}</li>
+        <li>
+            Courses: 
+            {% for course in book.courses.all %}
+                {{ course }}
+            {% endfor %}
+        </li>
+    </ul>
+</p>
+{% endblock %}

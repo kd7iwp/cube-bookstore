@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+{% load humanize %}
+<p>
+    Book successfully created and added to ref #{{ listing.id }}.
+</p>
+<p>
+    <ul>
+        <li>Title: <em>{{ listing.book.title }}</em></li>
+        <li>Author: {{ listing.book.author }}</li>
+        <li>Barcode: {{ listing.book.barcode }}</li>
+        <li>Edition: {{ listing.book.edition|ordinal }}</li>
+    </ul>
+</p>
+{% endblock %}

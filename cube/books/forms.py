@@ -1,155 +1,15 @@
+from cube.books.models import Book, Course, Listing, DEPARTMENT_CHOICES
 from django import forms
 from django.core.exceptions import ValidationError
 from decimal import Decimal
 
-DEPARTMENT_CHOICES = (
-    ('ALDR', 'MA Leadership'),
-    ('ANTH', 'Anthropology'),
-    ('ART', 'Art'),
-    ('AV', 'Aviation'),
-    ('AVIA', 'Aviation'),
-    ('BIC', 'Bible Exposition'),
-    ('BIE', 'Bible Exposition'),
-    ('BIL', 'Biblical Languages'),
-    ('BIOL', 'Biology'),
-    ('BOTA', 'Biology'),
-    ('BUSI', 'Business'),
-    ('CAP', 'Contemporary Apologetics'),
-    ('CARR', 'Career Skills Courses'),
-    ('CATH', 'Catholicism'),
-    ('CCM', 'Cross Cultural Ministries'),
-    ('CEC', 'Christian Education'),
-    ('CED', 'Christian Education'),
-    ('CEI', 'Christian Education'),
-    ('CH', 'Church History'),
-    ('CHED', 'Christian Education'),
-    ('CHEM', 'Chemistry'),
-    ('CHIN', 'Chinese'),
-    ('CHM', 'Church Ministries'),
-    ('CHP', 'Chaplaincy'),
-    ('CLC', 'Counseling'),
-    ('CLD', 'Church Leadership'),
-    ('CLG', 'Counseling'),
-    ('CMCC', 'Contemporary Music Centre CCCU'),
-    ('CMPT', 'Computer Sciences'),
-    ('COMM', 'Communications'),
-    ('COOP', 'Cooperative Education'),
-    ('CPL', 'Church Planting'),
-    ('CPNC', 'Counselling  Psyc Non Credit'),
-    ('CPR', 'CPR and First Aid Certificatio'),
-    ('CPSY', 'Counseling Psychology'),
-    ('DMN', 'Doctor of Ministry'),
-    ('DRAM', 'Drama'),
-    ('DS', 'Unapproved Directed Study'),
-    ('ECON', 'Economics'),
-    ('EDUC', 'Education'),
-    ('ELCE', 'Office of the Dean'),
-    ('ENGL', 'English'),
-    ('ENVS', 'Environmental Studies'),
-    ('ESLI', 'English as a Second Language'),
-    ('ESNC', 'ESLI Non Credit'),
-    ('FINE', 'Fine Arts'),
-    ('FREN', 'French'),
-    ('FSC', 'Family &amp; Soc Science (Korean)'),
-    ('FSUR', 'Geography'),
-    ('GEOG', 'Geography'),
-    ('GEOL', 'Geology'),
-    ('GERM', 'German'),
-    ('GLNC', 'Global Learning Connections'),
-    ('GREE', 'Greek'),
-    ('HEBR', 'Hebrew'),
-    ('HIC', 'Church History'),
-    ('HIS', 'Church History'),
-    ('HIST', 'History'),
-    ('HKIN', 'Human Kinetics'),
-    ('HSER', 'Human Services'),
-    ('HUMA', 'Humanities'),
-    ('HUMN', 'Humanities and Social Services'),
-    ('IDIS', 'Interdisciplinary Studies'),
-    ('INT', 'Internship'),
-    ('ISC', 'Indepent Studies'),
-    ('ISYS', 'Information Systems'),
-    ('JAPA', 'Japanese'),
-    ('LAST', 'Latin American Studies (CCCU)'),
-    ('LATI', 'Religious Studies'),
-    ('LATN', 'Latin'),
-    ('LBR', 'Library'),
-    ('LDC', 'Leadership Studies'),
-    ('LDR', 'Leadership Studies'),
-    ('LDRS', 'Leadership'),
-    ('LIN', 'Linguistics'),
-    ('LING', 'Linguistics'),
-    ('LLC', 'Laurentian Leadership Centre'),
-    ('MATH', 'Mathematics'),
-    ('MCS', 'MA in Christian Studies'),
-    ('MEST', 'Middle East Studies (CCCU)'),
-    ('MIC', 'Missions'),
-    ('MIS', 'Missions'),
-    ('MLE', 'Master of Linguistics Exeges'),
-    ('MM1', 'Master of Ministry One'),
-    ('MM2', 'Master of Ministry Two'),
-    ('MM3', 'Master of Ministry Three'),
-    ('MMI', 'Master of Ministry'),
-    ('MNF', 'Ministry Formation'),
-    ('MRE', 'Master of Religious Education'),
-    ('MRP', 'Ministry Research Project'),
-    ('MTH', 'Master of Theology'),
-    ('MTS', 'Master of Theological Studies'),
-    ('MTSC', 'Master of Theo in Counseling'),
-    ('MUSI', 'Music'),
-    ('NATS', 'Natural Science'),
-    ('NURS', 'Nursing'),
-    ('OMC', 'Outreach Ministries'),
-    ('OMI', 'Outreach Ministries'),
-    ('OMT', 'Outreach Ministries'),
-    ('PDEV', 'Prof. Dev./Non Credit'),
-    ('PDTC', 'Professional Development (GLC)'),
-    ('PHED', 'Physical Education'),
-    ('PHIL', 'Philosophy'),
-    ('PHYS', 'Physics'),
-    ('POLS', 'Political Science'),
-    ('PREP', 'Career Preparation'),
-    ('PSYC', 'Psychology'),
-    ('PTC', 'Pastoral Theology'),
-    ('PTH', 'Pastoral Theology'),
-    ('RCE', 'Religion Culture and Ethics'),
-    ('RCE5', 'Religion Culture and Ethics'),
-    ('RECR', 'Recreation'),
-    ('RELS', 'Religious Studies'),
-    ('RES', 'Research Studies'),
-    ('RIST', 'Roehampton Inst Studies (CCCU)'),
-    ('RSHP', 'Relationships Non Credit'),
-    ('RUSS', 'Russian'),
-    ('RUST', 'Russian Studies (CCCU)'),
-    ('SCS', 'Science Studies (Korean)'),
-    ('SIJO', 'Sum Inst of Journalism (CCCU)'),
-    ('SKLS', 'Study Skills'),
-    ('SOCI', 'Sociology'),
-    ('SOCS', 'Humanities and Soc Services'),
-    ('SPAN', 'Spanish'),
-    ('STUD', 'Enrolment Services'),
-    ('TENC', 'TESL Non Credit'),
-    ('TEST', 'Test - Enrolment Services Only'),
-    ('THC', 'Theological Studies'),
-    ('THS', 'Theological Studies'),
-    ('TNET', 'Training Network'),
-    ('TRAN', 'Transfer Credit - Unspecified'),
-    ('TRVL', 'Enrolment Services'),
-    ('UNIV', 'Student Life'),
-    ('WLS', 'Worship Leadership Studies'),
-    ('WMS', 'Womens Ministry Studies'),
-    ('WSNC', 'Worship Studies Non Credit'),
-    ('WSTU', 'Worship Studies'),
-    ('WVS', 'Worldview Studies (Korean)'),
-    ('ZOOL', 'Biology'),
-)
-
-def validate_course_number(value):
-    str_value = str(value)
-    if len(str_value) < 2:
-        raise ValidationError("The Course Number %d is too short" % value)
-    if len(str_value) > 3:
-        raise ValidationError("The Course Number %d is too long" % value)
+class CourseNumberField(forms.IntegerField):
+    # TODO this doesn't seem to be working
+    def validate(value):
+        if len(str(value)) < 2:
+            raise ValidationError("The Course Number %d is too short" % value)
+        if len(str(value)) > 3:
+            raise ValidationError("The Course Number %d is too long" % value)
 
 class BookAndListingForm(forms.Form):
     barcode = forms.CharField(max_length=50)
@@ -159,5 +19,21 @@ class BookAndListingForm(forms.Form):
     title = forms.CharField(max_length=250)
     edition = forms.IntegerField(min_value=1)
     department = forms.ChoiceField(choices=DEPARTMENT_CHOICES)
-    course_number = forms.IntegerField()#(validators=[validate_course_number])
+    course_number = CourseNumberField()
 
+    listing_id = forms.IntegerField(required=False, widget=forms.HiddenInput())
+
+    def clean_barcode(self):
+        return self.cleaned_data['barcode'].replace('-', '')
+
+class BookForm(forms.ModelForm):
+    class Meta:
+        model = Book
+
+class CourseForm(forms.ModelForm):
+    class Meta:
+        model = Course
+
+class ListingForm(forms.ModelForm):
+    class Meta:
+        model = Listing
