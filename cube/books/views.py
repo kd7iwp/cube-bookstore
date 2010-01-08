@@ -3,7 +3,7 @@ from cube.books.models import Book, Course, Listing, Log
 from cube.books.forms import BookAndListingForm, BookForm
 from cube.books.view_tools import book_sort, listing_filter,\
                                   listing_sort, get_number, tidy_error,\
-                                  import_user
+                                  import_user, house_cleaning
 from cube.books.email import send_missing_emails, send_sold_emails,\
                              send_tbd_emails
 from django.contrib.auth.decorators import login_required
@@ -29,6 +29,7 @@ def listings(request):
     Shows a list of all the books listed.
     Does pagination, sorting and filtering.
     """
+    house_cleaning()
     # Filter for the search box
     if request.GET.has_key("filter") and request.GET.has_key("field"):
         # only run the filter if the GET args are there
@@ -86,7 +87,6 @@ def update_listing(request):
         return rtr(template, vars, context_instance=RC(request))
     elif action[:1] == "To Be Deleted"[:1]:
         # apparently some browsers have issues passing spaces
-        # TODO add bells and whistles
         # can't do this for Deleted, Seller Paid, and Sold Books
         bunch = bunch.exclude(status__in='DPS')
         send_tbd_emails(bunch)
@@ -581,10 +581,6 @@ def update_books(request):
             template = 'books/update_book/saved.html'
             return rtr(template, vars, context_instance=RC(request))
         vars = {'form' : form}
-        template = 'books/edit_book.html'
-        return rtr(template, vars, context_instance=RC(request))
-    elif action[:3] == "Add New"[:3]:
-        vars = {'form' : BookForm()}
         template = 'books/edit_book.html'
         return rtr(template, vars, context_instance=RC(request))
     else:

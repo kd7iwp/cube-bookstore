@@ -1,8 +1,34 @@
 from cube.books.models import Listing, Book
 from cube.twupass.backend import TWUPassBackend
+from cube.books.email import send_tbd_emails
 from django.db.models.query import QuerySet
+from datetime import datetime, timedelta
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+
+def expire_holds():
+    """
+    Expires holds on books after 24 hours
+    """
+    yester = datetime.today() - timedelta(1)
+    expired_listings = Listing.objects.filter(status='O', hold_date__lte=yester)
+    expired_listings.update(status='F', holder=None, hold_date=None)
+
+def warn_annual_sellers():
+    """
+    If a listing is a year old, mark it as to be deleted and send them an email
+    """
+    last_year = datetime.today() - timedelta(365)
+    old_listings = Listing.objects.filter(status='F', list_date__lte=last_year)
+    send_tbd_emails(old_listings)
+    old_listings.update(status='T')
+
+def house_cleaning():
+    """
+    calls methods which need to be done frequently
+    """
+    expire_holds()
+    warn_annual_sellers()
 
 def tidy_error(request, error_message):
     """
