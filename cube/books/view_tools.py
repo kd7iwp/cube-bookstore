@@ -1,5 +1,21 @@
 from cube.books.models import Listing, Book
+from cube.twupass.backend import TWUPassBackend
 from django.db.models.query import QuerySet
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+
+def tidy_error(request, error_message):
+    """
+    takes a request and an error message and returns a
+    tidy HttpResponse with it
+    """
+    return render_to_response('error.html', {'message' : error_message },
+                              context_instance=RequestContext(request))
+def import_user(id):
+    """
+    Gets imports a user from twupass and returns it
+    """
+    return TWUPassBackend().import_user(id)
 
 def get_number(list, key, default):
     """

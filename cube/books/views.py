@@ -1,7 +1,9 @@
 # django imports
 from cube.books.models import Book, Course, Listing, Log
+from cube.books.forms import BookAndListingForm
 from cube.books.view_tools import book_sort, listing_filter,\
-                                  listing_sort, get_number
+                                  listing_sort, get_number, tidy_error,\
+                                  import_user
 from cube.books.email import send_missing_emails, send_sold_emails,\
                              send_tbd_emails
 from django.contrib.auth.decorators import login_required
@@ -208,9 +210,7 @@ def update_listing_edit(request):
                     'student_id' : g('seller-student-id', str(listing.seller.id)),
                     'price' : g('price', str(listing.price)),
                     'edition_range' : range(1,51),
-                    'hidden_fields' : {
-                        'listing_id' : listing.id,
-                    },
+                    'hidden_fields' : {'listing_id' : listing.id },
                 }
                 return render_to_response('books/new_book.html', vars,
                                           context_instance=RequestContext(request))
@@ -218,24 +218,30 @@ def update_listing_edit(request):
             message = "There was no barcode"
             return render_to_response('error.html', {'message' : message },
                                   context_instance=RequestContext(request))
-        # TODO finish this
         listing.book = Book.objects.get(barcode=g('bar-code', listing.book.barcode))
         listing.seller = User.objects.get(id=int(g('seller-student-id', str(listing.seller.id))))
         listing.price = Decimal(g('price', str(listing.price)))
         listing.save()
         Log(who=request.user, action='E', listing=listing).save()
-        return HttpResponse("It should have worked")
+        vars = {'listing' : listing}
+        return render_to_response('books/update_listing/edited.html', vars,
+                              context_instance=RequestContext(request))
     else:
         message = "There was no IdToEdit"
-        return render_to_response('error.html', {'message' : message },
+        return render_to_response('error.html', {'message' : message},
                               context_instance=RequestContext(request))
 
 @login_required()
 def attach_book(request):
-    return HttpResponse("Now is the time when I should attach the book to the given listing...")
+    if request.method == 'POST':
+        form = BookAndListingForm(request.POST)
+        if form.is_valid():
+            return HttpResponse("Valid Form: Forms work!!!")
+        return HttpResposne("method was post, but form wasn't valid")
+    return HttpResponse("method wasn't even post")
 
 @login_required()
-def myBooksies(request):
+def my_books(request):
     """
     Displays books the user has on hold
     and is selling, sorts by search box, filters, calculates total prices
@@ -278,7 +284,7 @@ def myBooksies(request):
          'filter_text' : request.GET.get('filter', ''),
          'search' : searched
     }             
-    return render_to_response('myBooks.html', vars,
+    return render_to_response('books/my_books.html', vars,
                               context_instance=RequestContext(request))    
     
 @login_required()    
@@ -307,6 +313,7 @@ def update_staff(request):
     # Delete User
     student_id = request.POST.get("student_id", '')
     if request.POST.get("Action", '') == "Delete" and student_id:
+        # Delete single
         try:
             user = User.objects.get(id = student_id)
             user.is_superuser = False
@@ -316,9 +323,9 @@ def update_staff(request):
             return render_to_response('books/update_staff/deleted.html', vars, 
                                       context_instance=RequestContext(request))
         except User.DoesNotExist:
-            # TODO make an error page to pass messages to
-            return HttpResponse("User does not Exist")
+            return tidy_error(request, "Invalid Student ID: %s" % student_id)
     elif request.POST.get("Action", '') == "Delete":
+        # Delete multiple
         try:
             num_deleted = 0
             for key, value in request.POST.items():
@@ -332,30 +339,35 @@ def update_staff(request):
             return render_to_response('books/update_staff/deleted.html', vars, 
                                       context_instance=RequestContext(request))
         except User.DoesNotExist:
-            # TODO make an error page to pass messages to
-            return HttpResponse("User does not Exist")
+            message = "Only %d user" % num_deleted +\
+                      (" was" if num_deleted == 1 else "s were") +\
+                      "deleted because %s is an invalid student ID" % value
+            return tidy_error(request, message) 
 
     # Save New User
     if request.POST.get("Action", '') == "Save":
         role = request.POST.get("role", '')
         try:
             user = User.objects.get(id = student_id)
-            if request.POST.get("role", '') == "Administrator":
-                user.is_superuser = True
-                user.is_staff = True
-                user.save()
-            else:
-                user.is_superuser = False
-                user.is_staff = True
-                user.save()
-            vars = {
-                'user_name' : user.get_full_name(),
-                'administrator' : user.is_superuser,
-            }
-            return render_to_response('books/update_staff/saved.html', vars, 
-                                      context_instance=RequestContext(request))
         except User.DoesNotExist:
-            return HttpResponse("Invalid Student ID")
+            user = import_user(student_id)
+            if user == None:
+                message = "Invalid Student ID: %s" % student_id
+                return tidy_error(request, message)
+        if request.POST.get("role", '') == "Administrator":
+            user.is_superuser = True
+            user.is_staff = True
+            user.save()
+        else:
+            user.is_superuser = False
+            user.is_staff = True
+            user.save()
+        vars = {
+            'user_name' : user.get_full_name(),
+            'administrator' : user.is_superuser,
+        }
+        return render_to_response('books/update_staff/saved.html', vars, 
+                                  context_instance=RequestContext(request))
 
 @login_required()
 def staffedit(request):
@@ -410,13 +422,10 @@ def add_book(request):
         try:
             seller = User.objects.get(id=student_id)
         except User.DoesNotExist:
-            from cube.twupass.backend import TWUPassBackend
-            seller = TWUPassBackend().import_user(student_id)
+            seller = import_user(student_id)
             if seller == None:
-                message = "Invalid Student ID"
-                return render_to_response('error.html', {'message' : message },
-                                      context_instance=RequestContext(request))
-                
+                message = "Invalid Student ID: %s" % student_id
+                return tidy_error(request, message)
         listing = Listing(list_date=datetime.now(), price=price, status="F",
                           book=book, seller=seller)
         listing.save()
@@ -432,8 +441,8 @@ def add_book(request):
         # create a book and a listing
         g = lambda x: request.POST.get(x, '')
         barcode, price, sid, author, title, ed, dept, course_num =\
-            g('barcode'), g('price'), int(g('student_id')), g('author'),\
-            g('title'), g('edition'), g('department'), g('course_num')
+            g('barcode'), g('price'), int(g('seller')), g('author'),\
+            g('title'), g('edition'), g('department'), g('course_number')
         book = Book(barcode=barcode, author=author, title=title, edition=ed)
         book.save()
         course, created = Course.objects.get_or_create(division=dept,
@@ -443,12 +452,10 @@ def add_book(request):
         try:
             seller = User.objects.get(pk=sid)
         except User.DoesNotExist:
-            from cube.twupass.backend import TWUPassBackend
-            seller = TWUPassBackend().import_user(sid)
+            seller = import_user(sid)
             if seller == None:
-                message = "Invalid Student ID"
-                return render_to_response('error.html', {'message' : message },
-                                      context_instance=RequestContext(request))
+                message = "Invalid Student ID: %s" % sid
+                return tidy_error(request, message)
         listing = Listing(seller=seller, price=Decimal(price), book=book)
         listing.status = 'F'
         listing.save()
@@ -461,23 +468,13 @@ def add_book(request):
         }
         return render_to_response('books/update_book/added.html', vars, 
                                   context_instance=RequestContext(request))
-    elif request.POST.get("Author"):
-        # TODO what is this case for???
-        # and request.POST.get("Title") and request.POST.get("Edition") and request.POST.get("Department") and request.POST.get("Course Number"):
-        course = request.POST.get("Department") + " " + request.POST.get("Course Number")
-        the_author = request.POST.get("Author")
-        the_title = request.POST.get("Title")
-        the_edition = request.POST.get("Edition")
-        new_book = Book(author=the_author, title=the_title, edition=the_edition, courses=course) 
-        new_book.save()
-        return HttpResponse("happy")
     else:
         # the user is hitting the page for the first time
         return render_to_response('books/add_book.html',
                                   context_instance=RequestContext(request))
 
 @login_required()
-def listBooks(request):
+def list_books(request):
     """
     List all books in the database
     """
@@ -504,7 +501,7 @@ def listBooks(request):
         'dir' : 'desc' if request.GET.get('dir', '') == 'asc' else 'asc'
     }
 
-    return render_to_response('books/listBooks.html', vars,
+    return render_to_response('books/list_books.html', vars,
                                context_instance=RequestContext(request))
 @login_required()
 def update_books(request):

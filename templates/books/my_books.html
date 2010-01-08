@@ -4,7 +4,7 @@
 {% load selected %}
 {% load until_hold_expiry %}
 {% block content %}
-        <form action="{% url myBooks %}" method="get">
+        <form action="{% url my_books %}" method="get">
         <p id="booksearch">
             <input type="text" class="text" name="filter" value="{{ filter_text }}" />
             <select name="field">

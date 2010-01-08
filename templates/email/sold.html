@@ -10,7 +10,7 @@ Wednesday: 9:00-10:00
 <br /><br />
 Questions?! <a href="mailto:{{ admin_email }}">{{ admin_email }}</a>
 <br /><br />{% load absurl %}
-{% if owner_selling %}To see the status of the other book{{ owner_selling|pluralize }} you have for sale please visit: {% absurl myBooks %}
+{% if owner_selling %}To see the status of the other book{{ owner_selling|pluralize }} you have for sale please visit: {% absurl my_books %}
 {% else %}To sell other books, come visit us at the Cube by the cafeteria.{% endif %}
 <br /><br />
 sincerely,<br />

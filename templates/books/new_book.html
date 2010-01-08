@@ -21,7 +21,7 @@
                     </label>
                 </td>   
                 <td class="TableInput">
-                    <input type="text" id="BarCode" class="InputField" name="barcode" maxlength="20" tabindex="1" value="{{ barcode }}" />
+                    <input type="text" name="barcode" maxlength="20" value="{{ barcode }}" />
                 </td>      
             </tr>
             <tr id="row_Student ID" class="form_text">
@@ -31,7 +31,7 @@
                     </label>
                 </td>   
                 <td class="TableInput">
-                    <input type="text" id="AltDBld" class="InputField" name="student_id" value="{{ student_id }}" maxlength="10" tabindex="2" />
+                    <input type="text" name="seller" value="{{ student_id }}" maxlength="10" />
                 </td>
             </tr>
             <tr id="row_Price" class="form_text">
@@ -41,7 +41,7 @@
                     </label>
                 </td> 
                 <td class="TableInput">
-                    <input type="text" id="Price" class="InputField" name="price" value="{{ price }}" tabindex="3" />
+                    <input type="text" name="price" value="{{ price }}" />
                 </td>
             </tr>
             <tr id="row_Author" class="form_text">
@@ -52,7 +52,7 @@
                     <a onclick="ShowHide("AuthorInstructions","toggle")"title="What's this?" />
                 </td> 
                 <td class="TableInput">
-                    <input type="text" id="Author" class="InputField" name="author" maxlength="100" tabindex="4" />
+                    <input type="text" name="author" maxlength="100" />
                 </td>      
             </tr>
             <tr id="row_Title" class="form_text">
@@ -62,7 +62,7 @@
                     </label>
                 </td> 
                 <td class="TableInput">
-                    <input type="text" id="Title" class="InputField" name="title" maxlength="255" tabindex="5" />
+                    <input type="text" name="title" maxlength="255" />
                 </td>
             </tr>
             <tr id='row_Edition' class='form_dropdown'> 
@@ -70,7 +70,7 @@
                     <label for='Edition'><span>Edition:</span></label> 
                 </td> 
                 <td class='TableInput'> 
-                    <select  id='Edition'  class='InputField' name='edition' size='1' tabindex='6' > 
+                    <select name='edition' size='1' > 
                     {% for edition in edition_range %}
                         <option value='{{ edition }}' {% ifequal edition 1 %}selected='selected'{% endifequal %}>{{ edition|ordinal }}</option>
                     {% endfor %}
@@ -234,7 +234,7 @@
                     </label>
                 </td> 
                 <td class="TableInput">
-                    <input type="text" id="CourseNumber" class="InputField" name="course_num" maxlength="6" tabindex="8" />
+                    <input type="text" name="course_number" maxlength="6" />
                 </td>
             </tr>
         </tbody>

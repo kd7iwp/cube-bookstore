@@ -18,7 +18,7 @@
         </div><!--End Header-->
 
 {% url list as list_url %}
-{% url myBooks as myBooks_url %}
+{% url my_books as my_books_url %}
 {% url staff as staff_url %}
 {% url help as help_url %}
 
@@ -34,7 +34,7 @@
                 {% endspaceless %}
                 {% spaceless %}
                 <li id="my">
-                    <a href="{% url myBooks %}" class="{# tab_active request list_url #}">
+                    <a href="{% url my_books %}" class="{# tab_active request list_url #}">
                      
                         <span>My Books</span>
                     </a>
