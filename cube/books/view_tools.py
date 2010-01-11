@@ -20,8 +20,9 @@ def warn_annual_sellers():
     """
     last_year = datetime.today() - timedelta(365)
     old_listings = Listing.objects.filter(status='F', list_date__lte=last_year)
-    send_tbd_emails(old_listings)
-    old_listings.update(status='T')
+    if old_listings.count():
+        send_tbd_emails(old_listings)
+        old_listings.update(status='T')
 
 def house_cleaning():
     """

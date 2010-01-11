@@ -214,6 +214,7 @@ class Listing(models.Model):
     hold_date = models.DateTimeField('Date Held', blank=True, null=True)
     price = models.DecimalField(max_digits=7, decimal_places=2)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='F')
+    is_legacy = models.BooleanField(default=False)
 
     def __unicode__(self):
         return "%s by %s on %s" % (self.book, self.seller,
