@@ -93,7 +93,7 @@ def listing_filter(filter, field, listings):
     if field == "any_field":
         # do all the queries and merge them with the | operator
         # all queries being |'d must be either distinct or non-distinct
-        return author(filter).distinct() |\
+        return title(filter).distinct() |\
                author(filter).distinct() |\
                course(filter).distinct() |\
                ref(filter).distinct() |\
