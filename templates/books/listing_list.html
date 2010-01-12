@@ -26,7 +26,7 @@
             <div class="PageCounterNav">
                 <p>
                 {% if listings.has_previous %}
-                    <a href="?page={{ listings.previous_page_number }}&amp;per_page={{ per_page }}">
+                    <a href="?page={{ listings.previous_page_number }}&amp;per_page={{ per_page }}&amp;field={{ field }}&amp;filter={{ filter_text }}">
                         <img src="{{ MEDIA_URL }}images/pagenav_prev.gif" alt="Previous Page" />
                     </a>
                 {% else %}
@@ -34,7 +34,7 @@
                 {% endif %}
                 Pages: ({{ listings.number }} of {{listings.paginator.num_pages}})
                 {% if listings.has_next %}
-                    <a href="?page={{ listings.next_page_number }}&amp;per_page={{ per_page }}">
+                    <a href="?page={{ listings.next_page_number }}&amp;per_page={{ per_page }}&amp;field={{ field }}&amp;filter={{ filter_text }}">
                         <img src="{{ MEDIA_URL }}images/pagenav_next.gif" alt="Next Page" />
                     </a>
                 {% else %}

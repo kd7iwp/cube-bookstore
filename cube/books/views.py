@@ -1,6 +1,6 @@
 # django imports
 from cube.books.models import Book, Course, Listing, Log
-from cube.books.forms import BookAndListingForm, BookForm
+from cube.books.forms import BookAndListingForm, BookForm, ListingForm
 from cube.books.view_tools import book_sort, listing_filter,\
                                   listing_sort, get_number, tidy_error,\
                                   import_user, house_cleaning
@@ -171,12 +171,15 @@ def update_listing(request):
     elif action == "Edit":
         too_many = True if bunch.count() > 1 else False
         item = bunch[0]
-        rows = [{'name' : 'Seller Student ID', 'value' : item.seller.id},
-                {'name' : 'Price', 'value' : item.price},
-                {'name' : 'Bar Code', 'value' : item.book.barcode}]
+        initial = {
+            'seller' : item.seller.id,
+            'price' : item.price,
+            'barcode' : item.book.barcode,
+        }
+        form = ListingForm(initial=initial)
         logs = Log.objects.filter(listing=item)
         vars = {
-            'rows' : rows,
+            'form' : form,
             'too_many' : too_many,
             'id' : item.id,
             'logs' : logs,
@@ -194,21 +197,24 @@ def update_listing_edit(request):
     If the barcode doesn't exist,
     it makes the user create a Book object as well
     """
-    if request.POST.has_key('IdToEdit'):
-        listing = Listing.objects.get(id=int(request.POST["IdToEdit"]))
-        g = request.POST.get
-        if g('bar-code', ''):
-            # there is a barcode
-            barcode = g('bar-code', '')
-            if Book.objects.filter(barcode=barcode):
-                # a book exists in the db with that barcode
+    if request.method == "POST":
+        form = ListingForm(request.POST)
+        if form.is_valid():
+            id = request.POST.get('IdToEdit')
+            try:
+                listing = Listing.objects.get(id=id)
+            except Listing.DoesNotExist:
+                message = 'Listing with ref# "%s" does not exist' % id
+                return tidy_error(request, message)
+            try:
+                barcode = form.cleaned_data['barcode']
                 listing.book = Book.objects.get(barcode=barcode)
-            else:
-                # barcode doesn't exist in db, we have to make a book.
-                initial={
+            except Book.DoesNotExist:
+                # barcode doesn't exist in db, we have to create a book.
+                initial = {
                     'barcode': barcode,
-                    'seller' : g('seller-student-id', str(listing.seller.id)),
-                    'price' : g('price', str(listing.price)),
+                    'seller' : form.cleaned_data['seller'],
+                    'price' : form.cleaned_data['price'],
                     'listing_id' : listing.id
                 }
                 form = BookAndListingForm(initial=initial)
@@ -218,30 +224,35 @@ def update_listing_edit(request):
                 }
                 template = 'books/add_book.html'
                 return rtr(template, vars, context_instance=RC(request))
-        else:
-            vars = {'message' : "There was no barcode"}
-            template = 'error.html'
+            try:
+                seller_id = form.cleaned_data['seller']
+                listing.seller = User.objects.get(id=seller_id)
+            except User.DoesNotExist:
+                user = import_user(seller_id)
+                if user == None:
+                    message = "Invalid Student ID: %s" % id
+                    return tidy_error(request, message)
+                listing.seller = user
+            listing.price = form.cleaned_data['price']
+            listing.save()
+            Log(who=request.user, action='E', listing=listing).save()
+            vars = {'listing' : listing}
+            template = 'books/update_listing/edited.html'
             return rtr(template, vars, context_instance=RC(request))
-        listing.book = Book.objects.get(barcode=g('bar-code', listing.book.barcode))
-        try:
-            id = g('seller-student-id', str(listing.seller.id))
-            listing.seller = User.objects.get(id=id)
-        except User.DoesNotExist:
-            user = import_user(id)
-            if user == None:
-                message = "Invalid Student ID: %s" % id
-                return tidy_error(request, message)
-            listing.seller = user
-        listing.price = Decimal(g('price', str(listing.price)))
-        listing.save()
-        Log(who=request.user, action='E', listing=listing).save()
-        vars = {'listing' : listing}
-        template = 'books/update_listing/edited.html'
-        return rtr(template, vars, context_instance=RC(request))
-    else:
-        message = "There was no IdToEdit"
-        template = 'error.html'
-        return rtr(template, {'message' : message}, context_instance=RC(request))
+                
+        elif request.POST.get('IdToEdit'):
+            # form isn't valid, but we have an id to work with. send user back
+            id = request.POST.get('IdToEdit')
+            vars = {
+                'form' : form,
+                'too_many' : False,
+                'id' : id,
+                'logs' : Log.objects.filter(listing=id),
+            }
+            template = 'books/update_listing/edit.html'
+            return rtr(template, vars, context_instance=RC(request))
+    # form isn't valid and we don't have an id so there is nothing we can do
+    return HttpResponseNotAllowed(['POST'])
 
 @login_required()
 def attach_book(request):
@@ -271,8 +282,14 @@ def attach_book(request):
             vars = {'listing' : listing}
             template = 'books/attached.html'
             return rtr(template, vars, context_instance=RC(request))
-        return HttpResponse("method was post, but form wasn't valid")
-    return HttpResponse("method wasn't even post")
+        # The form has bad data. send the user back
+        vars = {
+            'form' : form,
+            'attach' : True,
+        }
+        template = 'books/add_book.html'
+        return rtr(template, vars, context_instance=RC(request))
+    return HttpResponseNotAllowed(['POST'])
 
 @login_required()
 def my_books(request):
@@ -437,41 +454,46 @@ def staffedit(request):
 
 @login_required()
 def add_book(request):
-    if request.POST.get("student_id") and request.POST.get("Price") and request.POST.get("BarCode"):
-        barcode = request.POST.get("BarCode")
-        student_id = int(request.POST.get("student_id"))
-        price = Decimal(request.POST.get("Price"))
-        try:
-            book = Book.objects.get(barcode=barcode)
-        except Book.DoesNotExist: 
-            initial = {
-                'barcode' : barcode,
-                'seller' : student_id,
-                'price' : price
-            }
-            form = BookAndListingForm(initial=initial)
+    if request.method == "POST":
+        form = ListingForm(request.POST)
+        if form.is_valid():
+            student_id = form.cleaned_data['seller']
+            price = form.cleaned_data['price']
+            barcode = form.cleaned_data['barcode']
+            try:
+                book = Book.objects.get(barcode=barcode)
+            except Book.DoesNotExist: 
+                initial = {
+                    'barcode' : barcode,
+                    'seller' : student_id,
+                    'price' : price
+                }
+                form = BookAndListingForm(initial=initial)
+                vars = {
+                    'form' : form,
+                    'attach' : False,
+                }
+                template = 'books/add_book.html'
+                return rtr(template, vars, context_instance=RC(request))
+            try:
+                seller = User.objects.get(id=student_id)
+            except User.DoesNotExist:
+                seller = import_user(student_id)
+                if seller == None:
+                    message = "Invalid Student ID: %s" % student_id
+                    return tidy_error(request, message)
+            listing = Listing(price=price, status="F", book=book, seller=seller)
+            listing.save()
+            Log(listing=listing, who=request.user, action='A').save()
             vars = {
-                'form' : form,
-                'attach' : False,
+                'title' : book.title,
+                'listing_id' : listing.id
             }
-            template = 'books/add_book.html'
+            template = 'books/update_listing/added.html'
             return rtr(template, vars, context_instance=RC(request))
-        try:
-            seller = User.objects.get(id=student_id)
-        except User.DoesNotExist:
-            seller = import_user(student_id)
-            if seller == None:
-                message = "Invalid Student ID: %s" % student_id
-                return tidy_error(request, message)
-        listing = Listing(list_date=datetime.now(), price=price, status="F",
-                          book=book, seller=seller)
-        listing.save()
-        Log(listing=listing, who=request.user, action='A').save()
-        vars = {
-            'title' : book.title,
-            'listing_id' : listing.id
-        }
-        template = 'books/update_listing/added.html'
+        # the form isn't valid. send the user back.
+        vars = {'form' : form}
+        template = 'books/add_listing.html'
         return rtr(template, vars, context_instance=RC(request))
     elif request.POST.get("Action", '') == 'Add':
         # This came from the add_book view, and we need to
@@ -507,8 +529,10 @@ def add_book(request):
         return rtr(template, vars, context_instance=RC(request))
     else:
         # the user is hitting the page for the first time
+        form = ListingForm()
+        vars = {'form' : form}
         template = 'books/add_listing.html'
-        return rtr(template, context_instance=RC(request))
+        return rtr(template, vars, context_instance=RC(request))
 
 @login_required()
 def list_books(request):
@@ -549,7 +573,7 @@ def update_books(request):
     if request.method == "POST":
         action = request.POST.get("Action", '')
     else:
-        return HttpResponseNotAllowed(["POST"])
+        return HttpResponseNotAllowed(['POST'])
 
     for key, value in request.POST.items():
         if "idToEdit" in key:
@@ -580,6 +604,7 @@ def update_books(request):
             vars={'book': book}
             template = 'books/update_book/saved.html'
             return rtr(template, vars, context_instance=RC(request))
+        # the form isn't valid. send the user back
         vars = {'form' : form}
         template = 'books/edit_book.html'
         return rtr(template, vars, context_instance=RC(request))

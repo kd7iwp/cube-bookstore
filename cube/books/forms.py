@@ -14,7 +14,8 @@ class CourseNumberField(forms.IntegerField):
 class BookAndListingForm(forms.Form):
     barcode = forms.CharField(max_length=50)
     seller = forms.IntegerField(label="Student ID", min_value=1)
-    price = forms.DecimalField(min_value=Decimal("1"), decimal_places=2)
+    price = forms.DecimalField(min_value=Decimal("1"), max_digits=7,
+                               decimal_places=2)
     author = forms.CharField(max_length=70)
     title = forms.CharField(max_length=250)
     edition = forms.IntegerField(min_value=1)
@@ -34,6 +35,8 @@ class CourseForm(forms.ModelForm):
     class Meta:
         model = Course
 
-class ListingForm(forms.ModelForm):
-    class Meta:
-        model = Listing
+class ListingForm(forms.Form):
+    seller = forms.IntegerField(label="Student ID", min_value=1)
+    price = forms.DecimalField(min_value=Decimal("1"), max_digits=7,
+                               decimal_places=2)
+    barcode = forms.CharField(max_length=50)
