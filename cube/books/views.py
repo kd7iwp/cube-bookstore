@@ -219,11 +219,8 @@ def update_listing_edit(request):
                     'listing_id' : listing.id
                 }
                 form = BookAndListingForm(initial=initial)
-                vars = {
-                    'form' : form,
-                    'attach' : True,
-                }
-                template = 'books/add_listing_and_book.html'
+                vars = {'form' : form}
+                template = 'books/attach_book.html'
                 return rtr(template, vars, context_instance=RC(request))
             try:
                 seller_id = form.cleaned_data['seller']
@@ -284,11 +281,8 @@ def attach_book(request):
             template = 'books/attached.html'
             return rtr(template, vars, context_instance=RC(request))
         # The form has bad data. send the user back
-        vars = {
-            'form' : form,
-            'attach' : True,
-        }
-        template = 'books/add_listing_and_book.html'
+        vars = {'form' : form}
+        template = 'books/attach_book.html'
         return rtr(template, vars, context_instance=RC(request))
     return HttpResponseNotAllowed(['POST'])
 
@@ -474,10 +468,7 @@ def add_listing(request):
                     'price' : price
                 }
                 form = BookAndListingForm(initial=initial)
-                vars = {
-                    'form' : form,
-                    'attach' : False,
-                }
+                vars = {'form' : form}
                 template = 'books/add_listing_and_book.html'
                 return rtr(template, vars, context_instance=RC(request))
             try:
@@ -510,36 +501,41 @@ def add_listing(request):
 def add_listing_and_book(request):
     if request.method == "POST":
         if request.POST.get("Action", '') == 'Add':
-            # This came from the add_book view, and we need to
-            # create a book and a listing
-            g = lambda x: request.POST.get(x, '')
-            barcode, price, sid, author, title, ed, dept, course_num =\
-                g('barcode'), g('price'), int(g('seller')), g('author'),\
-                g('title'), g('edition'), g('department'), g('course_number')
-            book = Book(barcode=barcode, author=author, title=title, edition=ed)
-            book.save()
-            goc = Course.objects.get_or_create
-            course, created = goc(department=dept, number=course_num)
-            book.courses.add(course)
-            book.save()
-            try:
-                seller = User.objects.get(pk=sid)
-            except User.DoesNotExist:
-                seller = import_user(sid)
-                if seller == None:
-                    message = "Invalid Student ID: %s" % sid
-                    return tidy_error(request, message)
-            listing = Listing(seller=seller, price=Decimal(price), book=book)
-            listing.status = 'F'
-            listing.save()
-            Log(listing=listing, who=request.user, action='A').save()
+            form = BookAndListingForm(request.POST)
+            if form.is_valid():
+                # This came from the add_book view, and we need to
+                # create a book and a listing
+                g = lambda x: request.POST.get(x, '')
+                barcode, price, sid, author, title, ed, dept, course_num =\
+                    g('barcode'), g('price'), int(g('seller')), g('author'),\
+                    g('title'), g('edition'), g('department'), g('course_number')
+                book = Book(barcode=barcode, author=author, title=title, edition=ed)
+                book.save()
+                goc = Course.objects.get_or_create
+                course, created = goc(department=dept, number=course_num)
+                book.courses.add(course)
+                book.save()
+                try:
+                    seller = User.objects.get(pk=sid)
+                except User.DoesNotExist:
+                    seller = import_user(sid)
+                    if seller == None:
+                        message = "Invalid Student ID: %s" % sid
+                        return tidy_error(request, message)
+                listing = Listing(seller=seller, price=Decimal(price), book=book)
+                listing.status = 'F'
+                listing.save()
+                Log(listing=listing, who=request.user, action='A').save()
 
-            vars = {
-                'title' : book.title,
-                'author' : book.author,
-                'seller_name' : seller.get_full_name()
-            }
-            template = 'books/update_book/added.html'
+                vars = {
+                    'title' : book.title,
+                    'author' : book.author,
+                    'seller_name' : seller.get_full_name()
+                }
+                template = 'books/update_book/added.html'
+                return rtr(template, vars, context_instance=RC(request))
+            vars = {'form' : form}
+            template = 'books/add_listing_and_book.html'
             return rtr(template, vars, context_instance=RC(request))
 
 @login_required()
