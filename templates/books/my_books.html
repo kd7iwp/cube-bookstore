@@ -14,7 +14,6 @@
                 <option {% selected field "course_code" %}>Course Code</option> 
                 {% if user.is_staff %}
                     <option {% selected field "ref" %}>Ref #</option> 
-                    <option {% selected field "status" %}>Status</option> 
                 {% endif %}
             </select>
             <input type="submit" class="submit" value="Search" />
@@ -48,7 +47,7 @@
                     </th>
                     {% endif %}
                     <th>
-                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;sort_by=status&amp;dir={{ dir }}">Status </a>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;sort_by=status&amp;dir={{ dir }}">Expires In</a>
                     </th>
                     
                 </tr>

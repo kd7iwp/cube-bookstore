@@ -40,3 +40,19 @@ class ListingForm(forms.Form):
     price = forms.DecimalField(min_value=Decimal("1"), max_digits=7,
                                decimal_places=2)
     barcode = forms.CharField(max_length=50)
+
+class FilterForm(forms.Form):
+    """
+    Used for searching for books on the main page
+    """
+    FILTER_CHOICES = (
+        ('any_field', 'In Any Field'),
+        ('title', 'Title'),
+        ('author', 'Author'),
+        ('course_code', 'Course Code'),
+        ('ref', 'Ref #'),
+        ('status', 'Status'),
+    )
+    filter = forms.CharField()
+    field = forms.ChoiceField(choices=FILTER_CHOICES)
+

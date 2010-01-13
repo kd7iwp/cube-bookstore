@@ -1,6 +1,7 @@
 # django imports
 from cube.books.models import Book, Course, Listing, Log
-from cube.books.forms import BookAndListingForm, BookForm, ListingForm
+from cube.books.forms import BookAndListingForm, BookForm, ListingForm,\
+                             FilterForm
 from cube.books.view_tools import book_sort, listing_filter,\
                                   listing_sort, get_number, tidy_error,\
                                   house_cleaning
@@ -32,14 +33,16 @@ def listings(request):
     """
     house_cleaning()
     # Filter for the search box
-    if request.GET.has_key("filter") and request.GET.has_key("field"):
-        # only run the filter if the GET args are there
-        listings = listing_filter(request.GET["filter"] , request.GET["field"],
-                                  Listing.objects.all())
-    elif request.GET.has_key("sort_by") and request.GET.has_key("dir"):
-        listings = listing_sort(request.GET["sort_by"], request.GET["dir"])
-    else:
-        listings = Listing.objects.all()
+    if request.method == 'GET':
+        filter_form = FilterForm(request.GET)
+        if filter_form.is_valid():
+            cd = filter_form.cleaned_data
+            all_listings = Listing.objects.all()
+            listings = listing_filter(cd['filter'], cd['field'], all_listings)
+        elif request.GET.has_key("sort_by") and request.GET.has_key("dir"):
+            listings = listing_sort(request.GET["sort_by"], request.GET["dir"])
+        else:
+            listings = Listing.objects.all()
 
     # Filter according to permissions
     if not request.user.is_staff:
@@ -505,10 +508,15 @@ def add_listing_and_book(request):
             if form.is_valid():
                 # This came from the add_book view, and we need to
                 # create a book and a listing
-                g = lambda x: request.POST.get(x, '')
-                barcode, price, sid, author, title, ed, dept, course_num =\
-                    g('barcode'), g('price'), int(g('seller')), g('author'),\
-                    g('title'), g('edition'), g('department'), g('course_number')
+                barcode = form.cleaned_data['barcode']
+                price = form.cleaned_data['price']
+                sid = form.cleaned_data['seller']
+                author = form.cleaned_data['author']
+                title = form.cleaned_data['title']
+                ed = form.cleaned_data['edition']
+                dept = form.cleaned_data['department']
+                course_num = form.cleaned_data['course_number']
+
                 book = Book(barcode=barcode, author=author, title=title, edition=ed)
                 book.save()
                 goc = Course.objects.get_or_create
