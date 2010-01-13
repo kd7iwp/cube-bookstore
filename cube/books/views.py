@@ -3,7 +3,8 @@ from cube.books.models import Book, Course, Listing, Log
 from cube.books.forms import BookAndListingForm, BookForm, ListingForm
 from cube.books.view_tools import book_sort, listing_filter,\
                                   listing_sort, get_number, tidy_error,\
-                                  import_user, house_cleaning
+                                  house_cleaning
+from cube.twupass.tools import import_user
 from cube.books.email import send_missing_emails, send_sold_emails,\
                              send_tbd_emails
 from django.contrib.auth.decorators import login_required
@@ -222,7 +223,7 @@ def update_listing_edit(request):
                     'form' : form,
                     'attach' : True,
                 }
-                template = 'books/add_book.html'
+                template = 'books/add_listing_and_book.html'
                 return rtr(template, vars, context_instance=RC(request))
             try:
                 seller_id = form.cleaned_data['seller']
@@ -287,7 +288,7 @@ def attach_book(request):
             'form' : form,
             'attach' : True,
         }
-        template = 'books/add_book.html'
+        template = 'books/add_listing_and_book.html'
         return rtr(template, vars, context_instance=RC(request))
     return HttpResponseNotAllowed(['POST'])
 
@@ -361,9 +362,13 @@ def staff(request):
 
 @login_required()
 def update_staff(request):
+    if request.method == 'POST':
+        student_id = request.POST.get("student_id", '')
+        action = request.POST.get('Action')
+    else:
+        return HttpResponseNotAllowed(['POST'])
     # Delete User
-    student_id = request.POST.get("student_id", '')
-    if request.POST.get("Action", '') == "Delete" and student_id:
+    if action == "Delete" and student_id:
         # Delete single
         try:
             user = User.objects.get(id = student_id)
@@ -375,7 +380,7 @@ def update_staff(request):
             return rtr(template, vars,  context_instance=RC(request))
         except User.DoesNotExist:
             return tidy_error(request, "Invalid Student ID: %s" % student_id)
-    elif request.POST.get("Action", '') == "Delete":
+    elif action == "Delete":
         # Delete multiple
         try:
             num_deleted = 0
@@ -396,7 +401,7 @@ def update_staff(request):
             return tidy_error(request, message) 
 
     # Save New User
-    if request.POST.get("Action", '') == "Save":
+    if action == "Save":
         role = request.POST.get("role", '')
         try:
             user = User.objects.get(id = student_id)
@@ -453,7 +458,7 @@ def staffedit(request):
     return rtr(template, vars, context_instance=RC(request))
 
 @login_required()
-def add_book(request):
+def add_listing(request):
     if request.method == "POST":
         form = ListingForm(request.POST)
         if form.is_valid():
@@ -473,7 +478,7 @@ def add_book(request):
                     'form' : form,
                     'attach' : False,
                 }
-                template = 'books/add_book.html'
+                template = 'books/add_listing_and_book.html'
                 return rtr(template, vars, context_instance=RC(request))
             try:
                 seller = User.objects.get(id=student_id)
@@ -495,44 +500,47 @@ def add_book(request):
         vars = {'form' : form}
         template = 'books/add_listing.html'
         return rtr(template, vars, context_instance=RC(request))
-    elif request.POST.get("Action", '') == 'Add':
-        # This came from the add_book view, and we need to
-        # create a book and a listing
-        g = lambda x: request.POST.get(x, '')
-        barcode, price, sid, author, title, ed, dept, course_num =\
-            g('barcode'), g('price'), int(g('seller')), g('author'),\
-            g('title'), g('edition'), g('department'), g('course_number')
-        book = Book(barcode=barcode, author=author, title=title, edition=ed)
-        book.save()
-        goc = Course.objects.get_or_create
-        course, created = goc(department=dept, number=course_num)
-        book.courses.add(course)
-        book.save()
-        try:
-            seller = User.objects.get(pk=sid)
-        except User.DoesNotExist:
-            seller = import_user(sid)
-            if seller == None:
-                message = "Invalid Student ID: %s" % sid
-                return tidy_error(request, message)
-        listing = Listing(seller=seller, price=Decimal(price), book=book)
-        listing.status = 'F'
-        listing.save()
-        Log(listing=listing, who=request.user, action='A').save()
-
-        vars = {
-            'title' : book.title,
-            'author' : book.author,
-            'seller_name' : seller.get_full_name()
-        }
-        template = 'books/update_book/added.html'
-        return rtr(template, vars, context_instance=RC(request))
     else:
         # the user is hitting the page for the first time
         form = ListingForm()
         vars = {'form' : form}
         template = 'books/add_listing.html'
         return rtr(template, vars, context_instance=RC(request))
+
+def add_listing_and_book(request):
+    if request.method == "POST":
+        if request.POST.get("Action", '') == 'Add':
+            # This came from the add_book view, and we need to
+            # create a book and a listing
+            g = lambda x: request.POST.get(x, '')
+            barcode, price, sid, author, title, ed, dept, course_num =\
+                g('barcode'), g('price'), int(g('seller')), g('author'),\
+                g('title'), g('edition'), g('department'), g('course_number')
+            book = Book(barcode=barcode, author=author, title=title, edition=ed)
+            book.save()
+            goc = Course.objects.get_or_create
+            course, created = goc(department=dept, number=course_num)
+            book.courses.add(course)
+            book.save()
+            try:
+                seller = User.objects.get(pk=sid)
+            except User.DoesNotExist:
+                seller = import_user(sid)
+                if seller == None:
+                    message = "Invalid Student ID: %s" % sid
+                    return tidy_error(request, message)
+            listing = Listing(seller=seller, price=Decimal(price), book=book)
+            listing.status = 'F'
+            listing.save()
+            Log(listing=listing, who=request.user, action='A').save()
+
+            vars = {
+                'title' : book.title,
+                'author' : book.author,
+                'seller_name' : seller.get_full_name()
+            }
+            template = 'books/update_book/added.html'
+            return rtr(template, vars, context_instance=RC(request))
 
 @login_required()
 def list_books(request):

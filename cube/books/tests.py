@@ -10,8 +10,8 @@ class SimpleTest(TestCase):
     def test_my_books(self):
         response = self.client.get('/my_books/')
         self.failUnlessEqual(response.status_code, 200)
-    def test_add_book(self):
-        response = self.client.get('/add_book/')
+    def test_add_listing(self):
+        response = self.client.get('/add_listing/')
         self.failUnlessEqual(response.status_code, 200)
     def test_list_books(self):
         response = self.client.get('/list_books/')

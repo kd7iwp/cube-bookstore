@@ -1,5 +1,4 @@
 from cube.books.models import Listing, Book
-from cube.twupass.backend import TWUPassBackend
 from cube.books.email import send_tbd_emails
 from django.db.models.query import QuerySet
 from datetime import datetime, timedelta
@@ -38,12 +37,6 @@ def tidy_error(request, error_message):
     """
     return render_to_response('error.html', {'message' : error_message },
                               context_instance=RequestContext(request))
-def import_user(id):
-    """
-    Gets imports a user from twupass and returns it
-    """
-    return TWUPassBackend().import_user(id)
-
 def get_number(list, key, default):
     """
     grabs a string from a list and converts it to a number
