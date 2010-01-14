@@ -4,20 +4,20 @@
 
 {% load humanize %}
 {% block content %}
-    {% if books.object_list %}
-        {% if books.has_other_pages %}
+    {% if metabooks.object_list %}
+        {% if metabooks.has_other_pages %}
             <div class="PageCounterNav">
                 <p>
-                {% if books.has_previous %}
-                    <a href="?page={{ books.previous_page_number }}&amp;per_page={{ per_page }}">
+                {% if metabooks.has_previous %}
+                    <a href="?page={{ metabooks.previous_page_number }}&amp;per_page={{ per_page }}">
                         <img src="{{ MEDIA_URL }}images/pagenav_prev.gif" alt="Previous Page" />
                     </a>
                 {% else %}
                     <img src="{{ MEDIA_URL }}images/pagenav_prev_faded.gif" alt="No Previous Page" />
                 {% endif %}
-                Pages: ({{ books.number }} of {{ books.paginator.num_pages }})
-                {% if books.has_next %}
-                    <a href="?page={{ books.next_page_number }}&amp;per_page={{ per_page }}">
+                Pages: ({{ metabooks.number }} of {{ books.paginator.num_pages }})
+                {% if metabooks.has_next %}
+                    <a href="?page={{ metabooks.next_page_number }}&amp;per_page={{ per_page }}">
                         <img src="{{ MEDIA_URL }}images/pagenav_next.gif" alt="Next Page" />
                     </a>
                 {% else %}
@@ -49,20 +49,20 @@
                 </tr>
             </thead>
             <tbody>
-            {% for book in books.object_list %}
+            {% for metabook in metabooks.object_list %}
                 <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
                     <td class='row_check'>
-                        <input type='checkbox' name="idToEdit{{ forloop.counter }}" value="{{ book.id }}" />
+                        <input type='checkbox' name="idToEdit{{ forloop.counter }}" value="{{ metabook.id }}" />
                     </td>
-                    <td>{{ book.author }}</td>
+                    <td>{{ metabook.author }}</td>
                     <td>
-                        {{ book.title }}
-                        {% ifnotequal book.edition 1 %}
-                            ({{ book.edition|ordinal }} ed.)
+                        {{ metabook.title }}
+                        {% ifnotequal metabook.edition 1 %}
+                            ({{ metabook.edition|ordinal }} ed.)
                         {% endifnotequal %}
                     </td>
-                    <td>{{ book.course_codes }}</td>
-                    <td>{{ book.barcode }}</td>
+                    <td>{{ metabook.course_codes }}</td>
+                    <td>{{ metabook.barcode }}</td>
                 </tr>
             {% endfor %}
             </tbody>

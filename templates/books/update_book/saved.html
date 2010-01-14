@@ -6,13 +6,13 @@
 </p>
 <p>
     <ul>
-        <li>Title: {{ book.title }}</li>
-        <li>Author: {{ book.author }}</li>
-        <li>Barcode: {{ book.barcode }}</li>
-        <li>Edition: {{ book.edition|ordinal }}</li>
+        <li>Title: {{ metabook.title }}</li>
+        <li>Author: {{ metabook.author }}</li>
+        <li>Barcode: {{ metabook.barcode }}</li>
+        <li>Edition: {{ metabook.edition|ordinal }}</li>
         <li>
             Courses: 
-            {% for course in book.courses.all %}
+            {% for course in metabook.courses.all %}
                 {{ course }}
             {% endfor %}
         </li>

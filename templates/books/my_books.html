@@ -59,16 +59,16 @@
                         <input type='checkbox' name="idToEdit{{forloop.counter}}" value="{{listing.id}}"/>
                     </td>
                     <td class='row_title'>
-                        {{ listing.book.title }}
+                        {{ listing.metabook.title }}
                     </td>
                     <td class="row_author">
-                        {{ listing.book.author }}
+                        {{ listing.metabook.author }}
                     </td>
                     <td class="row_price">
                         &#36;{{ listing.price|floatformat:2 }}
                     </td>
                     <td class="row_coursecode">
-                        {{ listing.book.course_codes }}
+                        {{ listing.metabook.course_codes }}
                     </td>
                     {% if user.is_staff %}
                     <td class="row_refnum">
@@ -141,16 +141,16 @@
                         <input type='checkbox' />{# TODO name and value #}
                     </td>
                     <td class='row_title'>
-                        {{ listing.book.title }}
+                        {{ listing.metabook.title }}
                     </td>
                     <td class="row_author">
-                        {{ listing.book.author }}
+                        {{ listing.metabook.author }}
                     </td>
                     <td class="row_price">
                         &#36;{{ listing.price|floatformat:2 }}
                     </td>
                     <td class="row_coursecode">
-                        {{ listing.book.course_codes }}
+                        {{ listing.metabook.course_codes }}
                     </td>
 		      {% if user.is_staff %}
                     <td class="row_refnum">

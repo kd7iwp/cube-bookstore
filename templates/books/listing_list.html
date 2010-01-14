@@ -78,19 +78,19 @@
                         <input type='checkbox' name="idToEdit{{ forloop.counter }}" value="{{ listing.id }}" />
                     </td>
                     <td class='row_title'>
-                        {{ listing.book.title }}
-                        {% ifnotequal listing.book.edition 1 %}
-                            ({{ listing.book.edition|ordinal }} ed.)
+                        {{ listing.metabook.title }}
+                        {% ifnotequal listing.metabook.edition 1 %}
+                            ({{ listing.metabook.edition|ordinal }} ed.)
                         {% endifnotequal %}
                     </td>
                     <td class="row_author">
-                        {{ listing.book.author }}
+                        {{ listing.metabook.author }}
                     </td>
                     <td class="row_price">
                         &#36;{{ listing.price|floatformat:2 }}
                     </td>
                     <td class="row_coursecode">
-                        {{ listing.book.course_codes }}
+                        {{ listing.metabook.course_codes }}
                     </td>
                     {% if user.is_staff %}
                     <td class="row_refnum">

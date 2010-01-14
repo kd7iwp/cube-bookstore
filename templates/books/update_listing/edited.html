@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-<p>Your changes to <em>{{ listing.book.title }}</em> with ref #{{ listing.id }} were successfully saved</p>
+<p>Your changes to <em>{{ listing.metabook.title }}</em> with ref #{{ listing.id }} were successfully saved</p>
 <p>
     <ul>
-        <li>Barcode: {{ listing.book.barcode }}</li>
+        <li>Barcode: {{ listing.metabook.barcode }}</li>
         <li>Seller: {{ listing.seller.get_full_name }} ({{ listing.seller.id }})</li>
         <li>Price: ${{ listing.price|floatformat:2 }}</li>
     </ul>

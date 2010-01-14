@@ -1,4 +1,4 @@
-from cube.books.models import Listing, Book
+from cube.books.models import Listing, MetaBook
 from cube.books.email import send_tbd_emails
 from django.db.models.query import QuerySet
 from datetime import datetime, timedelta
@@ -66,9 +66,9 @@ def listing_filter(filter, field, listings):
         for word in filter.split():
             try:
                 x = int(word)
-                q = q & f(book__courses__number__icontains=word)
+                q = q & f(metabook__courses__number__icontains=word)
             except ValueError:
-                q = q & f(book__courses__department__icontains=word)
+                q = q & f(metabook__courses__department__icontains=word)
         return q.distinct()
 
     def ref(filter):
@@ -78,10 +78,10 @@ def listing_filter(filter, field, listings):
             return Listing.objects.none()
 
     def title(filter):
-        return listings.filter(book__title__icontains=filter)
+        return listings.filter(metabook__title__icontains=filter)
 
     def author(filter):
-        return listings.filter(book__author__icontains=filter)
+        return listings.filter(metabook__author__icontains=filter)
 
     if field == "any_field":
         # do all the queries and merge them with the | operator
@@ -108,6 +108,6 @@ def listing_sort(field, dir):
     dir = '-' if dir == 'desc' else ''
     return Listing.objects.order_by("%s%s" % (dir, field))
 
-def book_sort(field, dir):
+def metabook_sort(field, dir):
     dir = '-' if dir == 'desc' else ''
-    return Book.objects.order_by("%s%s" % (dir, field))
+    return MetaBook.objects.order_by("%s%s" % (dir, field))

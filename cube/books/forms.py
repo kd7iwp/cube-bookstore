@@ -1,4 +1,4 @@
-from cube.books.models import Book, Course, Listing, DEPARTMENT_CHOICES
+from cube.books.models import MetaBook, Course, Listing, DEPARTMENT_CHOICES
 from django import forms
 from django.core.exceptions import ValidationError
 from decimal import Decimal
@@ -27,9 +27,9 @@ class BookAndListingForm(forms.Form):
     def clean_barcode(self):
         return self.cleaned_data['barcode'].replace('-', '')
 
-class BookForm(forms.ModelForm):
+class MetaBookForm(forms.ModelForm):
     class Meta:
-        model = Book
+        model = MetaBook
 
 class CourseForm(forms.ModelForm):
     class Meta:

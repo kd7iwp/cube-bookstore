@@ -1,4 +1,4 @@
-from cube.books.models import Book
+from cube.books.models import MetaBook
 from xml.dom import minidom
 import urllib
 
@@ -29,7 +29,7 @@ def get_book(isbn):
     titles = get("Title")
     authors = get("AuthorsText")
     if not (titles and authors): raise ISBNException("Book not found")
-    book = Book()
-    book.title = get_text(titles)
-    book.author = get_text(authors)
-    return book
+    metabook = MetaBook()
+    metabook.title = get_text(titles)
+    metabook.author = get_text(authors)
+    return metabook

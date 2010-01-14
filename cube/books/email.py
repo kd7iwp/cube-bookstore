@@ -21,7 +21,7 @@ def create_context(owner, listings):
     return Context({
         'name' : owner.first_name,
         'num_listings' : len(listings),
-        'book_titles' : map(lambda x: x.book.title, listings),
+        'book_titles' : map(lambda x: x.metabook.title, listings),
         'owner_selling' : Listing.objects.filter(seller=owner, status='F'),
         'admin_email' : admin_emails[0][1],
     })

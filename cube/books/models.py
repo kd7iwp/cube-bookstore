@@ -158,7 +158,7 @@ class Course(models.Model):
     def __unicode__(self):
         return self.code()
 
-class Book(models.Model):
+class MetaBook(models.Model):
     """
     Information on a book (as opposed to a particular copy of it)
     The attributes should be self-explanatory
@@ -205,7 +205,7 @@ class Listing(models.Model):
         (u'D', u'Deleted'),
     )
 
-    book = models.ForeignKey(Book)
+    metabook = models.ForeignKey(MetaBook)
     list_date = models.DateTimeField('Date Listed', auto_now_add=True)
     seller = models.ForeignKey(User, related_name="selling")
     sell_date = models.DateTimeField('Date Sold', blank=True, null=True)
@@ -217,7 +217,7 @@ class Listing(models.Model):
     is_legacy = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return "%s by %s on %s" % (self.book, self.seller,
+        return "%s by %s on %s" % (self.metabook, self.seller,
 	                           self.list_date.date())
 class Log(models.Model):
     """

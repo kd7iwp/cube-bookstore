@@ -1,8 +1,8 @@
 # django imports
-from cube.books.models import Book, Course, Listing, Log
-from cube.books.forms import BookAndListingForm, BookForm, ListingForm,\
+from cube.books.models import MetaBook, Course, Listing, Log
+from cube.books.forms import BookAndListingForm, MetaBookForm, ListingForm,\
                              FilterForm
-from cube.books.view_tools import book_sort, listing_filter,\
+from cube.books.views.tools import metabook_sort, listing_filter,\
                                   listing_sort, get_number, tidy_error,\
                                   house_cleaning
 from cube.twupass.tools import import_user
@@ -22,7 +22,6 @@ from decimal import Decimal
 
 # pagination defaults
 PER_PAGE = '30'
-PER_PAGE_STAFF = '20'
 PAGE_NUM = '1'
 
 @login_required()
@@ -178,7 +177,7 @@ def update_listing(request):
         initial = {
             'seller' : item.seller.id,
             'price' : item.price,
-            'barcode' : item.book.barcode,
+            'barcode' : item.metabook.barcode,
         }
         form = ListingForm(initial=initial)
         logs = Log.objects.filter(listing=item)
@@ -212,9 +211,9 @@ def update_listing_edit(request):
                 return tidy_error(request, message)
             try:
                 barcode = form.cleaned_data['barcode']
-                listing.book = Book.objects.get(barcode=barcode)
-            except Book.DoesNotExist:
-                # barcode doesn't exist in db, we have to create a book.
+                listing.metabook = Book.objects.get(barcode=barcode)
+            except MetaBook.DoesNotExist:
+                # barcode doesn't exist in db, we have to create a metabook.
                 initial = {
                     'barcode': barcode,
                     'seller' : form.cleaned_data['seller'],
@@ -268,17 +267,17 @@ def attach_book(request):
             tpl = goc(department=cd['department'], number=cd['course_number'])
             course = tpl[0]
 
-            book = Book()
-            book.title = form.cleaned_data['title']
-            book.author = form.cleaned_data['author']
-            book.barcode = form.cleaned_data['barcode']
-            book.edition = form.cleaned_data['edition']
-            book.save()
-            book.courses.add(course)
-            book.save()
+            metabook = MetaBook()
+            metabook.title = form.cleaned_data['title']
+            metabook.author = form.cleaned_data['author']
+            metabook.barcode = form.cleaned_data['barcode']
+            metabook.edition = form.cleaned_data['edition']
+            metabook.save()
+            metabook.courses.add(course)
+            metabook.save()
 
             listing = Listing.objects.get(pk=form.cleaned_data['listing_id'])
-            listing.book = book
+            listing.metabook = metabook
             listing.save()
             vars = {'listing' : listing}
             template = 'books/attached.html'
@@ -336,67 +335,6 @@ def my_books(request):
     template = 'books/my_books.html'
     return rtr(template, vars, context_instance=RC(request))    
     
-@login_required()    
-def staff(request):
-    users = User.objects.filter(is_staff = True)
-    page_num = get_number(request.GET, 'page', PAGE_NUM)
-    users_per_page = get_number(request.GET, 'per_page', PER_PAGE_STAFF)
-    paginator = Paginator(users, users_per_page)
-    try:
-        page_of_users = paginator.page(page_num)
-    except (EmptyPage, InvalidPage):
-        page_of_users = paginator.page(paginator.num_pages)
-    vars = {
-        'users' : page_of_users,
-        'per_page' : users_per_page,
-        'page' : page_num,
-        'field' : request.GET.get('field', 'any_field'),
-        'filter_text' : request.GET.get('filter', ''),
-        'dir' : 'desc' if request.GET.get('dir', '') == 'asc' else 'asc'
-    }
-    template = 'books/staff.html'
-    return rtr(template, vars,  context_instance=RC(request))
-
-@login_required()
-def update_staff(request):
-    if request.method == 'POST':
-        student_id = request.POST.get("student_id", '')
-        action = request.POST.get('Action')
-    else:
-        return HttpResponseNotAllowed(['POST'])
-    # Delete User
-    if action == "Delete" and student_id:
-        # Delete single
-        try:
-            user = User.objects.get(id = student_id)
-            user.is_superuser = False
-            user.is_staff = False
-            user.save()
-            vars = { 'num_deleted' : 1 }
-            template = 'books/update_staff/deleted.html'
-            return rtr(template, vars,  context_instance=RC(request))
-        except User.DoesNotExist:
-            return tidy_error(request, "Invalid Student ID: %s" % student_id)
-    elif action == "Delete":
-        # Delete multiple
-        try:
-            num_deleted = 0
-            for key, value in request.POST.items():
-                if "idToEdit" in key:
-                    user = User.objects.get(id = value)  
-                    user.is_superuser = False
-                    user.is_staff = False
-                    user.save()
-                    num_deleted += 1
-            vars = { 'num_deleted' : num_deleted }
-            template = 'books/update_staff/deleted.html'
-            return rtr(template, vars,  context_instance=RC(request))
-        except User.DoesNotExist:
-            message = "Only %d user" % num_deleted +\
-                      (" was" if num_deleted == 1 else "s were") +\
-                      "deleted because %s is an invalid student ID" % value
-            return tidy_error(request, message) 
-
     # Save New User
     if action == "Save":
         role = request.POST.get("role", '')
@@ -423,38 +361,6 @@ def update_staff(request):
         return rtr(template, vars, context_instance=RC(request))
 
 @login_required()
-def staffedit(request):
-    """
-    Displays an edit page for user permissions
-    If the data needs to be updated (e.g. delete or save)
-    then it passes the request on to update_staff
-    """
-    if request.POST.get('Action', '') == "Delete":
-        return update_staff(request)
-    users = []
-    if request.POST.get('Action', '')[:3] == "Add New"[:3]:
-        # Apparently some browsers have trouble POSTing spaces
-        edit = False
-        users.append(User())
-    else:
-        edit = True
-        for key, value in request.POST.items():
-            if "idToEdit" in key:
-                users.append(User.objects.get(id=value))
-        if len(users) == 0:
-            # They clicked edit without selecting any users. How silly.
-            return staff(request)
-    vars = {
-        'edit' : edit,
-        'too_many' : len(users) > 1,
-        'name' : users[0].get_full_name(),
-        'student_id' : users[0].id,
-        'current_role' : 'admin' if users[0].is_superuser else 'staff',
-    }
-    template = 'books/staffedit.html'
-    return rtr(template, vars, context_instance=RC(request))
-
-@login_required()
 def add_listing(request):
     if request.method == "POST":
         form = ListingForm(request.POST)
@@ -463,8 +369,8 @@ def add_listing(request):
             price = form.cleaned_data['price']
             barcode = form.cleaned_data['barcode']
             try:
-                book = Book.objects.get(barcode=barcode)
-            except Book.DoesNotExist: 
+                metabook = MetaBook.objects.get(barcode=barcode)
+            except MetaBook.DoesNotExist: 
                 initial = {
                     'barcode' : barcode,
                     'seller' : student_id,
@@ -481,11 +387,11 @@ def add_listing(request):
                 if seller == None:
                     message = "Invalid Student ID: %s" % student_id
                     return tidy_error(request, message)
-            listing = Listing(price=price, status="F", book=book, seller=seller)
+            listing = Listing(price=price, status="F", metabook=metabook, seller=seller)
             listing.save()
             Log(listing=listing, who=request.user, action='A').save()
             vars = {
-                'title' : book.title,
+                'title' : metabook.title,
                 'listing_id' : listing.id
             }
             template = 'books/update_listing/added.html'
@@ -517,12 +423,12 @@ def add_listing_and_book(request):
                 dept = form.cleaned_data['department']
                 course_num = form.cleaned_data['course_number']
 
-                book = Book(barcode=barcode, author=author, title=title, edition=ed)
-                book.save()
+                metabook = MetaBook(barcode=barcode, author=author, title=title, edition=ed)
+                metabook.save()
                 goc = Course.objects.get_or_create
                 course, created = goc(department=dept, number=course_num)
-                book.courses.add(course)
-                book.save()
+                metabook.courses.add(course)
+                metabook.save()
                 try:
                     seller = User.objects.get(pk=sid)
                 except User.DoesNotExist:
@@ -530,14 +436,14 @@ def add_listing_and_book(request):
                     if seller == None:
                         message = "Invalid Student ID: %s" % sid
                         return tidy_error(request, message)
-                listing = Listing(seller=seller, price=Decimal(price), book=book)
+                listing = Listing(seller=seller, price=Decimal(price), metabook=metabook)
                 listing.status = 'F'
                 listing.save()
                 Log(listing=listing, who=request.user, action='A').save()
 
                 vars = {
-                    'title' : book.title,
-                    'author' : book.author,
+                    'title' : metabook.title,
+                    'author' : metabook.author,
                     'seller_name' : seller.get_full_name()
                 }
                 template = 'books/update_book/added.html'
@@ -553,23 +459,23 @@ def list_books(request):
     """
     # TODO allow non-staff to view this?
     if request.GET.has_key("sort_by") and request.GET.has_key("dir"):
-        books = book_sort(request.GET["sort_by"], request.GET["dir"])
-    else: books = Book.objects.all()
+        metabooks = book_sort(request.GET["sort_by"], request.GET["dir"])
+    else: metabooks = MetaBook.objects.all()
 
     # Pagination
     page_num = get_number(request.GET, 'page', PAGE_NUM)
-    books_per_page = get_number(request.GET, 'per_page', PER_PAGE)
+    metabooks_per_page = get_number(request.GET, 'per_page', PER_PAGE)
 
-    paginator = Paginator(books, books_per_page)
+    paginator = Paginator(metabooks, metabooks_per_page)
     try:
-        page_of_books = paginator.page(page_num)
+        page_of_metabooks = paginator.page(page_num)
     except (EmptyPage, InvalidPage):
-        page_of_books = paginator.page(paginator.num_pages)
+        page_of_metabooks = paginator.page(paginator.num_pages)
 
     # Template time
     vars = {
-        'books' : page_of_books,
-        'per_page' : books_per_page,
+        'metabooks' : page_of_metabooks,
+        'per_page' : metabooks_per_page,
         'page' : page_num,
         'dir' : 'desc' if request.GET.get('dir', '') == 'asc' else 'asc'
     }
@@ -581,7 +487,7 @@ def update_books(request):
     """
     This view is used to update book data
     """
-    bunch = Book.objects.none()
+    bunch = MetaBook.objects.none()
     if request.method == "POST":
         action = request.POST.get("Action", '')
     else:
@@ -589,7 +495,7 @@ def update_books(request):
 
     for key, value in request.POST.items():
         if "idToEdit" in key:
-            bunch = bunch | Book.objects.filter(pk=int(value))
+            bunch = bunch | MetaBook.objects.filter(pk=int(value))
             
     if action == "Delete":
         bunch = bunch.exclude(status='D')
@@ -600,20 +506,20 @@ def update_books(request):
     elif action == "Edit":
         too_many = True if bunch.count() > 1 else False
         item = bunch[0]
-        form = BookForm(instance=item)
+        form = MetaBookForm(instance=item)
         vars = {
             'form' : form,
-            'book_id' : item.id,
+            'metabook_id' : item.id,
         }
         template = 'books/edit_book.html'
         return rtr(template, vars, context_instance=RC(request))
     elif action == "Save":
-        book_id = request.POST.get('book_id', '')
-        book = Book.objects.get(pk=book_id)
-        form = BookForm(request.POST, instance=book)
+        metabook_id = request.POST.get('metabook_id', '')
+        metabook = MetaBook.objects.get(pk=metabook_id)
+        form = MetaBookForm(request.POST, instance=metabook)
         if form.is_valid():
             form.save()
-            vars={'book': book}
+            vars={'metabook': metabook}
             template = 'books/update_book/saved.html'
             return rtr(template, vars, context_instance=RC(request))
         # the form isn't valid. send the user back
