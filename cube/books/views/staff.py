@@ -19,13 +19,15 @@ def staff(request):
         page_of_users = paginator.page(page_num)
     except (EmptyPage, InvalidPage):
         page_of_users = paginator.page(paginator.num_pages)
+    if request.GET.get('dir', '') == 'asc': dir = 'desc'
+    else: dir = 'asc'
     vars = {
         'users' : page_of_users,
         'per_page' : users_per_page,
         'page' : page_num,
         'field' : request.GET.get('field', 'any_field'),
         'filter_text' : request.GET.get('filter', ''),
-        'dir' : 'desc' if request.GET.get('dir', '') == 'asc' else 'asc'
+        'dir' : dir, 
     }
     template = 'books/staff.html'
     return rtr(template, vars,  context_instance=RC(request))
@@ -65,8 +67,9 @@ def update_staff(request):
             template = 'books/update_staff/deleted.html'
             return rtr(template, vars,  context_instance=RC(request))
         except User.DoesNotExist:
-            message = "Only %d user" % num_deleted +\
-                      (" was" if num_deleted == 1 else "s were") +\
+            if num_deleted == 1: p = ' was'
+            else: p = 's were'
+            message = "Only %d user%s" % (num_deleted, p) + \
                       "deleted because %s is an invalid student ID" % value
             return tidy_error(request, message) 
 
@@ -92,12 +95,15 @@ def staffedit(request):
         if len(users) == 0:
             # They clicked edit without selecting any users. How silly.
             return staff(request)
+    if users[0].is_superuser:
+        current_role = 'admin'
+    else: current_role = 'staff'
     vars = {
         'edit' : edit,
         'too_many' : len(users) > 1,
         'name' : users[0].get_full_name(),
         'student_id' : users[0].id,
-        'current_role' : 'admin' if users[0].is_superuser else 'staff',
+        'current_role' : current_role 
     }
     template = 'books/staffedit.html'
     return rtr(template, vars, context_instance=RC(request))

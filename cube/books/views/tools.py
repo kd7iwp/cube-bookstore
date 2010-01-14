@@ -105,9 +105,11 @@ def listing_filter(filter, field, listings):
         return listings
 
 def listing_sort(field, dir):
-    dir = '-' if dir == 'desc' else ''
+    if dir == 'desc': dir = '-'
+    else: dir = ''
     return Listing.objects.order_by("%s%s" % (dir, field))
 
 def metabook_sort(field, dir):
-    dir = '-' if dir == 'desc' else ''
+    if dir == 'desc': dir = '-'
+    else: dir = ''
     return MetaBook.objects.order_by("%s%s" % (dir, field))

@@ -40,8 +40,9 @@ def send_missing_emails(listings):
     missing = index_by_owner(listings)
     for owner, listings in missing.items():
         c = create_context(owner, listings)
-        subj = 'Your book%s went missing at the Cube' %\
-                ('' if len(listings) == 1 else 's')
+        if len(listings) == 1: p = ''
+        else: p = 's'
+        subj = 'Your book%s went missing at the Cube' % p
         msg = create_email(subj, t.render(c), owner.email)
         msg.send()
 
@@ -50,8 +51,9 @@ def send_sold_emails(listings):
     sold = index_by_owner(listings)
     for owner, listings in sold.items():
         c = create_context(owner, listings)
-        subj = 'Your book%s been sold at the Cube' %\
-                (' has' if len(listings) == 1 else 's have')
+        if len(listings) == 1: p = ' has'
+        else: p = 's have'
+        subj = 'Your book%s been sold at the Cube' % p
         msg = create_email(subj, t.render(c), owner.email)
         msg.send()
 
@@ -60,7 +62,8 @@ def send_tbd_emails(listings):
     to_be_deleted = index_by_owner(listings)
     for owner, listings in to_be_deleted.items():
         c = create_context(owner, listings)
-        subj = 'Your book%s not sold at the Cube' %\
-                (' was' if len(listings) == 1 else 's were')
+        if len(listings) == 1: p = ' was'
+        else: p = 's were'
+        subj = 'Your book%s not sold at the Cube' % p
         msg = create_email(subj, t.render(c), owner.email)
         msg.send()

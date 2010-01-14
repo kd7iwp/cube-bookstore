@@ -59,13 +59,15 @@ def listings(request):
         page_of_listings = paginator.page(paginator.num_pages)
 
     # Template time
+    if request.GET.get('dir', '') == 'asc': dir = 'desc'
+    else: dir = 'asc'
     vars = {
         'listings' : page_of_listings,
         'per_page' : listings_per_page,
         'page' : page_num,
         'field' : request.GET.get('field', 'any_field'),
         'filter_text' : request.GET.get('filter', ''),
-        'dir' : 'desc' if request.GET.get('dir', '') == 'asc' else 'asc'
+        'dir' : dir
     }
     return rtr('books/listing_list.html', vars, context_instance=RC(request))
 @login_required()
@@ -172,7 +174,8 @@ def update_listing(request):
         template = 'books/update_listing/remove_holds.html'
         return rtr(template, vars, context_instance=RC(request))
     elif action == "Edit":
-        too_many = True if bunch.count() > 1 else False
+        if bunch.count() > 1: too_many = True
+        else: too_many = False
         item = bunch[0]
         initial = {
             'seller' : item.seller.id,
@@ -473,6 +476,8 @@ def list_books(request):
         page_of_metabooks = paginator.page(paginator.num_pages)
 
     # Template time
+    if request.GET.get('dir', '') == 'asc': dir = 'desc'
+    else: dir = 'asc'
     vars = {
         'metabooks' : page_of_metabooks,
         'per_page' : metabooks_per_page,
@@ -504,7 +509,8 @@ def update_books(request):
         template = 'books/update_listing/deleted.html'
         return rtr(template, vars, context_instance=RC(request))
     elif action == "Edit":
-        too_many = True if bunch.count() > 1 else False
+        if bunch.count() > 1: too_many = True
+        else: too_many = False
         item = bunch[0]
         form = MetaBookForm(instance=item)
         vars = {
