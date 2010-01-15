@@ -1,3 +1,5 @@
+# Copyright (C) 2010  Trinity Western University
+
 import urlparse
 from django.template import Library
 from django.template.defaulttags import URLNode, url

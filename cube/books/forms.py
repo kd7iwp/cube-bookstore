@@ -1,3 +1,5 @@
+# Copyright (C) 2010  Trinity Western University
+
 from cube.books.models import MetaBook, Course, Book, DEPARTMENT_CHOICES
 from django import forms
 from django.core.exceptions import ValidationError

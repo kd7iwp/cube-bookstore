@@ -1,3 +1,5 @@
+# Copyright (C) 2010  Trinity Western University
+
 from django.db import models
 from django.contrib.auth.models import User
 

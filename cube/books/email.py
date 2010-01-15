@@ -1,3 +1,5 @@
+# Copyright (C) 2010  Trinity Western University
+
 from cube.settings import ADMINS as admin_emails
 from cube.books.models import Book
 from django.core.mail import EmailMultiAlternatives

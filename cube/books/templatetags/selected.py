@@ -1,3 +1,5 @@
+# Copyright (C) 2010  Trinity Western University
+
 from django import template
 register = template.Library()
 @register.simple_tag

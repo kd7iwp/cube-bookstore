@@ -1,3 +1,5 @@
+# Copyright (C) 2010  Trinity Western University
+
 from cube.books.models import Book
 from django.contrib.auth.models import User
 

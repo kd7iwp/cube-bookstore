@@ -1,3 +1,5 @@
+# Copyright (C) 2010  Trinity Western University
+
 from django import template
 from django.utils.timesince import timeuntil
 from datetime import timedelta
