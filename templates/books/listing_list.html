@@ -21,20 +21,20 @@
             <input type="submit" class="submit" value="Search" />
         </p>
     </form>
-    {% if listings.object_list %}
-        {% if listings.has_other_pages %}
+    {% if books.object_list %}
+        {% if books.has_other_pages %}
             <div class="PageCounterNav">
                 <p>
-                {% if listings.has_previous %}
-                    <a href="?page={{ listings.previous_page_number }}&amp;per_page={{ per_page }}&amp;field={{ field }}&amp;filter={{ filter_text }}">
+                {% if books.has_previous %}
+                    <a href="?page={{ books.previous_page_number }}&amp;per_page={{ per_page }}&amp;field={{ field }}&amp;filter={{ filter_text }}">
                         <img src="{{ MEDIA_URL }}images/pagenav_prev.gif" alt="Previous Page" />
                     </a>
                 {% else %}
                     <img src="{{ MEDIA_URL }}images/pagenav_prev_faded.gif" alt="No Previous Page" />
                 {% endif %}
-                Pages: ({{ listings.number }} of {{listings.paginator.num_pages}})
-                {% if listings.has_next %}
-                    <a href="?page={{ listings.next_page_number }}&amp;per_page={{ per_page }}&amp;field={{ field }}&amp;filter={{ filter_text }}">
+                Pages: ({{ books.number }} of {{books.paginator.num_pages}})
+                {% if books.has_next %}
+                    <a href="?page={{ books.next_page_number }}&amp;per_page={{ per_page }}&amp;field={{ field }}&amp;filter={{ filter_text }}">
                         <img src="{{ MEDIA_URL }}images/pagenav_next.gif" alt="Next Page" />
                     </a>
                 {% else %}
@@ -42,7 +42,7 @@
                 {% endif %}
             </div>
         {% endif %}
-        <form action="{% url update_listing %}" method="post" name="ListItems">
+        <form action="{% url update_book %}" method="post" name="ListItems">
         <table cellspacing='0'>
             <thead>
                 <tr>
@@ -72,32 +72,32 @@
                 </tr>
             </thead>
             <tbody>
-            {% for listing in listings.object_list %}
+            {% for book in books.object_list %}
                 <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
                     <td class='row_check'>
-                        <input type='checkbox' name="idToEdit{{ forloop.counter }}" value="{{ listing.id }}" />
+                        <input type='checkbox' name="idToEdit{{ forloop.counter }}" value="{{ book.id }}" />
                     </td>
                     <td class='row_title'>
-                        {{ listing.metabook.title }}
-                        {% ifnotequal listing.metabook.edition 1 %}
-                            ({{ listing.metabook.edition|ordinal }} ed.)
+                        {{ book.metabook.title }}
+                        {% ifnotequal book.metabook.edition 1 %}
+                            ({{ book.metabook.edition|ordinal }} ed.)
                         {% endifnotequal %}
                     </td>
                     <td class="row_author">
-                        {{ listing.metabook.author }}
+                        {{ book.metabook.author }}
                     </td>
                     <td class="row_price">
-                        &#36;{{ listing.price|floatformat:2 }}
+                        &#36;{{ book.price|floatformat:2 }}
                     </td>
                     <td class="row_coursecode">
-                        {{ listing.metabook.course_codes }}
+                        {{ book.metabook.course_codes }}
                     </td>
                     {% if user.is_staff %}
                     <td class="row_refnum">
-                        {{ listing.id }}
+                        {{ book.id }}
                     </td>
                     <td class="row_status">
-                        {{ listing.get_status_display }}
+                        {{ book.get_status_display }}
                     </td>
                     {% endif %}
                 </tr>

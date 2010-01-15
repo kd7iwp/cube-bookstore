@@ -1,4 +1,4 @@
-from cube.books.models import Listing, MetaBook
+from cube.books.models import Book, MetaBook
 from cube.books.email import send_tbd_emails
 from django.db.models.query import QuerySet
 from datetime import datetime, timedelta
@@ -10,18 +10,18 @@ def expire_holds():
     Expires holds on books after 24 hours
     """
     yester = datetime.today() - timedelta(1)
-    expired_listings = Listing.objects.filter(status='O', hold_date__lte=yester)
-    expired_listings.update(status='F', holder=None, hold_date=None)
+    expired_books = Book.objects.filter(status='O', hold_date__lte=yester)
+    expired_books.update(status='F', holder=None, hold_date=None)
 
 def warn_annual_sellers():
     """
-    If a listing is a year old, mark it as to be deleted and send them an email
+    If a book is a year old, mark it as to be deleted and send them an email
     """
     last_year = datetime.today() - timedelta(365)
-    old_listings = Listing.objects.filter(status='F', list_date__lte=last_year)
-    if old_listings.count():
-        send_tbd_emails(old_listings)
-        old_listings.update(status='T')
+    old_books = Book.objects.filter(status='F', list_date__lte=last_year)
+    if old_books.count():
+        send_tbd_emails(old_books)
+        old_books.update(status='T')
 
 def house_cleaning():
     """
@@ -49,20 +49,20 @@ def get_number(list, key, default):
         number = int(default)
     return number
 
-def listing_filter(filter, field, listings):
+def book_filter(filter, field, books):
     """
-    Returns a filtered list of Listing objects only if the field is valid
-    otherwise it returns all of the listing objects
+    Returns a filtered list of Book objects only if the field is valid
+    otherwise it returns all of the book objects
     """
     def status(filter):
-        for choice in Listing.STATUS_CHOICES:
+        for choice in Book.STATUS_CHOICES:
             if filter.lower() in choice[1].lower():
-                return listings.filter(status=choice[0])
-        return Listing.objects.none()
+                return books.filter(status=choice[0])
+        return Book.objects.none()
 
     def course(filter):
-        q = listings
-        f = listings.filter
+        q = books
+        f = books.filter
         for word in filter.split():
             try:
                 x = int(word)
@@ -73,15 +73,15 @@ def listing_filter(filter, field, listings):
 
     def ref(filter):
         try:
-            return listings.filter(pk=int(filter))
+            return books.filter(pk=int(filter))
         except ValueError:
-            return Listing.objects.none()
+            return Book.objects.none()
 
     def title(filter):
-        return listings.filter(metabook__title__icontains=filter)
+        return books.filter(metabook__title__icontains=filter)
 
     def author(filter):
-        return listings.filter(metabook__author__icontains=filter)
+        return books.filter(metabook__author__icontains=filter)
 
     if field == "any_field":
         # do all the queries and merge them with the | operator
@@ -102,12 +102,12 @@ def listing_filter(filter, field, listings):
     elif field == "status":
         return status(filter)
     else:
-        return listings
+        return books
 
-def listing_sort(field, dir):
+def book_sort(field, dir):
     if dir == 'desc': dir = '-'
     else: dir = ''
-    return Listing.objects.order_by("%s%s" % (dir, field))
+    return Book.objects.order_by("%s%s" % (dir, field))
 
 def metabook_sort(field, dir):
     if dir == 'desc': dir = '-'

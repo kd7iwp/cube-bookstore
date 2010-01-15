@@ -2,14 +2,14 @@
 {% block content %}
 {% load humanize %}
 <p>
-    Book successfully created and added to ref #{{ listing.id }}.
+    Book successfully created and added to ref #{{ book.id }}.
 </p>
 <p>
     <ul>
-        <li>Title: <em>{{ listing.metabook.title }}</em></li>
-        <li>Author: {{ listing.metabook.author }}</li>
-        <li>Barcode: {{ listing.metabook.barcode }}</li>
-        <li>Edition: {{ listing.metabook.edition|ordinal }}</li>
+        <li>Title: <em>{{ book.metabook.title }}</em></li>
+        <li>Author: {{ book.metabook.author }}</li>
+        <li>Barcode: {{ book.metabook.barcode }}</li>
+        <li>Edition: {{ book.metabook.edition|ordinal }}</li>
     </ul>
 </p>
 {% endblock %}

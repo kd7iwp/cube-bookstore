@@ -22,7 +22,7 @@
        
         {% if holdP %}
         <h4>Books I have on Hold </h4>
-        <form action="{% url update_listing %}" method="post" name="Update Info">
+        <form action="{% url update_book %}" method="post" name="Update Info">
         <table cellspacing='0'>
             <thead>
                 <tr>
@@ -53,30 +53,30 @@
                 </tr>
             </thead>
             <tbody>
-            {% for listing in holdP %}
+            {% for book in holdP %}
                 <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
                     <td class='row_check'>
-                        <input type='checkbox' name="idToEdit{{forloop.counter}}" value="{{listing.id}}"/>
+                        <input type='checkbox' name="idToEdit{{forloop.counter}}" value="{{book.id}}"/>
                     </td>
                     <td class='row_title'>
-                        {{ listing.metabook.title }}
+                        {{ book.metabook.title }}
                     </td>
                     <td class="row_author">
-                        {{ listing.metabook.author }}
+                        {{ book.metabook.author }}
                     </td>
                     <td class="row_price">
-                        &#36;{{ listing.price|floatformat:2 }}
+                        &#36;{{ book.price|floatformat:2 }}
                     </td>
                     <td class="row_coursecode">
-                        {{ listing.metabook.course_codes }}
+                        {{ book.metabook.course_codes }}
                     </td>
                     {% if user.is_staff %}
                     <td class="row_refnum">
-                        {{ listing.id }}
+                        {{ book.id }}
                     </td>
                    {% endif %}
                     <td class="row_status">
-			    {% until_hold_expiry listing.hold_date %}
+			    {% until_hold_expiry book.hold_date %}
                     </td>
                 </tr>
             {% endfor %}
@@ -105,7 +105,7 @@
        
        {% if sellP %}
        <h4>Books I have for Sale </h4> 
-       <form action="{% url update_listing %}" method="post" name="Update Info">
+       <form action="{% url update_book %}" method="post" name="Update Info">
        <table cellspacing='0'>
             <thead>
                 <tr>
@@ -135,29 +135,29 @@
                 </tr>
             </thead>
             <tbody>
-            {% for listing in sellP %}
+            {% for book in sellP %}
                 <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
                     <td class='row_check'>
                         <input type='checkbox' />{# TODO name and value #}
                     </td>
                     <td class='row_title'>
-                        {{ listing.metabook.title }}
+                        {{ book.metabook.title }}
                     </td>
                     <td class="row_author">
-                        {{ listing.metabook.author }}
+                        {{ book.metabook.author }}
                     </td>
                     <td class="row_price">
-                        &#36;{{ listing.price|floatformat:2 }}
+                        &#36;{{ book.price|floatformat:2 }}
                     </td>
                     <td class="row_coursecode">
-                        {{ listing.metabook.course_codes }}
+                        {{ book.metabook.course_codes }}
                     </td>
 		      {% if user.is_staff %}
                     <td class="row_refnum">
-                        {{ listing.id }}
+                        {{ book.id }}
                     </td>
                     <td class="row_status">
-                        {{ listing.get_status_display }}
+                        {{ book.get_status_display }}
                     </td>
                    {% endif %}
                 </tr>

@@ -1,4 +1,4 @@
-from cube.books.models import Listing
+from cube.books.models import Book
 from django.contrib.auth.models import User
 
 from django.contrib import admin
@@ -11,16 +11,17 @@ urlpatterns = patterns('',
     (r'^$', 'cube.twupass.views.login_cube'),
     (r'^logout/$', 'cube.twupass.views.logout_cube'),
 
-    url(r'^books/$', 'cube.books.views.views.listings', name="list"),
-    url(r'^books/update/listing/$', 'cube.books.views.views.update_listing', name="update_listing"),
-    url(r'^books/update/listing/edit/$', 'cube.books.views.views.update_listing_edit',
-        name="update_listing_edit"),
+    url(r'^books/$', 'cube.books.views.views.books', name="list"),
+    url(r'^books/update/book/$', 'cube.books.views.views.update_book',
+        name="update_book"),
+    url(r'^books/update/book/edit/$', 'cube.books.views.views.update_book_edit',
+        name="update_book_edit"),
     url(r'books/update/book/$', 'cube.books.views.views.update_books',
         name="update_books"),
 
-    url(r'^add_listing/$', 'cube.books.views.views.add_listing', name="add_listing"),
-    url(r'^add_listing_and_book/$', 'cube.books.views.views.add_listing_and_book',
-        name="add_listing_and_book"),
+    url(r'^add_book/$', 'cube.books.views.views.add_book', name="add_book"),
+    url(r'^add_new_book/$', 'cube.books.views.views.add_new_book',
+        name="add_new_book"),
     url(r'^attach_book/$', 'cube.books.views.views.attach_book', name="attach_book"),
     url(r'^help/$', direct_to_template, {'template' : 'help.html'}, name="help"),
     url(r'^my_books/$', 'cube.books.views.views.my_books', name="my_books"),

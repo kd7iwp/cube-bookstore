@@ -1,7 +1,7 @@
 Dear {{name}},
 <br /><br />
 {# Unfortunately I can't use newlines otherwise they will end up in the email #}
-Your book{{ num_listings|pluralize }} {% for book_title in book_titles %}{% if not forloop.first %}, {% endif %}{% if forloop.last %}{% ifnotequal num_listings 1 %}and {% endifnotequal %}{% endif %}"{{ book_title }}"{% endfor %} ha{{ num_listings|pluralize:"s,ve" }} not been sold. Please come to the Cube in the Reimer Student Centre to pick up your book in the next 30 days. Unclaimed books after 30 days will be donated to charity.
+Your book{{ num_books|pluralize }} {% for book_title in book_titles %}{% if not forloop.first %}, {% endif %}{% if forloop.last %}{% ifnotequal num_books 1 %}and {% endifnotequal %}{% endif %}"{{ book_title }}"{% endfor %} ha{{ num_books|pluralize:"s,ve" }} not been sold. Please come to the Cube in the Reimer Student Centre to pick up your book in the next 30 days. Unclaimed books after 30 days will be donated to charity.
 <br /><br />{% load absurl %}
 {% if owner_selling %}To see the status of the other book{{ owner_selling|pluralize }} you have for sale please visit: {% absurl my_books %}{% endif %}
 <br /><br />

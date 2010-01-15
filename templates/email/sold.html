@@ -1,6 +1,6 @@
 Dear {{name}},
 {# Unfortunately I can't use newlines otherwise they will end up in the email #}<br /><br />
-Your book{{ num_listings|pluralize }} {% for book_title in book_titles %}{% if not forloop.first %}, {% endif %}{% if forloop.last %}{% ifnotequal num_listings 1 %}and {% endifnotequal %}{% endif %}"{{ book_title }}"{% endfor %} ha{{ num_listings|pluralize:"s,ve" }} been sold. Please come to the TWUSA Office in the Douglas Centre to pick up your money.
+Your book{{ num_books|pluralize }} {% for book_title in book_titles %}{% if not forloop.first %}, {% endif %}{% if forloop.last %}{% ifnotequal num_books 1 %}and {% endifnotequal %}{% endif %}"{{ book_title }}"{% endfor %} ha{{ num_books|pluralize:"s,ve" }} been sold. Please come to the TWUSA Office in the Douglas Centre to pick up your money.
 <br /><br />
 Hours to pick up are:
 <br /><br />

@@ -185,7 +185,7 @@ class MetaBook(models.Model):
     def title_list(self):
         return self.author
 
-class Listing(models.Model):
+class Book(models.Model):
     """
     For when a student lists a particular copy of a book.
     Keeps track of 
@@ -193,7 +193,7 @@ class Listing(models.Model):
         * if and who is currently holding it
         * when it was last put on hold
 	* when it finally got sold
-	* whether the listing is flagged for deletion or not
+	* whether the book is flagged for deletion or not
     """
     STATUS_CHOICES = (
         (u'F', u'For Sale'),
@@ -221,7 +221,7 @@ class Listing(models.Model):
 	                           self.list_date.date())
 class Log(models.Model):
     """
-    Keeps track of all actions taken on Listings
+    Keeps track of all actions taken on Books
     """
     ACTION_CHOICES = (
         (u'A', u'Added Book'), # -> For Sale
@@ -237,7 +237,7 @@ class Log(models.Model):
     )
     action = models.CharField(max_length=1, choices=ACTION_CHOICES)
     when = models.DateTimeField(auto_now_add=True)
-    listing = models.ForeignKey(Listing, related_name="logs")
+    book = models.ForeignKey(Book, related_name="logs")
     who = models.ForeignKey(User, related_name="actions")
 
     def __unicode__(self):

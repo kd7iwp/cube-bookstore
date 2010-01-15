@@ -1,7 +1,7 @@
 Dear {{name}},
 <br /><br />
 {# Unfortunately I can't use newlines otherwise they will end up in the email #}
-We regret to inform you that your book{{ num_listings|pluralize }} {% for book_title in book_titles %}{% if not forloop.first %}, {% endif %}{% if forloop.last %}{% ifnotequal num_listings 1 %}and {% endifnotequal %}{% endif %}"{{ book_title }}"{% endfor %} ha{{ num_listings|pluralize:"s,ve" }} gone missing.
+We regret to inform you that your book{{ num_books|pluralize }} {% for book_title in book_titles %}{% if not forloop.first %}, {% endif %}{% if forloop.last %}{% ifnotequal num_books 1 %}and {% endifnotequal %}{% endif %}"{{ book_title }}"{% endfor %} ha{{ num_books|pluralize:"s,ve" }} gone missing.
 <br /><br />
 sincerely,<br />{% load absurl %}
 <a href="{% absurl list %} ">The Cube</a>
