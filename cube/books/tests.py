@@ -18,13 +18,13 @@ STAFF_USERNAME = 'test_staff'
 STAFF_EMAIL = 'staff@example.com'
 
 # Test User
-TEST_USERNAME = 'test'
+TEST_USERNAME = 'test_user'
 TEST_EMAIL = 'test@example.com'
 
 class SimpleTest(TestCase):
     fixtures = ['test_empty.json']
     def setUp(self):
-        self.client.login(username='test_admin', password='testpass')
+        self.client.login(username=ADMIN_USERNAME, password=PASSWORD)
     def test_book_list(self):
         """ Ensure Book List displays without errors """
         response = self.client.get('/books/')
@@ -58,7 +58,7 @@ from django.core import mail
 class EmailTest(TestCase):
     fixtures = ['test_3_for_sale.json']
     def setUp(self):
-        self.client.login(username='test_staff', password='testpass')
+        self.client.login(username=STAFF_USERNAME, password=PASSWORD)
     def test_send_mail(self):
         mail.send_mail('Subject', 'Message', 'from@cube.com',
                         ['to@example.com'], fail_silently=False)
@@ -91,7 +91,7 @@ class EmailTest(TestCase):
 class AddNewBookTest(TestCase):
     fixtures = ['test_empty.json']
     def setUp(self):
-        self.client.login(username='test_staff', password='testpass')
+        self.client.login(username=STAFF_USERNAME, password=PASSWORD)
     def test_feedback(self):
         """ Make sure feedback is correct when adding a new book """
         author = 'Bruce Wilkinson'
@@ -121,7 +121,7 @@ class SeachBookTest(TestCase):
     BARCODE = '9780618391110'
     EDITION = 1
     def setUp(self):
-        self.client.login(username='test_user', password='testpass')
+        self.client.login(username=TEST_USERNAME, password=PASSWORD)
         self.get_data = {'field' : '', 'filter' : ''}
 
         self.course = Course(department='ENGL', number='103')
@@ -212,7 +212,7 @@ class SeachBookTest(TestCase):
 #    it's a little more complicated than the others
 #    """
 #    def setUp(self):
-#        self.client.login(username='test_user', password='testpass')
+#        self.client.login(username='test_user', password=PASSWORD)
 #        self.get_data = {'field' : 'status', 'filter' : ''}
 #    def test_forsale(self):
 #        self.get_data['filter'] = 'For Sale'
