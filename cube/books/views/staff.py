@@ -10,7 +10,7 @@ PAGE_NUM = '1'
 PER_PAGE = '20'
 
 @login_required()    
-def staff(request):
+def staff_list(request):
     users = User.objects.filter(is_staff = True)
     page_num = get_number(request.GET, 'page', PAGE_NUM)
     users_per_page = get_number(request.GET, 'per_page', PER_PAGE)
@@ -80,30 +80,33 @@ def staffedit(request):
     If the data needs to be updated (e.g. delete or save)
     then it passes the request on to update_staff
     """
-    if request.POST.get('Action', '') == "Delete":
-        return update_staff(request)
-    users = []
-    if request.POST.get('Action', '')[:3] == "Add New"[:3]:
-        # Apparently some browsers have trouble POSTing spaces
-        edit = False
-        users.append(User())
+    if request.method == "POST":
+        users = []
+        too_many = False
+        if request.POST.get('Action', '') == "Delete":
+            return update_staff(request)
+        users = []
+        if request.POST.get('Action', '') == "Edit":
+            edit = True
+            for key, value in request.POST.items():
+                if "idToEdit" in key:
+                    users.append(User.objects.get(id=value))
+            if len(users) > 1: too_many = True
+            if len(users) == 0:
+                # They clicked edit without selecting any users. How silly.
+                return staff_list(request)
+        else:
+            users.append(User())
     else:
-        edit = True
-        for key, value in request.POST.items():
-            if "idToEdit" in key:
-                users.append(User.objects.get(id=value))
-        if len(users) == 0:
-            # They clicked edit without selecting any users. How silly.
-            return staff(request)
-    if users[0].is_superuser:
-        current_role = 'admin'
-    else: current_role = 'staff'
+        too_many = False
+        users = [User()]
+        edit = False
     vars = {
         'edit' : edit,
-        'too_many' : len(users) > 1,
+        'too_many' : too_many,
         'name' : users[0].get_full_name(),
         'student_id' : users[0].id,
-        'current_role' : current_role 
+        'current_role' : 'admin' if users[0].is_superuser else 'staff' 
     }
     template = 'books/staffedit.html'
     return rtr(template, vars, context_instance=RC(request))
