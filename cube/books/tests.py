@@ -28,8 +28,8 @@ class SimpleTest(TestCase):
     def test_add_book(self):
         response = self.client.get('/add_book/')
         self.failUnlessEqual(response.status_code, 200)
-    def test_list_books(self):
-        response = self.client.get('/list_books/')
+    def test_list_metabooks(self):
+        response = self.client.get('/list_metabooks/')
         self.failUnlessEqual(response.status_code, 200)
     def test_staff(self):
         response = self.client.get('/staff/')
@@ -37,8 +37,8 @@ class SimpleTest(TestCase):
     def test_help(self):
         response = self.client.get('/help/')
         self.failUnlessEqual(response.status_code, 200)
-    def test_update_books(self):
-        response = self.client.get('/books/update/book/')
+    def test_update_metabooks(self):
+        response = self.client.get('/books/update/metabook/')
         self.failUnlessEqual(response.status_code, 405)
 
 #from django.core import mail

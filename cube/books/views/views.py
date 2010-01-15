@@ -201,7 +201,7 @@ def update_book_edit(request):
     """
     Applies changes to a book made on the edit page
     If the barcode doesn't exist,
-    it makes the user create a Book object as well
+    it makes the user create a MetaBook object as well
     """
     if request.method == "POST":
         form = BookForm(request.POST)
@@ -456,7 +456,7 @@ def add_new_book(request):
             return rtr(template, vars, context_instance=RC(request))
 
 @login_required()
-def list_books(request):
+def list_metabooks(request):
     """
     List all books in the database
     """
@@ -485,10 +485,10 @@ def list_books(request):
         'dir' : 'desc' if request.GET.get('dir', '') == 'asc' else 'asc'
     }
 
-    template = 'books/list_books.html'
+    template = 'books/list_metabooks.html'
     return rtr(template, vars, context_instance=RC(request))
 @login_required()
-def update_books(request):
+def update_metabooks(request):
     """
     This view is used to update book data
     """
