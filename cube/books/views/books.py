@@ -221,7 +221,8 @@ def update_book_edit(request):
                     'barcode': barcode,
                     'seller' : form.cleaned_data['seller'],
                     'price' : form.cleaned_data['price'],
-                    'book_id' : book.id
+                    'book_id' : book.id,
+                    'edition' : '1',
                 }
                 form = NewBookForm(initial=initial)
                 vars = {'form' : form}
@@ -377,7 +378,8 @@ def add_book(request):
                 initial = {
                     'barcode' : barcode,
                     'seller' : student_id,
-                    'price' : price
+                    'price' : price,
+                    'edition' : '1',
                 }
                 form = NewBookForm(initial=initial)
                 vars = {'form' : form}
