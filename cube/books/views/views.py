@@ -447,7 +447,8 @@ def add_new_book(request):
                 vars = {
                     'title' : metabook.title,
                     'author' : metabook.author,
-                    'seller_name' : seller.get_full_name()
+                    'seller_name' : seller.get_full_name(),
+                    'book_id' : book.id,
                 }
                 template = 'books/update_book/added.html'
                 return rtr(template, vars, context_instance=RC(request))

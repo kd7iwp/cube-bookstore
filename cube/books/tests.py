@@ -45,3 +45,29 @@ class SimpleTest(TestCase):
 #class EmailTest(TestCase):
 #    def test_sold(self):
 #        mail.send_mail('
+
+class AddNewBookTest(TestCase):
+    fixtures = ['test_empty.json']
+    def setUp(self):
+        self.client.login(username='test_staff', password='testpass')
+    def test_feedback(self):
+        """ Make sure feedback is correct when adding a new book """
+        author = 'Bruce Wilkinson'
+        title = 'The Prayer of Jabez'
+        book_id = '1'
+        post_data = {
+            'barcode' : '9781590524756',
+            'seller' : '3',
+            'price' : '4.78',
+            'author' : author,
+            'title' : title,
+            'edition' : '1',
+            'department' : 'RELS',
+            'course_number' : '123',
+            'book_id' : book_id,
+            'Action' : 'Add'
+        }
+        response = self.client.post('/add_new_book/', post_data)
+        self.assertContains(response, author)
+        self.assertContains(response, title)
+        self.assertContains(response, 'reference # %s' % book_id)
