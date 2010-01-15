@@ -1,4 +1,7 @@
+from cube.books.models import Book, MetaBook, Course
+from decimal import Decimal
 from django.test import TestCase
+from django.contrib.auth.models import User
 
 # test account details
 PASSWORD = 'testpass'
@@ -80,22 +83,105 @@ class AddNewBookTest(TestCase):
         self.assertContains(response, 'reference # %s' % book_id)
 
 class SeachBookTest(TestCase):
-    fixtures = ['test_3_for_sale.json']
+    fixtures = ['test_empty.json']
+    TITLE = 'The Silmarillion'
+    AUTHOR = 'J.R.R. Tolkien'
+    BARCODE = '9780618391110'
+    EDITION = 1
     def setUp(self):
         self.client.login(username='test_user', password='testpass')
         self.get_data = {'field' : '', 'filter' : ''}
+
+        self.course = Course(department='ENGL', number='103')
+        self.course.save()
+
+        metabook = MetaBook(title=self.TITLE, author=self.AUTHOR)
+        metabook.barcode = self.BARCODE
+        metabook.edition = self.EDITION
+        metabook.save()
+        metabook.courses.add(self.course)
+
+        seller = User.objects.get(pk=3)
+
+        self.book = Book(metabook=metabook, seller=seller)
+        self.book.price = Decimal('1.01')
+        self.book.save()
+
+    # Barcode
     def test_barcode(self):
         """ Searching for barcodes in book list should work """
         self.get_data['field'] = 'barcode'
-        self.get_data['filter'] = '9780618391110'
+        self.get_data['filter'] = self.BARCODE
         response = self.client.get('/books/', self.get_data)
-        self.assertContains(response, 'The Silmarillion')
-    def test_barcode_any_field(self):
-        """ 
-        Searching for barcodes in in 'any_field"
-        in the book list should work
-        """
+        self.assertContains(response, self.TITLE)
+    def test_barcode_anyfield(self):
+        """ Searching for barcodes in any field """
         self.get_data['field'] = 'any_field'
-        self.get_data['filter'] = '9780618391110'
+        self.get_data['filter'] = self.BARCODE
         response = self.client.get('/books/', self.get_data)
-        self.assertContains(response, 'The Silmarillion')
+        self.assertContains(response, self.TITLE) 
+    # Title
+    def test_title(self):
+        """ Searching for title """
+        self.get_data['field'] = 'title'
+        self.get_data['filter'] = self.TITLE
+        response = self.client.get('/books/', self.get_data)
+        self.assertContains(response, self.AUTHOR)
+    def test_title_anyfield(self):
+        """ Searching for title in any field """
+        self.get_data['field'] = 'any_field'
+        self.get_data['filter'] = self.TITLE
+        response = self.client.get('/books/', self.get_data)
+        self.assertContains(response, self.AUTHOR)
+    # Author
+    def test_author(self):
+        """ Searching for author """
+        self.get_data['field'] = 'author'
+        self.get_data['filter'] = self.AUTHOR
+        response = self.client.get('/books/', self.get_data)
+        self.assertContains(response, self.TITLE)
+    def test_author_anyfield(self):
+        """ Searching for author in Any Field """
+        self.get_data['field'] = 'any_field'
+        self.get_data['filter'] = self.AUTHOR
+        response = self.client.get('/books/', self.get_data)
+        self.assertContains(response, self.TITLE)
+    # Course Code
+    def test_course_code(self):
+        """ Searching for course code """
+        self.get_data['field'] = 'course_code'
+        self.get_data['filter'] = self.course.code()
+        response = self.client.get('/books/', self.get_data)
+        self.assertContains(response, self.AUTHOR)
+    def test_course_code_anyfield(self):
+        """ Searching for course code in any field """
+        self.get_data['field'] = 'any_field'
+        self.get_data['filter'] = self.course.code()
+        response = self.client.get('/books/', self.get_data)
+        self.assertContains(response, self.AUTHOR)
+    # Ref #
+    def test_refno(self):
+        """ Searching for course code """
+        self.get_data['field'] = 'ref_no'
+        self.get_data['filter'] = self.EDITION
+        response = self.client.get('/books/', self.get_data)
+        self.assertContains(response, self.AUTHOR)
+    def test_refno_anyfield(self):
+        """ Searching for course code in any field """
+        self.get_data['field'] = 'any_field'
+        self.get_data['filter'] = self.EDITION
+        response = self.client.get('/books/', self.get_data)
+        self.assertContains(response, self.AUTHOR)
+
+#TODO implement this
+#class SearchBookStatusTest(TestCase):
+#    """
+#    Searching Status gets its own test class because
+#    it's a little more complicated than the others
+#    """
+#    def setUp(self):
+#        self.client.login(username='test_user', password='testpass')
+#        self.get_data = {'field' : 'status', 'filter' : ''}
+#    def test_forsale(self):
+#        self.get_data['filter'] = 'For Sale'
+        
