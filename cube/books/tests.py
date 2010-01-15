@@ -4,6 +4,7 @@ from cube.books.models import Book, MetaBook, Course
 from decimal import Decimal
 from django.test import TestCase
 from django.contrib.auth.models import User
+from django.core import mail
 
 # test account details
 PASSWORD = 'testpass'
@@ -53,10 +54,39 @@ class SimpleTest(TestCase):
         response = self.client.get('/books/update/metabook/')
         self.failUnlessEqual(response.status_code, 405)
 
-#from django.core import mail
-#class EmailTest(TestCase):
-#    def test_sold(self):
-#        mail.send_mail('
+from django.core import mail
+class EmailTest(TestCase):
+    fixtures = ['test_3_for_sale.json']
+    def setUp(self):
+        self.client.login(username='test_staff', password='testpass')
+    def test_send_mail(self):
+        mail.send_mail('Subject', 'Message', 'from@cube.com',
+                        ['to@example.com'], fail_silently=False)
+        self.assertEquals(len(mail.outbox), 1)
+        self.assertEquals(mail.outbox[0].subject, 'Subject')
+    def test_sold(self):
+        post_data = {
+            'idToEdit1' : '1',
+            'Action' : 'Sold',
+        }
+        response = self.client.post('/books/update/book/', post_data)
+        self.assertEquals(len(mail.outbox), 1)
+    def test_missing(self):
+        post_data = {
+            'idToEdit1' : '1',
+            'Action' : 'Missing',
+        }
+        response = self.client.post('/books/update/book/', post_data)
+        self.assertEquals(len(mail.outbox), 1)
+    def test_tobodeleted(self):
+        post_data = {
+            'idToEdit1' : '1',
+            'Action' : 'To Be Deleted',
+        }
+        response = self.client.post('/books/update/book/', post_data)
+        self.assertEquals(len(mail.outbox), 1)
+
+
 
 class AddNewBookTest(TestCase):
     fixtures = ['test_empty.json']
