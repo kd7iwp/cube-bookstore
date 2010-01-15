@@ -8,6 +8,7 @@
     <form action="{% url list %}" method="get">
         <p id="booksearch">
             <input type="text" class="text" name="filter" value="{{ filter_text }}" />
+            {{ form }}
             <select name="field">
                 <option {% selected field "any_field" %}>In Any Field</option>
                 <option {% selected field "title" %}>Title</option> 
@@ -17,6 +18,7 @@
                     <option {% selected field "ref" %}>Ref #</option> 
                     <option {% selected field "status" %}>Status</option> 
                 {% endif %}
+                <option {% selected field "barcode" %}>Barcode</option>
             </select>
             <input type="submit" class="submit" value="Search" />
         </p>

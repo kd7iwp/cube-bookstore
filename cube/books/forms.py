@@ -52,6 +52,7 @@ class FilterForm(forms.Form):
         ('course_code', 'Course Code'),
         ('ref', 'Ref #'),
         ('status', 'Status'),
+        ('barcode', 'Barcode'),
     )
     filter = forms.CharField()
     field = forms.ChoiceField(choices=FILTER_CHOICES)

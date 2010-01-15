@@ -83,6 +83,9 @@ def book_filter(filter, field, books):
     def author(filter):
         return books.filter(metabook__author__icontains=filter)
 
+    def barcode(filter):
+        return books.filter(metabook__barcode__icontains=filter)
+
     if field == "any_field":
         # do all the queries and merge them with the | operator
         # all queries being |'d must be either distinct or non-distinct
@@ -90,7 +93,8 @@ def book_filter(filter, field, books):
                author(filter).distinct() |\
                course(filter).distinct() |\
                ref(filter).distinct() |\
-               status(filter).distinct()
+               status(filter).distinct() |\
+               barcode(filter).distinct()
     elif field == "title":
         return title(filter)
     elif field == "author":
@@ -101,6 +105,8 @@ def book_filter(filter, field, books):
         return ref(filter)
     elif field == "status":
         return status(filter)
+    elif field == 'barcode':
+        return barcode(filter)
     else:
         return books
 
