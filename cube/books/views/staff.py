@@ -74,7 +74,7 @@ def update_staff(request):
             return tidy_error(request, message) 
 
 @login_required()
-def staffedit(request):
+def staff_edit(request):
     """
     Displays an edit page for user permissions
     If the data needs to be updated (e.g. delete or save)
@@ -108,7 +108,7 @@ def staffedit(request):
         'student_id' : users[0].id,
         'current_role' : 'admin' if users[0].is_superuser else 'staff' 
     }
-    template = 'books/staffedit.html'
+    template = 'books/staff_edit.html'
     return rtr(template, vars, context_instance=RC(request))
 
 

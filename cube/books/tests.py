@@ -114,6 +114,18 @@ class AddNewBookTest(TestCase):
         self.assertContains(response, title)
         self.assertContains(response, 'reference # %s' % book_id)
 
+class StaffTest(TestCase):
+    fixtures = ['test_empty.json']
+    def setUp(self):
+        self.client.login(username=ADMIN_USERNAME, password=PASSWORD)
+    def test_edit(self):
+        post_data = {
+            'idToEdit' : '1',
+            'Action' : 'Edit',
+        }
+        response = self.client.post('/staff_edit/', post_data)
+        self.assertContains(response, "Administrator")
+
 class SeachBookTest(TestCase):
     fixtures = ['test_empty.json']
     TITLE = 'The Silmarillion'

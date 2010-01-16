@@ -4,7 +4,7 @@
 
 {% block content %}
 {% if user.is_staff %} 
-<form action='{% url staffedit %}' method='post' name='Action'>
+<form action='{% url staff_edit %}' method='post' name='Action'>
     {% if users.object_list %}
         {% if users.has_other_pages %}
             <div class="PageCounterNav">

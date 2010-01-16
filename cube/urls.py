@@ -28,7 +28,7 @@ urlpatterns = patterns('',
     url(r'^help/$', direct_to_template, {'template' : 'help.html'}, name="help"),
     url(r'^my_books/$', 'cube.books.views.books.my_books', name="my_books"),
     url(r'^staff/$','cube.books.views.staff.staff_list', name="staff"),
-    url(r'^staffedit/$','cube.books.views.staff.staffedit', name="staffedit"),
+    url(r'^staff_edit/$','cube.books.views.staff.staff_edit', name="staff_edit"),
     url(r'^update_staff/$','cube.books.views.staff.update_staff', name="update_staff"),
     url(r'^list_metabooks/$','cube.books.views.books.list_metabooks', name="list_metabooks"),
 
