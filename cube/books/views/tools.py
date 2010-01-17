@@ -1,3 +1,5 @@
+# Copyright (C) 2010  Trinity Western University
+
 from cube.books.models import Book, MetaBook
 from cube.books.email import send_tbd_emails
 from django.db.models.query import QuerySet

@@ -1,3 +1,5 @@
+# Copyright (C) 2010  Trinity Western University
+
 from django.contrib.auth.models import User
 from cube.books.views.tools import get_number
 from django.core.paginator import Paginator, InvalidPage, EmptyPage

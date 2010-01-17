@@ -1,3 +1,5 @@
+// Copyright (C) 2010  Trinity Western University
+
 function toggleCBTogether()
 {
     var inputlist = document.getElementsByTagName("input");
