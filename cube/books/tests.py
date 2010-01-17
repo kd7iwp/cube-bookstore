@@ -38,8 +38,8 @@ class SimpleTest(TestCase):
         response = self.client.get('/add_book/')
         self.failUnlessEqual(response.status_code, 200)
     def test_list_metabooks(self):
-        """ Ensure MetaBook List displays without errors """
-        response = self.client.get('/list_metabooks/')
+        """ Ensure MetaBook list displays without errors """
+        response = self.client.get('/metabooks/')
         self.failUnlessEqual(response.status_code, 200)
     def test_staff(self):
         """ Ensure Staff List displays without errors """
@@ -51,7 +51,7 @@ class SimpleTest(TestCase):
         self.failUnlessEqual(response.status_code, 200)
     def test_update_metabooks(self):
         """ Ensure the MetaBook update page displays without errors """
-        response = self.client.get('/books/update/metabook/')
+        response = self.client.get('/metabooks/update/')
         self.failUnlessEqual(response.status_code, 405)
 
 from django.core import mail

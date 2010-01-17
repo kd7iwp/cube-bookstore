@@ -1,8 +1,9 @@
+# Copyright (C) 2010  Trinity Western University
+
 # django imports
 from cube.books.models import MetaBook, Course, Book, Log
-from cube.books.forms import NewBookForm, MetaBookForm, BookForm,\
-                             FilterForm
-from cube.books.views.tools import metabook_sort, book_filter,\
+from cube.books.forms import NewBookForm, BookForm, FilterForm 
+from cube.books.views.tools import book_filter,\
                                   book_sort, get_number, tidy_error,\
                                   house_cleaning
 from cube.twupass.tools import import_user
@@ -25,7 +26,7 @@ PER_PAGE = '30'
 PAGE_NUM = '1'
 
 @login_required()
-def books(request):
+def book_list(request):
     """
     Shows a list of all the books listed.
     Does pagination, sorting and filtering.
@@ -457,86 +458,3 @@ def add_new_book(request):
             vars = {'form' : form}
             template = 'books/add_new_book.html'
             return rtr(template, vars, context_instance=RC(request))
-
-@login_required()
-def list_metabooks(request):
-    """
-    List all books in the database
-    """
-    # TODO allow non-staff to view this?
-    if request.GET.has_key("sort_by") and request.GET.has_key("dir"):
-        metabooks = book_sort(request.GET["sort_by"], request.GET["dir"])
-    else: metabooks = MetaBook.objects.all()
-
-    # Pagination
-    page_num = get_number(request.GET, 'page', PAGE_NUM)
-    metabooks_per_page = get_number(request.GET, 'per_page', PER_PAGE)
-
-    paginator = Paginator(metabooks, metabooks_per_page)
-    try:
-        page_of_metabooks = paginator.page(page_num)
-    except (EmptyPage, InvalidPage):
-        page_of_metabooks = paginator.page(paginator.num_pages)
-
-    # Template time
-    if request.GET.get('dir', '') == 'asc': dir = 'desc'
-    else: dir = 'asc'
-    vars = {
-        'metabooks' : page_of_metabooks,
-        'per_page' : metabooks_per_page,
-        'page' : page_num,
-        'dir' : 'desc' if request.GET.get('dir', '') == 'asc' else 'asc'
-    }
-
-    template = 'books/list_metabooks.html'
-    return rtr(template, vars, context_instance=RC(request))
-@login_required()
-def update_metabooks(request):
-    """
-    This view is used to update book data
-    """
-    bunch = MetaBook.objects.none()
-    if request.method == "POST":
-        action = request.POST.get("Action", '')
-    else:
-        return HttpResponseNotAllowed(['POST'])
-
-    for key, value in request.POST.items():
-        if "idToEdit" in key:
-            bunch = bunch | MetaBook.objects.filter(pk=int(value))
-            
-    if action == "Delete":
-        bunch = bunch.exclude(status='D')
-        vars = {'num_deleted': bunch.count()}
-        bunch.update(status='D')
-        template = 'books/update_book/deleted.html'
-        return rtr(template, vars, context_instance=RC(request))
-    elif action == "Edit":
-        if bunch.count() > 1: too_many = True
-        else: too_many = False
-        item = bunch[0]
-        form = MetaBookForm(instance=item)
-        vars = {
-            'form' : form,
-            'metabook_id' : item.id,
-        }
-        template = 'books/edit_book.html'
-        return rtr(template, vars, context_instance=RC(request))
-    elif action == "Save":
-        metabook_id = request.POST.get('metabook_id', '')
-        metabook = MetaBook.objects.get(pk=metabook_id)
-        form = MetaBookForm(request.POST, instance=metabook)
-        if form.is_valid():
-            form.save()
-            vars={'metabook': metabook}
-            template = 'books/update_book/saved.html'
-            return rtr(template, vars, context_instance=RC(request))
-        # the form isn't valid. send the user back
-        vars = {'form' : form}
-        template = 'books/edit_book.html'
-        return rtr(template, vars, context_instance=RC(request))
-    else:
-        vars = {'action' : action}
-        template = 'books/update_book/error.html'
-        return rtr(template, vars, context_instance=RC(request))
-

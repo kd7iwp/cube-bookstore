@@ -13,12 +13,15 @@ urlpatterns = patterns('',
     (r'^$', 'cube.twupass.views.login_cube'),
     (r'^logout/$', 'cube.twupass.views.logout_cube'),
 
-    url(r'^books/$', 'cube.books.views.books.books', name="list"),
+    url(r'^books/$', 'cube.books.views.books.book_list', name="list"),
     url(r'^books/update/book/$', 'cube.books.views.books.update_book',
         name="update_book"),
     url(r'^books/update/book/edit/$', 'cube.books.views.books.update_book_edit',
         name="update_book_edit"),
-    url(r'books/update/metabook/$', 'cube.books.views.books.update_metabooks',
+
+    # metabooks
+    url(r'^metabooks/$','cube.books.views.metabooks.metabook_list', name="list_metabooks"),
+    url(r'metabooks/update/$', 'cube.books.views.metabooks.update',
         name="update_metabooks"),
 
     url(r'^add_book/$', 'cube.books.views.books.add_book', name="add_book"),
@@ -30,13 +33,12 @@ urlpatterns = patterns('',
     url(r'^staff/$','cube.books.views.staff.staff_list', name="staff"),
     url(r'^staff_edit/$','cube.books.views.staff.staff_edit', name="staff_edit"),
     url(r'^update_staff/$','cube.books.views.staff.update_staff', name="update_staff"),
-    url(r'^list_metabooks/$','cube.books.views.books.list_metabooks', name="list_metabooks"),
 
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     (r'^admin/(.*)', admin.site.root),
 
     # TODO remove this for live server
     (r'^site_media/(?P<path>.*)$', 'django.views.static.serve',
-        {'document_root': 'C:/Documents and Settings/david.somers-harris/Desktop/code/cube-bookstore/media'}),
+        {'document_root': 'C:/Documents and Settings/OEM User/My Documents/cube-bookstore/media/'}),
     
 )

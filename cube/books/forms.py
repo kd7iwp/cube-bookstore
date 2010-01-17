@@ -32,6 +32,7 @@ class NewBookForm(forms.Form):
 class MetaBookForm(forms.ModelForm):
     class Meta:
         model = MetaBook
+        exclude = ('courses',)
 
 class CourseForm(forms.ModelForm):
     class Meta:
@@ -42,6 +43,7 @@ class BookForm(forms.Form):
     price = forms.DecimalField(min_value=Decimal("1"), max_digits=7,
                                decimal_places=2)
     barcode = forms.CharField(max_length=50)
+
 
 class FilterForm(forms.Form):
     """

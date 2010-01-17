@@ -3,8 +3,30 @@
 {% block content %}
 <h4>Edit a Book</h4>
 <form method="post" action="{% url update_metabooks %}">
-    <input type="hidden" name="book_id" value="{{ metabook_id }}" />
-    {% include "form.html" %}
+    <input type="hidden" name="metabook_id" value="{{ metabook_id }}" />
+    <input type="hidden" name="course_id" value="{{ course_id }}" />
+    {% for field in metabook_form.hidden_fields %}
+        {{ field }}
+    {% endfor %}
+    {% for field in course_form.hidden_fields %}
+        {{ field }}
+    {% endfor %}
+    <table cellspacing="0" class="FormTable">
+        <tbody>
+            {% for field in metabook_form.visible_fields %}
+                <tr>
+                    <td>{{ field.label_tag }}:</td>
+                    <td>{{ field }}{{ field.errors }}</td>
+                </tr>
+            {% endfor %}
+            {% for field in course_form.visible_fields %}
+                <tr>
+                    <td>{{ field.label_tag }}:</td>
+                    <td>{{ field }}{{ field.errors }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     <p class="submit_options">
         <input class="submit" type="submit" value="Save" name="Action" />
     </p>
