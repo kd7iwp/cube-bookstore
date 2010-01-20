@@ -1,17 +1,19 @@
 # Copyright (C) 2010  Trinity Western University
 
 from cube.books.models import Book
+from cube.twupass.settings import TWUPASS_LOGOUT_URL
 from django.contrib.auth.models import User
 
 from django.contrib import admin
 from django.conf.urls.defaults import *
-from django.views.generic.simple import direct_to_template
+from django.views.generic.simple import direct_to_template, redirect_to
 
 admin.autodiscover()
 
 urlpatterns = patterns('',
     (r'^$', 'cube.twupass.views.login_cube'),
     (r'^logout/$', 'cube.twupass.views.logout_cube'),
+    url(r'^twupass-logout/$', redirect_to, {'url': TWUPASS_LOGOUT_URL}, name="twupass-logout"),
 
     url(r'^books/$', 'cube.books.views.books.book_list', name="list"),
     url(r'^books/update/book/$', 'cube.books.views.books.update_book',
@@ -39,6 +41,6 @@ urlpatterns = patterns('',
 
     # TODO remove this for live server
     (r'^site_media/(?P<path>.*)$', 'django.views.static.serve',
-        {'document_root': 'C:/Documents and Settings/OEM User/My Documents/cube-bookstore/media/'}),
+        {'document_root': 'C:/Documents and Settings/david.somers-harris/Desktop/code/cube-bookstore/media/'}),
     
 )
