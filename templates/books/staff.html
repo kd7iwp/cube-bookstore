@@ -39,7 +39,7 @@
             {% for user in users.object_list %}
                 <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
                     <td class='row_check'>
-                        <input type='checkbox' name="idToEdit{{ forloop.counter }}" value='{{ user.id }}'/>
+                        <input type='checkbox' name="idToEdit{{ forloop.counter }}" value='{{ user.id }}' {% ifequal user.id 1 %}disabled="disabled"{% endifequal %}/>
                     </td>
                     <td class='row_username'>
                         {{ user.get_full_name }}
