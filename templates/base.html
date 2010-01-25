@@ -87,7 +87,12 @@
                 {% endblock %}
             </ul>
         </div><!--End Navigation-->
-
+        <div id="user">
+            <p>
+                You are logged in as<br />
+                {{ request.user.get_full_name }}
+            </p>
+        </div>
         <div id="content">
             {% block content %}{# TODO we need anything here? #}{% endblock %}
         </div><!--End Content-->

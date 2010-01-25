@@ -314,4 +314,6 @@ table.FormTable tr td {
     /*</group>*//*<group=Footer>*/
     
     /*</group>*/
-
+#user{
+    text-align: right;
+}
