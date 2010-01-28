@@ -52,16 +52,16 @@
                         <a href="javascript:void(0);" onclick="toggleCBTogether();">All</a>
                     </th>
                     <th>
-                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=book__title&amp;dir={{ dir }}">Title</a>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=metabook__title&amp;dir={{ dir }}">Title</a>
                     </th>
                     <th>
-                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=book__author&amp;dir={{ dir }}">Author</a>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=metabook__author&amp;dir={{ dir }}">Author</a>
                     </th>
                     <th>
                         <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=price&amp;dir={{ dir }}">Price</a>
                     </th>
                     <th>
-                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=book__courses&amp;dir={{ dir }}">Course Code</a>
+                        <a href="{{ cube.books.views.list }}?page={{ page }}&amp;per_page={{ per_page }}&amp;sort_by=metabook__courses&amp;dir={{ dir }}">Course Code</a>
                     </th>
                     {% if user.is_staff %}
                     <th>
