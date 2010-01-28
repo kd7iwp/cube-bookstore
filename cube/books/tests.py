@@ -229,3 +229,71 @@ class SeachBookTest(TestCase):
 #    def test_forsale(self):
 #        self.get_data['filter'] = 'For Sale'
         
+class SortBookTest(TestCase):
+    fixtures = ['test_empty.json']
+    def setUp(self):
+        self.client.login(username=ADMIN_USERNAME, password=PASSWORD)
+    def test_title_asc(self):
+        """ Make sure sorting books by title in ascending order works"""
+        get_data = {
+            'sort_by' : 'metabook__title',
+            'dir' : 'asc',
+        }
+        response = self.client.get('/books/', get_data)
+        self.failUnlessEqual(response.status_code, 200)
+    def test_title_desc(self):
+        """ Make sure sorting books by title in descending order works"""
+        get_data = {
+            'sort_by' : 'metabook__title',
+            'dir' : 'desc',
+        }
+        response = self.client.get('/books/', get_data)
+        self.failUnlessEqual(response.status_code, 200)
+    def test_author_asc(self):
+        """ Make sure sorting books by author in ascending order works"""
+        get_data = {
+            'sort_by' : 'metabook__author',
+            'dir' : 'asc',
+        }
+        response = self.client.get('/books/', get_data)
+        self.failUnlessEqual(response.status_code, 200)
+    def test_author_desc(self):
+        """ Make sure sorting books by author in descending order works"""
+        get_data = {
+            'sort_by' : 'metabook__author',
+            'dir' : 'desc',
+        }
+        response = self.client.get('/books/', get_data)
+        self.failUnlessEqual(response.status_code, 200)
+    def test_price_asc(self):
+        """ Make sure sorting books by price in ascending order works"""
+        get_data = {
+            'sort_by' : 'price',
+            'dir' : 'asc',
+        }
+        response = self.client.get('/books/', get_data)
+        self.failUnlessEqual(response.status_code, 200)
+    def test_price_desc(self):
+        """ Make sure sorting books by price in descending order works"""
+        get_data = {
+            'sort_by' : 'price',
+            'dir' : 'desc',
+        }
+        response = self.client.get('/books/', get_data)
+        self.failUnlessEqual(response.status_code, 200)
+    def test_courses_asc(self):
+        """ Make sure sorting books by courses in ascending order works"""
+        get_data = {
+            'sort_by' : 'metabook__courses',
+            'dir' : 'asc',
+        }
+        response = self.client.get('/books/', get_data)
+        self.failUnlessEqual(response.status_code, 200)
+    def test_courses_desc(self):
+        """ Make sure sorting books by courses in descending order works"""
+        get_data = {
+            'sort_by' : 'metabook__courses',
+            'dir' : 'desc',
+        }
+        response = self.client.get('/books/', get_data)
+        self.failUnlessEqual(response.status_code, 200)
