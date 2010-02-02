@@ -99,6 +99,7 @@ def staff_edit(request):
                 return staff_list(request)
         else:
             users.append(User())
+            edit = False
     else:
         too_many = False
         users = [User()]

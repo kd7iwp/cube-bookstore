@@ -125,6 +125,13 @@ class StaffTest(TestCase):
         }
         response = self.client.post('/staff_edit/', post_data)
         self.assertContains(response, "Administrator")
+    def test_add(self):
+        """ Ensure the add staff page displays without errors """
+        post_data = {
+            'Action' : 'Add New',
+        }
+        response = self.client.post('/staff_edit/', post_data)
+        self.failUnlessEqual(response.status_code, 200)
 
 class SeachBookTest(TestCase):
     fixtures = ['test_empty.json']
