@@ -1,7 +1,7 @@
 # Copyright (C) 2010  Trinity Western University
 
 from django.contrib.auth.models import User
-from cube.books.views.tools import get_number
+from cube.books.views.tools import get_number, tidy_error
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response as rtr
@@ -74,6 +74,23 @@ def update_staff(request):
             message = "Only %d user%s" % (num_deleted, p) + \
                       "deleted because %s is an invalid student ID" % value
             return tidy_error(request, message) 
+    elif action == "Save":
+        try:
+            user = User.objects.get(id = student_id)
+            if request.POST.get("role", '') == 'admin':
+                user.is_superuser = True
+                user.is_staff = True
+            elif request.POST.get("role", '') == 'staff':
+                user.is_staff = True
+            user.save()
+            vars = {
+                'user_name' : user.get_full_name(),
+                'administrator': user.is_superuser
+            }
+            template = 'books/update_staff/saved.html'
+            return rtr(template, vars,  context_instance=RC(request))
+        except User.DoesNotExist:
+            return tidy_error(request, "Invalid Student ID: %s" % student_id)
 
 @login_required()
 def staff_edit(request):
@@ -113,5 +130,3 @@ def staff_edit(request):
     }
     template = 'books/staff_edit.html'
     return rtr(template, vars, context_instance=RC(request))
-
-

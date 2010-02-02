@@ -125,13 +125,27 @@ class StaffTest(TestCase):
         }
         response = self.client.post('/staff_edit/', post_data)
         self.assertContains(response, "Administrator")
-    def test_add(self):
+    def test_add_page(self):
         """ Ensure the add staff page displays without errors """
         post_data = {
             'Action' : 'Add New',
         }
         response = self.client.post('/staff_edit/', post_data)
         self.failUnlessEqual(response.status_code, 200)
+    # Commented out for 2 reasons
+    # 1. It's a twupass dependent test
+    # 2. It doesn't work, and I don't know why
+    #def test_add(self):
+    #    """ Ensure adding staff works """
+    #    # This is a twupass dependent test
+    #    post_data = {
+    #        'student_id' : '194908',
+    #        'role' : 'admin',
+    #        'Action' : 'Save',
+    #    }
+    #    response = self.client.post('/update_staff/', post_data)
+    #    self.failUnlessEqual(response.status_code, 200)
+    #    self.assertContains(response, "Administrator")
 
 class SeachBookTest(TestCase):
     fixtures = ['test_empty.json']
