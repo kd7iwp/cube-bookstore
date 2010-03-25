@@ -17,6 +17,7 @@
                 {% if user.is_staff %}
                     <option {% selected field "ref" %}>Ref #</option> 
                     <option {% selected field "status" %}>Status</option> 
+                    <option {% selected field "user" %}>Student #</option>
                 {% endif %}
                 <option {% selected field "barcode" %}>Barcode</option>
             </select>
