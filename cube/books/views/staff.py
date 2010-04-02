@@ -1,6 +1,7 @@
 # Copyright (C) 2010  Trinity Western University
 
 from django.contrib.auth.models import User
+from django.http import HttpResponseForbidden, HttpResponseNotAllowed
 from cube.books.views.tools import get_number, tidy_error
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib.auth.decorators import login_required
@@ -99,6 +100,9 @@ def staff_edit(request):
     If the data needs to be updated (e.g. delete or save)
     then it passes the request on to update_staff
     """
+    if not request.user.is_staff:
+        # User must be staff or admin to get to this page
+        return HttpResponseForbidden()
     if request.method == "POST":
         users = []
         too_many = False

@@ -45,6 +45,10 @@ class SimpleTest(TestCase):
         """ Ensure Staff List displays without errors """
         response = self.client.get('/staff/')
         self.failUnlessEqual(response.status_code, 200)
+    def test_update_staff(self):
+        """ Ensure the staff update page returns HttpResponseNotAllowed """
+        response = self.client.get('/update_staff/')
+        self.failUnlessEqual(response.status_code, 405)
     def test_help(self):
         """ Ensure Help page displays without errors """
         response = self.client.get('/help/')
@@ -318,3 +322,12 @@ class SortBookTest(TestCase):
         }
         response = self.client.get('/books/', get_data)
         self.failUnlessEqual(response.status_code, 200)
+
+class SecurityTest(TestCase):
+    fixtures = ['test_empty.json']
+    def setUp(self):
+        self.client.login(username=TEST_USERNAME, password=PASSWORD)
+    def test_staff_edit(self):
+        """ Make sure normal users can't get to the staff edit page """
+        response = self.client.get('/staff_edit/')
+        self.failUnlessEqual(response.status_code, 403)
