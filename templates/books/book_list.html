@@ -29,15 +29,15 @@
             <div class="PageCounterNav">
                 <p>
                 {% if books.has_previous %}
-                    <a href="?page={{ books.previous_page_number }}&amp;per_page={{ per_page }}&amp;field={{ field }}&amp;filter={{ filter_text }}">
+                    <a href="?page={{ books.previous_page_number }}&amp;per_page={{ per_page }}&amp;field={{ field }}&amp;filter={{ filter_text }}#pages">
                         <img src="{{ MEDIA_URL }}images/pagenav_prev.gif" alt="Previous Page" />
                     </a>
                 {% else %}
                     <img src="{{ MEDIA_URL }}images/pagenav_prev_faded.gif" alt="No Previous Page" />
                 {% endif %}
-                Pages: ({{ books.number }} of {{books.paginator.num_pages}})
+                <a name="pages">Pages</a>: ({{ books.number }} of {{books.paginator.num_pages}})
                 {% if books.has_next %}
-                    <a href="?page={{ books.next_page_number }}&amp;per_page={{ per_page }}&amp;field={{ field }}&amp;filter={{ filter_text }}">
+                    <a href="?page={{ books.next_page_number }}&amp;per_page={{ per_page }}&amp;field={{ field }}&amp;filter={{ filter_text }}#pages">
                         <img src="{{ MEDIA_URL }}images/pagenav_next.gif" alt="Next Page" />
                     </a>
                 {% else %}

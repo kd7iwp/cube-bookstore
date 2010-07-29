@@ -151,7 +151,7 @@ class StaffTest(TestCase):
     #    self.failUnlessEqual(response.status_code, 200)
     #    self.assertContains(response, "Administrator")
 
-class SeachBookTest(TestCase):
+class SearchBookTest(TestCase):
     fixtures = ['test_empty.json']
     TITLE = 'The Silmarillion'
     AUTHOR = 'J.R.R. Tolkien'
