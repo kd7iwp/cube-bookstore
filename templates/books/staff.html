@@ -65,11 +65,13 @@
         <input type='submit' name='Action' class='submit' value='Delete' onclick="return confirm('This will permanently delete these items, are you sure?')" /> 
         <input type='submit' name='Action' class='submit' value='Add New' /> 
     </div>
+    {% else %}
+    <p>Only administrators can make changes to this list</p>
     {% endif %}
 </form>
 
 {% else %}
-	
+<p>You do not have permission to view this page</p>
 {% endif %}
 
 {% endblock %}
