@@ -41,6 +41,6 @@ urlpatterns = patterns('',
 
     # TODO remove this for live server
     (r'^site_media/(?P<path>.*)$', 'django.views.static.serve',
-        {'document_root': 'C:/Documents and Settings/david.somers-harris/Desktop/code/cube-bookstore/media/'}),
+        {'document_root': '/home/david/code/cube-bookstore/media/'}),
     
 )

@@ -1,6 +1,6 @@
 # Copyright (C) 2010  Trinity Western University
 
-from cube.settings import ADMINS as admin_emails
+from cube.settings import DEBUG, ADMINS as admin_emails
 from cube.books.models import Book
 from django.core.mail import EmailMultiAlternatives
 from django.template import loader, Context
@@ -31,6 +31,10 @@ def create_context(owner, books):
 def create_email(subj, html_content, owner_email):
     #TODO using admin_email might not be the brightest idea
     frm = "The Cube <%s>" % admin_emails[0][1]
+    if DEBUG:
+	# Don't want to email customers while we're debugging
+	owner_email = admin_emails[0][1]
+	subj = "DEBUG: " + subj
     to = [owner_email]
     text_content = strip_html(html_content)
     msg = EmailMultiAlternatives(subj, text_content, frm, to)
