@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}The Cube Online - Book List{% endblock %}
+
+{% block content %}
+
+<p>Found {{ count }} book{{ count|pluralize }} sold between {{ from_date }} and {{ to_date }}</p>
+{% ifnotequal count 0 %}
+<table>
+  <thead>
+    <tr>
+      <th>Ref</th>
+      <th>Title</th>
+      <th>Seller</th>
+      <th>Buyer</th>
+      <th>Date Sold</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for book in sold_books %}
+    <tr>
+      <td>{{ book.id }}</td>
+      <td>{{ book.metabook.title }}</td>
+      <td>{{ book.seller.get_full_name}} - {{ book.seller.id }}</td>
+      <td>{{ book.holder.get_full_name}} - {{ book.holder.id }}</td>
+      <td>{{ book.sell_date }}</td>
+    </tr>
+    {% endfor %}
+   </tbody>
+</table>
+{% endifnotequal %}
+{% endblock %}

@@ -1,5 +1,7 @@
 # Copyright (C) 2010  Trinity Western University
 
+from datetime import date
+
 from cube.books.models import MetaBook, Course, Book, DEPARTMENT_CHOICES
 from django import forms
 from django.core.exceptions import ValidationError
@@ -62,3 +64,9 @@ class FilterForm(forms.Form):
     filter = forms.CharField()
     field = forms.ChoiceField(choices=FILTER_CHOICES)
 
+class DateRangeForm(forms.Form):
+    """
+    Put in two dates to define a range. Used by a report
+    """
+    from_date = forms.DateField(initial=date.today)
+    to_date = forms.DateField(initial=date.today)

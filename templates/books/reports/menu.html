@@ -13,9 +13,15 @@
   </thead>
   <tbody>
     <tr>
-      <td>Books per Status</td>
+      <td>Number of Books per Status</td>
       <td>None</td>
       <td><input type="submit" onclick="javascript:window.location='{% url per_status %}'" value="Show Report" /></td>
+    </tr>
+    <tr>
+      <form action="{% url books_sold_within_date %}" method="post">
+      <td>List of Books Sold within a Date Range</td>
+      <td>{{ date_range_form.as_p }}</td>
+      <td><input type="submit" value="Show Report" /></td>
     </tr>
   </tbody>
 </table>
