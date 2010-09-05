@@ -24,6 +24,8 @@
 {% url my_books as my_books_url %}
 {% url staff as staff_url %}
 {% url help as help_url %}
+{% url reports_menu as reports_url %}
+{% url add_book as add_url %} 
 
         <div id="navigation">
             <ul>
@@ -37,7 +39,7 @@
                 {% endspaceless %}
                 {% spaceless %}
                 <li id="my">
-                    <a href="{% url my_books %}" class="{# tab_active request list_url #}">
+                    <a href="{% url my_books %}" class="{% tab_active request my_books_url %}">
                      
                         <span>My Books</span>
                     </a>
@@ -48,7 +50,7 @@
                 {% spaceless %}
 
                 <li id="add">
-                    <a href="{% url add_book %}" class="{# tab_active request list_url #}">
+                    <a href="{% url add_book %}" class="{% tab_active request add_url %}">
                         <span>Add Book</span>
                     </a>
                 </li>
@@ -62,7 +64,7 @@
                 {% endspaceless %}
                 {% spaceless %}
                 <li id="reports">
-                    <a href="{# url books.views.list #}" class="{# tab_active request list_url #}">
+                    <a href="{% url reports_menu %}" class="{% tab_active request reports_url %}">
                         <span>Reports</span>
                     </a>
                 </li>

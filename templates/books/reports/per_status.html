@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}The Cube Online - Per Status Report{% endblock %}
+
+{% block content %}
+<table>
+  <thead>
+    <tr>
+      <th>Status</th>
+      <th>Books</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>For Sale</td>
+      <td>{{ for_sale }}</td>
+    </tr>
+    <tr>
+      <td>Missing</td>
+      <td>{{ missing }}</td>
+    </tr>
+    <tr>
+      <td>On Hold</td>
+      <td>{{ on_hold }}</td>
+    </tr>
+    <tr>
+      <td>Seller Paid</td>
+      <td>{{ seller_paid }}</td>
+    </tr>
+    <tr>
+      <td>Sold</td>
+      <td>{{ sold }}</td>
+    </tr>
+    <tr>
+      <td>To Be Deleted</td>
+      <td>{{ to_be_deleted }}</td>
+    </tr>
+    <tr>
+      <td>Deleted</td>
+      <td>{{ deleted }}</td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}

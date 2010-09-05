@@ -20,7 +20,11 @@ urlpatterns = patterns('',
         name="update_book"),
     url(r'^books/update/book/edit/$', 'cube.books.views.books.update_book_edit',
         name="update_book_edit"),
+    
+    # reports
+    url(r'^reports/$', 'cube.books.views.reports.menu', name="reports_menu"),
 
+    url(r'^reports/per_status/$', 'cube.books.views.reports.per_status', name='per_status'),
     # metabooks
     url(r'^metabooks/$','cube.books.views.metabooks.metabook_list', name="list_metabooks"),
     url(r'metabooks/update/$', 'cube.books.views.metabooks.update',

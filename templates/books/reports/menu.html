@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}The Cube Online - Report Menu{% endblock %}
+
+{% block content %}
+<table>
+  <thead>
+    <tr>
+      <th>Report</th>
+      <th>Input</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Books per Status</td>
+      <td>None</td>
+      <td><input type="submit" onclick="javascript:window.location='{% url per_status %}'" value="Show Report" /></td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
