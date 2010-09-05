@@ -163,8 +163,8 @@ class Book(models.Model):
         (u'O', u'On Hold'),
         (u'P', u'Seller Paid'),
         (u'S', u'Sold'),
-        (u'T', u'To Be Deleted'),
         (u'D', u'Deleted'),
+        (u'T', u'To Be Deleted'),
     )
 
     metabook = models.ForeignKey(MetaBook)
