@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %} Book Report{% endblock %}
+{% load humanize %}
+{% block content %}
+<h1>
+  Book Report - "{{ book.metabook.title }}" 
+  (<a href="{% url metabook book.metabook.id %}">details</a>)
+</h1>
+<table>
+  <tr>
+    <th>Ref #</th>
+    <td>{{ book.id }}</td>
+    <th>List Date</th>
+    <td title="{{ book.list_date }}">{{ book.list_date|naturalday }}</td>
+  </tr>
+  <tr>
+    <th>Price</th>
+    <td>&#36;{{ book.price|floatformat:2 }}</td>
+    <th>Status</th>
+    <td>{{ book.get_status_display }}</td>
+  </tr>
+  <tr>
+    <th>Seller</th>
+    <td><a href="{% url user book.seller.id %}">{{ book.seller.get_full_name }}</a></td>
+    <th>Sell Date</th>
+    <td title="{{ book.sell_date }}">{{ book.sell_date|naturalday }}</td>
+  </tr>
+  <tr>
+    <th>Holder</th>
+    <td><a href="{% url user book.holder.id %}">{{ book.holder.get_full_name }}</a></td>
+    <th>Hold Date</th>
+    <td title="{{ book.hold_date }}">{{ book.hold_date|naturalday }}</td>
+  </tr>
+</table>
+<form action="{% url update_book %}" method="post" name="ListItems">
+  <p class="submit_options">
+    <input type='hidden' name="idToEdit1" value="{{ book.id }}" />
+    <input type="submit" name="Action" value="Edit" />
+  </p>
+</form>
+<br />
+<br />
+<br />
+<br />
+<br />
+<h1>Actions</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Action</th>
+      <th>User</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for log in logs %}
+    <tr>
+      <td title="{{ log.when }}">{{ log.when|naturalday }}</td>
+      <td>{{ log.get_action_display }}</td>
+      <td><a href="{% url user log.who.id %}">{{ log.who.get_full_name }}</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

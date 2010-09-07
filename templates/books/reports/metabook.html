@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Book Details {% endblock %}
+
+{% load humanize %}
+{% block content %}
+
+<h1>Book Details</h1>
+<table>
+  <tr>
+    <th>Title</th>
+    <td>{{ metabook.title }}</td>
+    <th>Author</th>
+    <td>{{ metabook.author }}</td>
+  </tr>
+  <tr>
+    <th>Barcode</th>
+    <td>{{ metabook.barcode }}</td>
+    <th>Edition</th>
+    <td>{{ metabook.edition }}</td>
+  </tr>
+  <tr>
+    <th>Courses</th>
+    <td>
+      {% for course in metabook.courses.all %}
+        {{ course }}
+      {% endfor %}
+    </td>
+  </tr>
+</table>
+<form action="{% url update_metabooks %}" method="post" name="ListItems">
+  <p class="submit_options">
+    <input type='hidden' name="idToEdit1" value="{{ metabook.id }}" />
+    <input type="submit" name="Action" value="Edit" />
+  </p>
+</form>
+<br />
+<br />
+<br />
+<br />
+<br />
+
+<h1>Copies</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Ref #</th>
+      <th>List Date</th>
+      <th>Seller</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for book in  books %}
+    <tr>
+      <td><a href="{% url book book.id %}">{{ book.id }}</a></td>
+      <td title="{{ book.list_date }}">{{ book.list_date|naturalday }}</td>
+      <td><a href="{% url user book.seller.id %}">{{ book.seller.get_full_name }}</a></td>
+      <td>{{ book.get_status_display }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

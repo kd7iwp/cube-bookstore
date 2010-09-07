@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}The Cube Online - Book List{% endblock %}
+{% block title %} Book List{% endblock %}
 
+{% load humanize %}
 {% block content %}
 
-<p>Found {{ count }} book{{ count|pluralize }} sold between {{ from_date }} and {{ to_date }}</p>
-{% ifnotequal count 0 %}
+<p>Found {{ sold_books|length }} book{{ sold_books|length|pluralize }} sold between {{ from_date }} and {{ to_date }} with sellers yet to be paid</p>
+{% ifnotequal sold_books|length 0 %}
 <table>
   <thead>
     <tr>
@@ -21,9 +22,9 @@
     <tr>
       <td>{{ book.id }}</td>
       <td>{{ book.metabook.title }}</td>
-      <td>{{ book.seller.get_full_name}} - {{ book.seller.id }}</td>
-      <td>{{ book.holder.get_full_name}} - {{ book.holder.id }}</td>
-      <td>{{ book.sell_date }}</td>
+      <td><a href="{% url user book.seller.id %}">{{ book.seller.get_full_name}}</a></td>
+      <td><a href="{% url user book.holder.id %}">{{ book.holder.get_full_name}}</a></td>
+      <td title="{{ book.sell_date }}">{{ book.sell_date|naturalday }}</td>
     </tr>
     {% endfor %}
    </tbody>

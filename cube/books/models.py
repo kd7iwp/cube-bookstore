@@ -1,5 +1,6 @@
 # Copyright (C) 2010  Trinity Western University
 
+from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -168,7 +169,7 @@ class Book(models.Model):
     )
 
     metabook = models.ForeignKey(MetaBook)
-    list_date = models.DateTimeField('Date Listed', auto_now_add=True)
+    list_date = models.DateTimeField('Date Listed', default=datetime.now)
     seller = models.ForeignKey(User, related_name="selling")
     sell_date = models.DateTimeField('Date Sold', blank=True, null=True)
     holder = models.ForeignKey(User, related_name="holding",
@@ -179,7 +180,7 @@ class Book(models.Model):
     is_legacy = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return "%s by %s on %s" % (self.metabook, self.seller,
+        return "%s listed by %s on %s" % (self.metabook, self.seller,
 	                           self.list_date.date())
 class Log(models.Model):
     """
@@ -198,7 +199,7 @@ class Log(models.Model):
         (u'E', u'Edited'), # -> Same Status
     )
     action = models.CharField(max_length=1, choices=ACTION_CHOICES)
-    when = models.DateTimeField(auto_now_add=True)
+    when = models.DateTimeField(default=datetime.now)
     book = models.ForeignKey(Book, related_name="logs")
     who = models.ForeignKey(User, related_name="actions")
 

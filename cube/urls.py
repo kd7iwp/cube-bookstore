@@ -29,6 +29,9 @@ urlpatterns = patterns('',
     url(r'^reports/books_sold_within_date/$', 
         'cube.books.views.reports.books_sold_within_date',
 	name='books_sold_within_date'),
+    url(r'^reports/user/(\d+)/$', 'cube.books.views.reports.user', name='user'),
+    url(r'^reports/book/(\d+)/$', 'cube.books.views.reports.book', name='book'),
+    url(r'^reports/metabook/(\d+)/$', 'cube.books.views.reports.metabook', name='metabook'),
 
     # metabooks
     url(r'^metabooks/$','cube.books.views.metabooks.metabook_list',

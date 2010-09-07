@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %} User Report{% endblock %}
+{% load humanize %}
+{% block content %}
+
+<h1>User Details</h1>
+<table>
+  <tbody>
+    <tr>
+      <th>ID</th>
+      <td>{{ user_obj.id }}</td>
+    </tr>
+    <tr>
+      <th>Name</th>
+      <td>{{ user_obj.get_full_name }}</td>
+    </tr>
+    <tr>
+      <th>Email</th>
+      <td>{{ user_obj.email }}</td>
+    </tr>
+  </tbody>
+</table>
+
+{% ifnotequal logs|length 0 %}
+<br />
+<h1>Action Log</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Action</th>
+      <th>Book</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for log in logs %}
+    <tr>
+      <td title="{{ log.when }}">{{ log.when|naturalday }}</td>
+      <td>{{ log.get_action_display }}</td>
+      <td><a href="{% url book log.book.id %}">{{ log.book.metabook.title }}</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<h1>This user hasn't made any Actions</h1>
+{% endifnotequal %}
+{% ifnotequal logs_of_books_for_sale|length 0 %}
+<h1>Books listed for sale by this user</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Date Listed</th>
+      <th>Book</th>
+      <th>Listed By</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for log in logs_of_books_for_sale %}
+    <tr>
+      <td title="{{ log.book.list_date }}">{{ log.book.list_date|naturalday }}</td>
+      <td><a href="{% url book log.book.id %}">{{ log.book.metabook.title }}</a></td>
+      <td><a href="{% url user log.who.id %}">{{ log.who.get_full_name }}</a></td>
+      <td>{{ log.book.get_status_display }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<h1>This user never put books up for sale</h1>
+{% endifnotequal %}
+
+{% endblock %}

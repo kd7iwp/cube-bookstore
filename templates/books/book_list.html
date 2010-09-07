@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}The Cube Online - Book List{% endblock %}
+{% block title %}Book List{% endblock %}
 
 {% load selected %}
 {% load humanize %}
@@ -97,7 +97,11 @@
                     </td>
                     {% if user.is_staff %}
                     <td class="row_refnum">
+                        {% if user.is_staff %}
+                        <a href="{% url book book.id %}">
+                        {% endif %}
                         {{ book.id }}
+                        {% if user.is_staff %}</a>{% endif %}
                     </td>
                     <td class="row_status">
                         {{ book.get_status_display }}

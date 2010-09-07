@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}The Cube Online - Report Menu{% endblock %}
+{% block title %} Report Menu{% endblock %}
 
 {% block content %}
 <table>
@@ -19,7 +19,7 @@
     </tr>
     <tr>
       <form action="{% url books_sold_within_date %}" method="post">
-      <td>List of Books Sold within a Date Range</td>
+      <td>Sold books with unpaid sellers</td>
       <td>{{ date_range_form.as_p }}</td>
       <td><input type="submit" value="Show Report" /></td>
     </tr>

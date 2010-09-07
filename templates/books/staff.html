@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}The Cube Online - Staff{% endblock %}
+{% block title %}Staff{% endblock %}
 
 {% block content %}
 {% if user.is_staff %} 
@@ -42,7 +42,7 @@
                         <input type='checkbox' name="idToEdit{{ forloop.counter }}" value='{{ user.id }}' {% ifequal user.id 1 %}disabled="disabled"{% endifequal %}/>
                     </td>
                     <td class='row_username'>
-                        {{ user.get_full_name }}
+                        <a href="{% url user user.id %}">{{ user.get_full_name }}</a>
                     </td>
                     
                     <td class="row_permission">

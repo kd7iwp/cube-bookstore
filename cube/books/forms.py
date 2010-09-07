@@ -68,5 +68,5 @@ class DateRangeForm(forms.Form):
     """
     Put in two dates to define a range. Used by a report
     """
-    from_date = forms.DateField(initial=date.today)
+    from_date = forms.DateField(initial=date(1970, 1, 1))
     to_date = forms.DateField(initial=date.today)
