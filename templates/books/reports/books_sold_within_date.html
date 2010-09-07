@@ -5,8 +5,8 @@
 {% load humanize %}
 {% block content %}
 
-<p>Found {{ sold_books|length }} book{{ sold_books|length|pluralize }} sold between {{ from_date }} and {{ to_date }} with sellers yet to be paid</p>
-{% ifnotequal sold_books|length 0 %}
+<p>Found {{ book_sale_logs|length }} book{{ book_sale_logs|length|pluralize }} sold between {{ from_date }} and {{ to_date }}</p>
+{% ifnotequal book_sale_logs|length 0 %}
 <table>
   <thead>
     <tr>
@@ -18,13 +18,13 @@
     </tr>
   </thead>
   <tbody>
-    {% for book in sold_books %}
+    {% for log in book_sale_logs %}
     <tr>
-      <td>{{ book.id }}</td>
-      <td>{{ book.metabook.title }}</td>
-      <td><a href="{% url user book.seller.id %}">{{ book.seller.get_full_name}}</a></td>
-      <td><a href="{% url user book.holder.id %}">{{ book.holder.get_full_name}}</a></td>
-      <td title="{{ book.sell_date }}">{{ book.sell_date|naturalday }}</td>
+      <td><a href="{% url book log.book.id %}">{{ log.book.id }}</a></td>
+      <td>{{ log.book.metabook.title }}</td>
+      <td><a href="{% url user log.book.seller.id %}">{{ log.book.seller.get_full_name}}</a></td>
+      <td><a href="{% url user log.book.holder.id %}">{{ log.book.holder.get_full_name}}</a></td>
+      <td title="{{ log.book.sell_date }}">{{ log.book.sell_date|naturalday }}</td>
     </tr>
     {% endfor %}
    </tbody>

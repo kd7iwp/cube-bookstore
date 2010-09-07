@@ -45,9 +45,9 @@ def books_sold_within_date(request):
 	
     to_date = date_range_form.cleaned_data['to_date']
     from_date = date_range_form.cleaned_data['from_date']
-    sold_books = Book.objects.filter(status='S', sell_date__gte=from_date).exclude(sell_date__gt=to_date)
+    book_sale_logs = Log.objects.filter(action='S', when__gte=from_date).exclude(when__gt=to_date)
     vars = {
-	'sold_books' : sold_books.order_by('sell_date'),
+	'book_sale_logs' : book_sale_logs.order_by('book__sell_date'),
 	'from_date' : from_date,
 	'to_date' : to_date,
     }
