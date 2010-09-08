@@ -2,6 +2,6 @@
 {% block content %}
 <p>
     The book '{{ title }}' by {{ author }} has been successfully listed for
-    sale under {{ seller_name }} with reference # {{ book_id }}.
+    sale under {{ seller_name }} with reference # <a href="{% url book book_id %}">{{ book_id }}</a>.
 </p>
 {% endblock %}

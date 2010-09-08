@@ -3,6 +3,7 @@
 from django.contrib.auth.models import User
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed
 from cube.books.views.tools import get_number, tidy_error
+from cube.twupass.backend import TWUPassBackend
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response as rtr
@@ -91,7 +92,13 @@ def update_staff(request):
             template = 'books/update_staff/saved.html'
             return rtr(template, vars,  context_instance=RC(request))
         except User.DoesNotExist:
-            return tidy_error(request, "Invalid Student ID: %s" % student_id)
+	    twupass_backend = TWUPassBackend()
+	    user = twupass_backend.import_user(student_id)
+	    if user:
+                template = 'books/update_staff/saved.html'
+		return rtr(template, vars, context_instance=RC(request))
+	    else:
+		return tidy_error(request, "Invalid Student ID: %s" % student_id)
 
 @login_required()
 def staff_edit(request):

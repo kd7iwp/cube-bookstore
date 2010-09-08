@@ -28,10 +28,11 @@ def create_context(owner, books):
         'admin_email' : admin_emails[0][1],
     })
 
-def create_email(subj, html_content, owner_email):
+def create_email(subj, html_content, owner):
     #TODO using admin_email might not be the brightest idea
     frm = "The Cube <%s>" % admin_emails[0][1]
-    if DEBUG:
+    owner_email = owner.email
+    if DEBUG and not owner.is_staff:
 	# Don't want to email customers while we're debugging
 	owner_email = admin_emails[0][1]
 	subj = "DEBUG: " + subj
@@ -49,7 +50,7 @@ def send_missing_emails(books):
         if len(books) == 1: p = ''
         else: p = 's'
         subj = 'Your book%s went missing at the Cube' % p
-        msg = create_email(subj, t.render(c), owner.email)
+        msg = create_email(subj, t.render(c), owner)
         msg.send()
 
 def send_sold_emails(books):
@@ -60,7 +61,7 @@ def send_sold_emails(books):
         if len(books) == 1: p = ' has'
         else: p = 's have'
         subj = 'Your book%s been sold at the Cube' % p
-        msg = create_email(subj, t.render(c), owner.email)
+        msg = create_email(subj, t.render(c), owner)
         msg.send()
 
 def send_tbd_emails(books):
@@ -71,5 +72,5 @@ def send_tbd_emails(books):
         if len(books) == 1: p = ' was'
         else: p = 's were'
         subj = 'Your book%s not sold at the Cube' % p
-        msg = create_email(subj, t.render(c), owner.email)
+        msg = create_email(subj, t.render(c), owner)
         msg.send()

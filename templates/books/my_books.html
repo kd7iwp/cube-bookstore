@@ -72,7 +72,10 @@
                     </td>
                     {% if user.is_staff %}
                     <td class="row_refnum">
-                        {{ book.id }}
+		        {% if user.is_staff %}
+			<a href="{% url book book.id %}">{{ book.id }}</a>
+			{% else %} {{ book.id }}
+			{% endif %}
                     </td>
                    {% endif %}
                     <td class="row_status">
@@ -154,7 +157,10 @@
                     </td>
 		      {% if user.is_staff %}
                     <td class="row_refnum">
-                        {{ book.id }}
+		        {% if user.is_staff %}
+			<a href="{% url book book.id %}">{{ book.id }}</a>
+			{% else %} {{ book.id }}
+			{% endif %}
                     </td>
                     <td class="row_status">
                         {{ book.get_status_display }}

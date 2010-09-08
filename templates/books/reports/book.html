@@ -22,13 +22,22 @@
   </tr>
   <tr>
     <th>Seller</th>
-    <td><a href="{% url user book.seller.id %}">{{ book.seller.get_full_name }}</a></td>
+    <td>
+        {% if book.seller %}
+        <a href="{% url user book.seller.id %}">
+	{{ book.seller.get_full_name }}</a>
+	{% endif %}
+    </td>
     <th>Sell Date</th>
     <td title="{{ book.sell_date }}">{{ book.sell_date|naturalday }}</td>
   </tr>
   <tr>
     <th>Holder</th>
-    <td><a href="{% url user book.holder.id %}">{{ book.holder.get_full_name }}</a></td>
+    <td>
+        {% if book.holder %}
+        <a href="{% url user book.holder.id %}">{{ book.holder.get_full_name }}</a>
+	{% endif %}
+    </td>
     <th>Hold Date</th>
     <td title="{{ book.hold_date }}">{{ book.hold_date|naturalday }}</td>
   </tr>
