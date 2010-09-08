@@ -79,26 +79,23 @@ def update_staff(request):
     elif action == "Save":
         try:
             user = User.objects.get(id = student_id)
-            if request.POST.get("role", '') == 'admin':
-                user.is_superuser = True
-                user.is_staff = True
-            elif request.POST.get("role", '') == 'staff':
-                user.is_staff = True
-            user.save()
-            vars = {
-                'user_name' : user.get_full_name(),
-                'administrator': user.is_superuser
-            }
-            template = 'books/update_staff/saved.html'
-            return rtr(template, vars,  context_instance=RC(request))
         except User.DoesNotExist:
-	    twupass_backend = TWUPassBackend()
-	    user = twupass_backend.import_user(student_id)
-	    if user:
-                template = 'books/update_staff/saved.html'
-		return rtr(template, vars, context_instance=RC(request))
-	    else:
-		return tidy_error(request, "Invalid Student ID: %s" % student_id)
+            twupass_backend = TWUPassBackend()
+            user = twupass_backend.import_user(student_id)
+            if user == None:
+                return tidy_error(request, "Invalid Student ID: %s" % student_id)
+        if request.POST.get("role", '') == 'admin':
+            user.is_superuser = True
+            user.is_staff = True
+        elif request.POST.get("role", '') == 'staff':
+            user.is_staff = True
+        user.save()
+        vars = {
+            'user_name' : user.get_full_name(),
+            'administrator': user.is_superuser
+        }
+        template = 'books/update_staff/saved.html'
+        return rtr(template, vars,  context_instance=RC(request))
 
 @login_required()
 def staff_edit(request):
