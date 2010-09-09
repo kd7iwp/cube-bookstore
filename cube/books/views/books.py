@@ -82,6 +82,8 @@ def update_book(request):
     for key, value in request.POST.items():
         if "idToEdit" in key:
             bunch = bunch | Book.objects.filter(pk=int(value))
+            # a hacky fix that stops people from placing all the books in the system on hold
+            if bunch.count() > 9: break
             
     if action == "Delete":
         bunch = bunch.exclude(status='D')

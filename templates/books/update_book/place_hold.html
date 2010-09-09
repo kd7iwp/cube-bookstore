@@ -9,14 +9,14 @@
 {% for book in extended %}
     {% if forloop.first %}
         <h1>Extended</h1>
-        <p><em>The following book{{ extended|length|pluralize:" has,s have" }} been placed on hold for another 24 hours:</em></p>
+        <p><em>The following {{ num_held }} book{{ extended|length|pluralize:" has,s have" }} been placed on hold for another 24 hours:</em></p>
     {% endif %}
     <p>{{ book.metabook.title }} ${{ book.price|floatformat:2 }}</p>
 {% endfor %}
 {% for book in new_hold %}
     {% if forloop.first %}
         <h1>Reserved</h1>
-        <p><em>The following book{{ new_hold|length|pluralize:" has,s have" }} been reserved for you for 24 hours:</em></p>
+        <p><em>The following {{ num_held }} book{{ new_hold|length|pluralize:" has,s have" }} been reserved for you for 24 hours:</em></p>
     {% endif %}
     <p>{{ book.metabook.title }} ${{ book.price|floatformat:2 }}</p>
 {% endfor %}
@@ -24,5 +24,7 @@
     <p><strong>Total</strong>: ${{ total_price|floatformat:2 }}</p>
     <p>Please pickup your requested book{{ num_held|pluralize }} within the next 24 hours from the &quot;Cube&quot; which is by the cafeteria.</p>
 {% endif %}
+<br />
 <p><a href='{% url my_books %}'>Click here to see all the books you have on order</a></p> 
+<p>Note: You can only place 10 books on hold at once.</p>
 {% endblock %}
