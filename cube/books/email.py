@@ -33,9 +33,9 @@ def create_email(subj, html_content, owner):
     frm = "The Cube <%s>" % admin_emails[0][1]
     owner_email = owner.email
     if DEBUG and not owner.is_staff:
-	# Don't want to email customers while we're debugging
-	owner_email = admin_emails[0][1]
-	subj = "DEBUG: " + subj
+        # Don't want to email customers while we're debugging
+        owner_email = admin_emails[0][1]
+        subj = "DEBUG: " + subj
     to = [owner_email]
     text_content = strip_html(html_content)
     msg = EmailMultiAlternatives(subj, text_content, frm, to)
@@ -74,3 +74,22 @@ def send_tbd_emails(books):
         subj = 'Your book%s not sold at the Cube' % p
         msg = create_email(subj, t.render(c), owner)
         msg.send()
+
+def send_error_email(request, bunch_count, iter_value, bunch):
+    # TODO TEMPORARY DEBUGGING
+    t = loader.get_template('email/error.html')
+    c = Context({
+        'request' : request,
+        'bunch_count' : bunch_count,
+        'iter_value' : iter_value,
+        'bunch' : bunch,
+    })
+    subj = "CUBE ERROR: Over 30 books"
+    frm = "noreply@twusa.ca"
+    to = ["davidkazuhiro@gmail.com"]
+    html_content = t.render(c)
+    text_content = strip_html(html_content)
+    msg = EmailMultiAlternatives(subj, text_content, frm, to)
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
+

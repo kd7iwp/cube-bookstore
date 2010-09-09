@@ -8,7 +8,7 @@ from cube.books.views.tools import book_filter,\
                                   house_cleaning
 from cube.twupass.tools import import_user
 from cube.books.email import send_missing_emails, send_sold_emails,\
-                             send_tbd_emails
+                             send_tbd_emails, send_error_email
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
@@ -83,7 +83,10 @@ def update_book(request):
         if "idToEdit" in key:
             bunch = bunch | Book.objects.filter(pk=int(value))
             # a hacky fix that stops people from placing all the books in the system on hold
-            if bunch.count() > 9: break
+            if bunch.count() > 30:
+                # TODO TEMPORARY DEBUGGING
+                send_error_email(request, bunch.count(), value, bunch)
+                return tidy_error(request, "Sorry, you have too many books selected")
             
     if action == "Delete":
         bunch = bunch.exclude(status='D')

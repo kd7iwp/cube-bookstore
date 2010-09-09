@@ -1,0 +1,11 @@
+Bunch Count: {{ bunch_count }}<br />
+Iteration Value: "{{ iter_value }}"<br />
+User: <a href="mailto:{{ request.user.email }}">{{ request.user.get_full_name }}</a><br />
+<br />
+Bunch:<br />
+{% for book in bunch %}
+    <a href="http://cube.twusa.ca/book/{{ book.id }}">{{ book }}</a><br />
+{% endfor %}
+<br />
+Request:<br />
+{{ request }}
