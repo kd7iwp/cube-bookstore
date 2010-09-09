@@ -116,7 +116,7 @@ class AddNewBookTest(TestCase):
         response = self.client.post('/add_new_book/', post_data)
         self.assertContains(response, author)
         self.assertContains(response, title)
-        self.assertContains(response, 'reference # %s' % book_id)
+        self.assertContains(response, '">%s</a>' % book_id)
 
 class StaffTest(TestCase):
     fixtures = ['test_empty.json']
