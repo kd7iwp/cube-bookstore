@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Holds per User{% endblock %}
+
+{% block content %}
+
+{% ifnotequal user_list|length 0 %}
+<table>
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Holds</th>
+      <th>Remove Holds</th>
+    </tr>
+  </thead>
+  <tbody>
+    <form action="{% url remove_holds_by_user %}" method="post">
+    {% for hold_count, holder in user_list %}
+    <tr>
+      <td>
+          <a href="{% url user holder.id %}">{{ holder.get_full_name }}</a>
+          <input type="hidden" name="holder_id" value="{{ holder.id}}" />
+      </td>
+      <td>{{ hold_count }}</td>
+      <td>
+        <input type="button" onclick="if (confirm('Are you sure you want to remove all of {{ holder.get_full_name }}\'s holds?')) submit();" value="Remove All User's Holds">
+      </td>
+    </tr>
+    {% endfor %}
+    </form>
+  </tbody>
+</table>
+{% else %}
+<p>There are no holds at this time</p>
+{% endifnotequal %}
+{% endblock %}
