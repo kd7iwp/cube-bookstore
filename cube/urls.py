@@ -21,6 +21,7 @@ urlpatterns = patterns('',
         name="update_book"),
     url(r'^books/update/book/edit/$', 'cube.books.views.books.update_book_edit',
         name="update_book_edit"),
+    url(r'books/update/remove_holds_by_user/$', 'cube.books.views.books.remove_holds_by_user', name="remove_holds_by_user"),
     
     # reports
     url(r'^reports/$', 'cube.books.views.reports.menu', name="reports_menu"),
@@ -32,6 +33,7 @@ urlpatterns = patterns('',
     url(r'^reports/user/(\d+)/$', 'cube.books.views.reports.user', name='user'),
     url(r'^reports/book/(\d+)/$', 'cube.books.views.reports.book', name='book'),
     url(r'^reports/metabook/(\d+)/$', 'cube.books.views.reports.metabook', name='metabook'),
+    url(r'^reports/holds_by_user/$', 'cube.books.views.reports.holds_by_user', name='holds_by_user'),
 
     # metabooks
     url(r'^metabooks/$','cube.books.views.metabooks.metabook_list',

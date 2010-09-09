@@ -463,3 +463,19 @@ def add_new_book(request):
             vars = {'form' : form}
             template = 'books/add_new_book.html'
             return rtr(template, vars, context_instance=RC(request))
+
+@login_required()
+def remove_holds_by_user(request):
+    if not request.method == "POST":
+        return HttpResponseNotAllowed(['GET'])
+    for key, value in request.POST.items():
+        if "holder_id" == key:
+            holder = User.objects.get(pk=int(value))
+            break
+    books = Book.objects.filter(holder=holder, status='O')
+    for book in books:
+        Log(action='R', book=book, who=request.user).save()
+    vars = {'removed' : books.count()}
+    books.update(status='F', hold_date=None, holder=None)
+    template = 'books/update_book/remove_holds.html'
+    return rtr(template, vars, context_instance=RC(request))

@@ -99,3 +99,18 @@ def metabook(request, metabook_id):
     }
     return rtr('books/reports/metabook.html', vars, context_instance=RC(request))
 
+@login_required()
+def holds_by_user(request):
+    if request.method == "POST": return HttpResponseNotAllowed(['POST'])
+    books_on_hold = Book.objects.filter(status='O')
+    user_dict = {}
+    for book in books_on_hold:
+        if not user_dict.has_key(book.holder):
+            user_dict[book.holder] = Book.objects.filter(status='O', holder=book.holder).count()
+    user_list_by_user = user_dict.items()
+    user_list_by_count = []
+    for item in user_list_by_user:
+        user_list_by_count.append((item[1], item[0]))
+    user_list_by_count.sort(reverse=True)
+    vars = {'user_list': user_list_by_count}
+    return rtr('books/reports/holds_by_user.html', vars, context_instance=RC(request))

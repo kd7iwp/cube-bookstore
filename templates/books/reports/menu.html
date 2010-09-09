@@ -22,6 +22,12 @@
       <td>Books Sold</td>
       <td>{{ date_range_form.as_p }}</td>
       <td><input type="submit" value="Show Report" /></td>
+      </form>
+    </tr>
+    <tr>
+      <td>Hold per User</td>
+      <td>None</td>
+      <td><input type="submit" onclick="javascript:window.location='{% url holds_by_user %}'" value="Show Report" /></td>
     </tr>
   </tbody>
 </table>
