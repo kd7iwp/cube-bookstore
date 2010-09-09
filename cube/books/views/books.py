@@ -83,7 +83,7 @@ def update_book(request):
         if "idToEdit" in key:
             bunch = bunch | Book.objects.filter(pk=int(value))
             # a hacky fix that stops people from placing all the books in the system on hold
-            if bunch.count() > 30:
+            if bunch.count() > 30 and action[:4] == "Place on Hold"[:4]:
                 # TODO TEMPORARY DEBUGGING
                 send_error_email(request, bunch.count(), value, bunch)
                 return tidy_error(request, "Sorry, you have too many books selected")
