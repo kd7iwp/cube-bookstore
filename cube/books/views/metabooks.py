@@ -5,7 +5,7 @@ from cube.books.forms import MetaBookForm, CourseForm
 from cube.books.views.tools import metabook_sort, get_number
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
-from django.http import HttpResponseNotAllowed
+from django.http import HttpResponseNotAllowed, HttpResponseForbidden
 from django.shortcuts import render_to_response as rtr
 from django.template import RequestContext as RC
 
@@ -17,8 +17,13 @@ PAGE_NUM = '1'
 def metabook_list(request):
     """
     List all metabooks in the database
+    
+    Tests:
+        - GETTest
+        - SecurityTest
     """
-    # TODO allow non-staff to view this?
+    # User must be staff or admin to get to this page
+    if not request.user.is_staff: return HttpResponseForbidden()
     if request.GET.has_key("sort_by") and request.GET.has_key("dir"):
         metabooks = metabook_sort(request.GET["sort_by"], request.GET["dir"])
     else: metabooks = MetaBook.objects.all()
@@ -49,14 +54,18 @@ def metabook_list(request):
 @login_required()
 def update(request):
     """
-    This view is used to update book data
+    This view is used to update metabook data
+    
+    Tests:
+        - GETTest
+        - SecurityTest
     """
-    bunch = MetaBook.objects.none()
-    if request.method == "POST":
-        action = request.POST.get("Action", '')
-    else:
-        return HttpResponseNotAllowed(['POST'])
+    if not request.method == "POST": return HttpResponseNotAllowed(['POST'])
+    # User must be staff or admin to get to this page
+    if not request.user.is_staff: return HttpResponseForbidden()
 
+    bunch = MetaBook.objects.none()
+    action = request.POST.get("Action", '')
     for key, value in request.POST.items():
         if "idToEdit" in key:
             bunch = bunch | MetaBook.objects.filter(pk=int(value))

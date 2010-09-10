@@ -8,34 +8,57 @@ from cube.books.views.tools import tidy_error
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response as rtr
 from django.template import RequestContext as RC
-from django.http import HttpResponseNotAllowed
+from django.http import HttpResponseNotAllowed, HttpResponseForbidden
 from django.contrib.auth.models import User
 
 @login_required()
 def menu(request):
+    """
+    Tests:
+        - GETTest
+        - SecurityTest
+    """
+    # User must be staff or admin to get to this page
+    if not request.user.is_staff: return HttpResponseForbidden()
     vars = {
-    'date_range_form': DateRangeForm(),
+        'date_range_form': DateRangeForm(),
     }
     return rtr('books/reports/menu.html', vars, context_instance=RC(request))
 
 @login_required()
 def per_status(request):
-    """ Shows the number of books per status """
+    """
+    Shows the number of books per status
+    
+    Tests:
+        - GETTest
+        - SecurityTest
+    """
+    # User must be staff or admin to get to this page
+    if not request.user.is_staff: return HttpResponseForbidden()
     vars = {
-    "for_sale" : Book.objects.filter(status='F').count(),
-    "missing" : Book.objects.filter(status='M').count(),
-    "on_hold" : Book.objects.filter(status='O').count(),
-    "seller_paid" : Book.objects.filter(status='P').count(),
-    "sold" : Book.objects.filter(status='S').count(),
-    "to_be_deleted" : Book.objects.filter(status='T').count(),
-    "deleted" : Book.objects.filter(status='D').count(),
+        "for_sale" : Book.objects.filter(status='F').count(),
+        "missing" : Book.objects.filter(status='M').count(),
+        "on_hold" : Book.objects.filter(status='O').count(),
+        "seller_paid" : Book.objects.filter(status='P').count(),
+        "sold" : Book.objects.filter(status='S').count(),
+        "to_be_deleted" : Book.objects.filter(status='T').count(),
+        "deleted" : Book.objects.filter(status='D').count(),
     }
     return rtr('books/reports/per_status.html', vars, context_instance=RC(request))
 
 @login_required()
 def books_sold_within_date(request):
-    """ Shows a list of all books sold within a given date range """
-    if request.method != "POST": return HttpResponseNotAllowed(['GET'])
+    """
+    Shows a list of all books sold within a given date range
+    
+    Test:
+        - GETTest
+        - SecurityTest
+    """
+    if not request.method == "POST": return HttpResponseNotAllowed(['POST'])
+    # User must be staff or admin to get to this page
+    if not request.user.is_staff: return HttpResponseForbidden()
     date_range_form = DateRangeForm(request.POST)
     if not date_range_form.is_valid():
         vars = {
@@ -55,7 +78,14 @@ def books_sold_within_date(request):
 
 @login_required()
 def user(request, user_id):
+    """
+    Tests:
+        - GETTest
+        - SecurityTest
+    """
     if request.method == "POST": return HttpResponseNotAllowed(['POST'])
+    # User must be staff or admin to get to this page
+    if not request.user.is_staff: return HttpResponseForbidden()
     try:
         user_obj = User.objects.get(id=user_id)
     except User.DoesNotExist:
@@ -73,7 +103,14 @@ def user(request, user_id):
 
 @login_required()
 def book(request, book_id):
+    """
+    Tests:
+        - GETTest
+        - SecurityTest
+    """
     if request.method == "POST": return HttpResponseNotAllowed(['POST'])
+    # User must be staff or admin to get to this page
+    if not request.user.is_staff: return HttpResponseForbidden()
     try:
         book = Book.objects.get(id=book_id)
     except Book.DoesNotExist:
@@ -87,7 +124,14 @@ def book(request, book_id):
 
 @login_required()
 def metabook(request, metabook_id):
+    """
+    Tests:
+        - GETTest
+        - SecurityTest
+    """
     if request.method == "POST": return HttpResponseNotAllowed(['POST'])
+    # User must be staff or admin to get to this page
+    if not request.user.is_staff: return HttpResponseForbidden()
     try:
         metabook = MetaBook.objects.get(id=metabook_id)
     except MetaBook.DoesNotExist:
@@ -101,7 +145,14 @@ def metabook(request, metabook_id):
 
 @login_required()
 def holds_by_user(request):
+    """
+    Tests:
+        - GETTest
+        - SecurityTest
+    """
     if request.method == "POST": return HttpResponseNotAllowed(['POST'])
+    # User must be staff or admin to get to this page
+    if not request.user.is_staff: return HttpResponseForbidden()
     books_on_hold = Book.objects.filter(status='O')
     user_dict = {}
     for book in books_on_hold:

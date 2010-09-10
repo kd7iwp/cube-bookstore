@@ -15,6 +15,13 @@ PER_PAGE = '20'
 
 @login_required()    
 def staff_list(request):
+    """
+    Tests:
+        - GETTest
+        - SecurityTest
+    """
+    # User must be staff or admin to get to this page
+    if not request.user.is_staff: return HttpResponseForbidden()
     users = User.objects.filter(is_staff = True)
     page_num = get_number(request.GET, 'page', PAGE_NUM)
     users_per_page = get_number(request.GET, 'per_page', PER_PAGE)
@@ -38,11 +45,13 @@ def staff_list(request):
 
 @login_required()
 def update_staff(request):
-    if request.method == 'POST':
-        student_id = request.POST.get("student_id", '')
-        action = request.POST.get('Action')
-    else:
-        return HttpResponseNotAllowed(['POST'])
+    """
+    
+    Tests: GETTest
+    """
+    if not request.method == 'POST': return HttpResponseNotAllowed(['POST'])
+    student_id = request.POST.get("student_id", '')
+    action = request.POST.get('Action')
     # Delete User
     if action == "Delete" and student_id:
         # Delete single
@@ -103,10 +112,14 @@ def staff_edit(request):
     Displays an edit page for user permissions
     If the data needs to be updated (e.g. delete or save)
     then it passes the request on to update_staff
+
+    Tests:
+        - GETTest
+        - StaffTest
+        - SecurityTest
     """
-    if not request.user.is_staff:
-        # User must be staff or admin to get to this page
-        return HttpResponseForbidden()
+    # User must be staff or admin to get to this page
+    if not request.user.is_staff: return HttpResponseForbidden()
     if request.method == "POST":
         users = []
         too_many = False

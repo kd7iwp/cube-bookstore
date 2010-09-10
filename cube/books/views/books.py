@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.http import HttpResponseRedirect, HttpResponse,\
-                        HttpResponseNotAllowed
+                        HttpResponseNotAllowed, HttpResponseForbidden
 from django.shortcuts import render_to_response as rtr
 from django.template import RequestContext as RC
 
@@ -31,7 +31,10 @@ def book_list(request):
     Shows a list of all the books listed.
     Does pagination, sorting and filtering.
     
-    Tests: SimpleTest.test_my_books
+    Tests:
+        - GETTest
+        - SearchBookTest
+        - SortBookTest
     """
     house_cleaning()
     # Filter for the search box
@@ -78,7 +81,12 @@ def book_list(request):
 def update_book(request):
     """
     This view is used to update book data
+    
+    Tests:
+        - GETTest
+        - EmailTest
     """
+    if not request.method == "POST": return HttpResponseNotAllowed(['POST'])
     bunch = Book.objects.none()
     action = request.POST.get("Action", '')
 
@@ -212,95 +220,105 @@ def update_book_edit(request):
     Applies changes to a book made on the edit page
     If the barcode doesn't exist,
     it makes the user create a MetaBook object as well
+    
+    Tests:
+        - GETTest
+        - SecurityTest
     """
-    if request.method == "POST":
-        form = BookForm(request.POST)
-        if form.is_valid():
-            id = request.POST.get('IdToEdit')
-            try:
-                book = Book.objects.get(id=id)
-            except Book.DoesNotExist:
-                message = 'Book with ref# "%s" does not exist' % id
-                return tidy_error(request, message)
-            try:
-                barcode = form.cleaned_data['barcode']
-                book.metabook = MetaBook.objects.get(barcode=barcode)
-            except MetaBook.DoesNotExist:
-                # barcode doesn't exist in db, we have to create a metabook.
-                initial = {
-                    'barcode': barcode,
-                    'seller' : form.cleaned_data['seller'],
-                    'price' : form.cleaned_data['price'],
-                    'book_id' : book.id,
-                    'edition' : '1',
-                }
-                form = NewBookForm(initial=initial)
-                vars = {'form' : form}
-                template = 'books/attach_book.html'
-                return rtr(template, vars, context_instance=RC(request))
-            try:
-                seller_id = form.cleaned_data['seller']
-                book.seller = User.objects.get(id=seller_id)
-            except User.DoesNotExist:
-                user = import_user(seller_id)
-                if user == None:
-                    message = "Invalid Student ID: %s" % id
-                    return tidy_error(request, message)
-                book.seller = user
-            book.price = form.cleaned_data['price']
-            book.save()
-            Log(who=request.user, action='E', book=book).save()
-            vars = {'book' : book}
-            template = 'books/update_book/edited.html'
-            return rtr(template, vars, context_instance=RC(request))
-                
-        elif request.POST.get('IdToEdit'):
-            # form isn't valid, but we have an id to work with. send user back
-            id = request.POST.get('IdToEdit')
-            vars = {
-                'form' : form,
-                'too_many' : False,
-                'id' : id,
-                'logs' : Log.objects.filter(book=id),
+    if not request.method == "POST": return HttpResponseNotAllowed(['POST'])
+    # User must be staff or admin to get to this page
+    if not request.user.is_staff: return HttpResponseForbidden()
+    form = BookForm(request.POST)
+    if form.is_valid():
+        id = request.POST.get('IdToEdit')
+        try:
+            book = Book.objects.get(id=id)
+        except Book.DoesNotExist:
+            message = 'Book with ref# "%s" does not exist' % id
+            return tidy_error(request, message)
+        try:
+            barcode = form.cleaned_data['barcode']
+            book.metabook = MetaBook.objects.get(barcode=barcode)
+        except MetaBook.DoesNotExist:
+            # barcode doesn't exist in db, we have to create a metabook.
+            initial = {
+                'barcode': barcode,
+                'seller' : form.cleaned_data['seller'],
+                'price' : form.cleaned_data['price'],
+                'book_id' : book.id,
+                'edition' : '1',
             }
-            template = 'books/update_book/edit.html'
+            form = NewBookForm(initial=initial)
+            vars = {'form' : form}
+            template = 'books/attach_book.html'
             return rtr(template, vars, context_instance=RC(request))
-    # form isn't valid and we don't have an id so there is nothing we can do
-    return HttpResponseNotAllowed(['POST'])
+        try:
+            seller_id = form.cleaned_data['seller']
+            book.seller = User.objects.get(id=seller_id)
+        except User.DoesNotExist:
+            user = import_user(seller_id)
+            if user == None:
+                message = "Invalid Student ID: %s" % id
+                return tidy_error(request, message)
+            book.seller = user
+        book.price = form.cleaned_data['price']
+        book.save()
+        Log(who=request.user, action='E', book=book).save()
+        vars = {'book' : book}
+        template = 'books/update_book/edited.html'
+        return rtr(template, vars, context_instance=RC(request))
+            
+    elif request.POST.get('IdToEdit'):
+        # form isn't valid, but we have an id to work with. send user back
+        id = request.POST.get('IdToEdit')
+        vars = {
+            'form' : form,
+            'too_many' : False,
+            'id' : id,
+            'logs' : Log.objects.filter(book=id),
+        }
+        template = 'books/update_book/edit.html'
+        return rtr(template, vars, context_instance=RC(request))
 
 @login_required()
 def attach_book(request):
-    if request.method == 'POST':
-        form = NewBookForm(request.POST)
-        if form.is_valid():
-            # shorten our code line lengths below
-            goc = Course.objects.get_or_create
-            cd = form.cleaned_data
-
-            # Get the course if it exists, otherwise create it.
-            tpl = goc(department=cd['department'], number=cd['course_number'])
-            course = tpl[0]
-
-            metabook = MetaBook()
-            metabook.title = form.cleaned_data['title']
-            metabook.author = form.cleaned_data['author']
-            metabook.barcode = form.cleaned_data['barcode']
-            metabook.edition = form.cleaned_data['edition']
-            metabook.save()
-            metabook.courses.add(course)
-            metabook.save()
-
-            book = Book.objects.get(pk=form.cleaned_data['book_id'])
-            book.metabook = metabook
-            book.save()
-            vars = {'book' : book}
-            template = 'books/attached.html'
-            return rtr(template, vars, context_instance=RC(request))
+    """
+    Tests:
+        - GETTest
+        - SecurityTest
+    """
+    # User must be staff or admin to get to this page
+    if not request.user.is_staff: return HttpResponseForbidden()
+    if not request.method == 'POST': return HttpResponseNotAllowed(['POST'])
+    form = NewBookForm(request.POST)
+    if not form.is_valid():
         # The form has bad data. send the user back
         vars = {'form' : form}
         template = 'books/attach_book.html'
         return rtr(template, vars, context_instance=RC(request))
-    return HttpResponseNotAllowed(['POST'])
+    # shorten our code line lengths below
+    goc = Course.objects.get_or_create
+    cd = form.cleaned_data
+
+    # Get the course if it exists, otherwise create it.
+    tpl = goc(department=cd['department'], number=cd['course_number'])
+    course = tpl[0]
+
+    metabook = MetaBook()
+    metabook.title = form.cleaned_data['title']
+    metabook.author = form.cleaned_data['author']
+    metabook.barcode = form.cleaned_data['barcode']
+    metabook.edition = form.cleaned_data['edition']
+    metabook.save()
+    metabook.courses.add(course)
+    metabook.save()
+
+    book = Book.objects.get(pk=form.cleaned_data['book_id'])
+    book.metabook = metabook
+    book.save()
+    vars = {'book' : book}
+    template = 'books/attached.html'
+    return rtr(template, vars, context_instance=RC(request))
 
 @login_required()
 def my_books(request):
@@ -308,7 +326,7 @@ def my_books(request):
     Displays books the user has on hold
     and is selling, sorts by search box, filters, calculates total prices
     
-    Tests: SimpleTest.test_book_list
+    Tests: GETTest
     """
     #gets users books
     selling = Book.objects.filter(seller = request.user)  
@@ -378,6 +396,13 @@ def my_books(request):
 
 @login_required()
 def add_book(request):
+    """
+    Tests:
+        - GETTest
+        - SecurityTest
+    """
+    # User must be staff or admin to get to this page
+    if not request.user.is_staff: return HttpResponseForbidden()
     if request.method == "POST":
         form = BookForm(request.POST)
         if form.is_valid():
@@ -425,55 +450,69 @@ def add_book(request):
         return rtr(template, vars, context_instance=RC(request))
 
 def add_new_book(request):
-    if request.method == "POST":
-        if request.POST.get("Action", '') == 'Add':
-            form = NewBookForm(request.POST)
-            if form.is_valid():
-                # This came from the add_book view, and we need to
-                # create a book and a metabook
-                barcode = form.cleaned_data['barcode']
-                price = form.cleaned_data['price']
-                sid = form.cleaned_data['seller']
-                author = form.cleaned_data['author']
-                title = form.cleaned_data['title']
-                ed = form.cleaned_data['edition']
-                dept = form.cleaned_data['department']
-                course_num = form.cleaned_data['course_number']
+    """
+    Tests:
+        - GETTest
+        - AddNewBookTest
+        - SecurityTest
+    """
+    if not request.method == 'POST': return HttpResponseNotAllowed(['POST'])
+    # User must be staff or admin to get to this page
+    if not request.user.is_staff: return HttpResponseForbidden()
+    if request.POST.get("Action", '') == 'Add':
+        form = NewBookForm(request.POST)
+        if form.is_valid():
+            # This came from the add_book view, and we need to
+            # create a book and a metabook
+            barcode = form.cleaned_data['barcode']
+            price = form.cleaned_data['price']
+            sid = form.cleaned_data['seller']
+            author = form.cleaned_data['author']
+            title = form.cleaned_data['title']
+            ed = form.cleaned_data['edition']
+            dept = form.cleaned_data['department']
+            course_num = form.cleaned_data['course_number']
 
-                metabook = MetaBook(barcode=barcode, author=author, title=title, edition=ed)
-                metabook.save()
-                goc = Course.objects.get_or_create
-                course, created = goc(department=dept, number=course_num)
-                metabook.courses.add(course)
-                metabook.save()
-                try:
-                    seller = User.objects.get(pk=sid)
-                except User.DoesNotExist:
-                    seller = import_user(sid)
-                    if seller == None:
-                        message = "Invalid Student ID: %s" % sid
-                        return tidy_error(request, message)
-                book = Book(seller=seller, price=Decimal(price), metabook=metabook)
-                book.status = 'F'
-                book.save()
-                Log(book=book, who=request.user, action='A').save()
+            metabook = MetaBook(barcode=barcode, author=author, title=title, edition=ed)
+            metabook.save()
+            goc = Course.objects.get_or_create
+            course, created = goc(department=dept, number=course_num)
+            metabook.courses.add(course)
+            metabook.save()
+            try:
+                seller = User.objects.get(pk=sid)
+            except User.DoesNotExist:
+                seller = import_user(sid)
+                if seller == None:
+                    message = "Invalid Student ID: %s" % sid
+                    return tidy_error(request, message)
+            book = Book(seller=seller, price=Decimal(price), metabook=metabook)
+            book.status = 'F'
+            book.save()
+            Log(book=book, who=request.user, action='A').save()
 
-                vars = {
-                    'title' : metabook.title,
-                    'author' : metabook.author,
-                    'seller_name' : seller.get_full_name(),
-                    'book_id' : book.id,
-                }
-                template = 'books/update_book/added.html'
-                return rtr(template, vars, context_instance=RC(request))
-            vars = {'form' : form}
-            template = 'books/add_new_book.html'
+            vars = {
+                'title' : metabook.title,
+                'author' : metabook.author,
+                'seller_name' : seller.get_full_name(),
+                'book_id' : book.id,
+            }
+            template = 'books/update_book/added.html'
             return rtr(template, vars, context_instance=RC(request))
+        vars = {'form' : form}
+        template = 'books/add_new_book.html'
+        return rtr(template, vars, context_instance=RC(request))
 
 @login_required()
 def remove_holds_by_user(request):
-    if not request.method == "POST":
-        return HttpResponseNotAllowed(['GET'])
+    """
+    Tests:
+        - GETTest
+        - SecurityTest
+    """
+    if not request.method == "POST": return HttpResponseNotAllowed(['POST'])
+    # User must be staff or admin to get to this page
+    if not request.user.is_staff: return HttpResponseForbidden()
     for key, value in request.POST.items():
         if "holder_id" == key:
             holder = User.objects.get(pk=int(value))

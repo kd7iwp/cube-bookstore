@@ -21,14 +21,37 @@ STAFF_EMAIL = 'staff@example.com'
 TEST_USERNAME = 'test_user'
 TEST_EMAIL = 'test@example.com'
 
-class SimpleTest(TestCase):
+class GETTest(TestCase):
+    """
+    Hits each view with a GET request and checks for an appropriate response
+    """
     fixtures = ['test_empty.json']
     def setUp(self):
         self.client.login(username=ADMIN_USERNAME, password=PASSWORD)
+
+    # No View
+    def test_help(self):
+        """ Ensure Help page displays without errors """
+        response = self.client.get('/help/')
+        self.failUnlessEqual(response.status_code, 200)
+
+    # /cube/books/views/books.py
     def test_book_list(self):
         """ Ensure Book List displays without errors """
         response = self.client.get('/books/')
         self.failUnlessEqual(response.status_code, 200)
+    def test_update_book(self):
+        """ Ensure the Book update page doesn't allow GET requests """
+        response = self.client.get('/books/update/book/')
+        self.failUnlessEqual(response.status_code, 405)
+    def test_update_book_edit(self):
+        """ Ensure the Book Edit update page doesn't allow GET requests """
+        response = self.client.get('/books/update/book/edit/')
+        self.failUnlessEqual(response.status_code, 405)
+    def test_attach_book(self):
+        """ Ensure the attach book page doesn't allow GET requests """
+        response = self.client.get('/attach_book/')
+        self.failUnlessEqual(response.status_code, 405)
     def test_my_books(self):
         """ Ensure My Books displays without errors """
         response = self.client.get('/my_books/')
@@ -37,10 +60,26 @@ class SimpleTest(TestCase):
         """ Ensure Add Book page displays without errors """
         response = self.client.get('/add_book/')
         self.failUnlessEqual(response.status_code, 200)
+    def test_add_new_book(self):
+        """ Ensure the add new book page doesn't allow GET requests """
+        response = self.client.get('/add_new_book/')
+        self.failUnlessEqual(response.status_code, 405)
+    def test_remove_hold_by_user(self):
+        """ Ensure the remove holds by user page doesn't allow GET requests """
+        response = self.client.get('/books/update/remove_holds_by_user/')
+        self.failUnlessEqual(response.status_code, 405)
+
+    # /cube/books/views/metabooks.py
     def test_list_metabooks(self):
         """ Ensure MetaBook list displays without errors """
         response = self.client.get('/metabooks/')
         self.failUnlessEqual(response.status_code, 200)
+    def test_update_metabooks(self):
+        """ Ensure the MetaBook update page displays without errors """
+        response = self.client.get('/metabooks/update/')
+        self.failUnlessEqual(response.status_code, 405)
+
+    # /cube/books/views/staff.py
     def test_staff(self):
         """ Ensure Staff List displays without errors """
         response = self.client.get('/staff/')
@@ -49,14 +88,41 @@ class SimpleTest(TestCase):
         """ Ensure the staff update page returns HttpResponseNotAllowed """
         response = self.client.get('/update_staff/')
         self.failUnlessEqual(response.status_code, 405)
-    def test_help(self):
-        """ Ensure Help page displays without errors """
-        response = self.client.get('/help/')
+    def test_staff_edit(self):
+        """ Ensure Staff Edit displays without errors """
+        response = self.client.get('/staff_edit/')
         self.failUnlessEqual(response.status_code, 200)
-    def test_update_metabooks(self):
-        """ Ensure the MetaBook update page displays without errors """
-        response = self.client.get('/metabooks/update/')
+
+    # /cube/books/views/reports.py
+    def test_reports_menu(self):
+        """ Ensure Reports Menu displays without errors """
+        response = self.client.get('/reports/')
+        self.failUnlessEqual(response.status_code, 200)
+    def test_reports_per_status(self):
+        """ Ensure Per Status report displays without errors """
+        response = self.client.get('/reports/per_status/')
+        self.failUnlessEqual(response.status_code, 200)
+    def test_reports_books_sold_within_date(self):
+        """ Ensure Books Sold Withing Date report doesn't allow GET requests """
+        response = self.client.get('/reports/books_sold_within_date/')
         self.failUnlessEqual(response.status_code, 405)
+    def test_reports_user(self):
+        """ Ensure User report displays without errors """
+        response = self.client.get('/reports/user/1/')
+        self.failUnlessEqual(response.status_code, 200)
+    def test_reports_book(self):
+        """ Ensure Book report displays without errors """
+        response = self.client.get('/reports/book/1/')
+        self.failUnlessEqual(response.status_code, 200)
+    def test_reports_metabook(self):
+        """ Ensure MetaBook report displays without errors """
+        response = self.client.get('/reports/metabook/1/')
+        self.failUnlessEqual(response.status_code, 200)
+    def test_reports_hold_by_user(self):
+        """ Ensure Holds by User report displays without errors """
+        response = self.client.get('/reports/holds_by_user/')
+        self.failUnlessEqual(response.status_code, 200)
+
 
 from django.core import mail
 class EmailTest(TestCase):
@@ -64,11 +130,13 @@ class EmailTest(TestCase):
     def setUp(self):
         self.client.login(username=STAFF_USERNAME, password=PASSWORD)
     def test_send_mail(self):
+        """ Ensure that the email system works """
         mail.send_mail('Subject', 'Message', 'from@cube.com',
                         ['to@example.com'], fail_silently=False)
         self.assertEquals(len(mail.outbox), 1)
         self.assertEquals(mail.outbox[0].subject, 'Subject')
     def test_sold(self):
+        """ Ensure that an email is sent when a book is sold """
         post_data = {
             'idToEdit1' : '1',
             'Action' : 'Sold',
@@ -76,6 +144,7 @@ class EmailTest(TestCase):
         response = self.client.post('/books/update/book/', post_data)
         self.assertEquals(len(mail.outbox), 1)
     def test_missing(self):
+        """ Ensure that an email is sent when a book goes missing """
         post_data = {
             'idToEdit1' : '1',
             'Action' : 'Missing',
@@ -83,14 +152,15 @@ class EmailTest(TestCase):
         response = self.client.post('/books/update/book/', post_data)
         self.assertEquals(len(mail.outbox), 1)
     def test_tobodeleted(self):
+        """
+        Ensure that an email is send when a book is marted as to be deleted
+        """
         post_data = {
             'idToEdit1' : '1',
             'Action' : 'To Be Deleted',
         }
         response = self.client.post('/books/update/book/', post_data)
         self.assertEquals(len(mail.outbox), 1)
-
-
 
 class AddNewBookTest(TestCase):
     fixtures = ['test_empty.json']
@@ -327,7 +397,83 @@ class SecurityTest(TestCase):
     fixtures = ['test_empty.json']
     def setUp(self):
         self.client.login(username=TEST_USERNAME, password=PASSWORD)
+
+    # /cube/books/views/books.py
+    def test_books_update_book_edit(self):
+        """ Make sure normal users can't get to the Update Book Edit Page """
+        response = self.client.post('/books/update/book/edit/')
+        self.failUnlessEqual(response.status_code, 403)
+    def test_books_attach_book(self):
+        """ Make sure normal users can't get to the Attach Book Page """
+        response = self.client.get('/attach_book/')
+        self.failUnlessEqual(response.status_code, 403)
+    def test_books_add_book(self):
+        """ Make sure normal users can't get to the Add Book Page """
+        response = self.client.get('/add_book/')
+        self.failUnlessEqual(response.status_code, 403)
+    def test_books_add_new_book(self):
+        """ Make sure normal users can't get to the Add New Book Page """
+        response = self.client.post('/add_new_book/')
+        self.failUnlessEqual(response.status_code, 403)
+    def test_books_remove_holds_by_user(self):
+        """
+        Make sure normal users can't get to the Remove Holds by User Page
+        """
+        response = self.client.post('/books/update/remove_holds_by_user/')
+        self.failUnlessEqual(response.status_code, 403)
+
+    # /cube/books/views/metabooks.py
+    def test_metabook_list(self):
+        """ Make sure normal users can't get to the MetaBook List Page """
+        response = self.client.get('/metabooks/')
+        self.failUnlessEqual(response.status_code, 403)
+    def test_metabook_update(self):
+        """ Make sure normal users can't get to the Update Metabook Page """
+        response = self.client.post('/metabooks/update/')
+        self.failUnlessEqual(response.status_code, 403)
+
+    # /cube/books/views/staff.py
+    def test_staff_list(self):
+        """ Make sure normal users can't get to the staff list page """
+        response = self.client.get('/staff/')
+        self.failUnlessEqual(response.status_code, 403)
     def test_staff_edit(self):
         """ Make sure normal users can't get to the staff edit page """
         response = self.client.get('/staff_edit/')
         self.failUnlessEqual(response.status_code, 403)
+
+    # /cube/books/views/reports.py
+    def test_reports_menu(self):
+        """ Make sure normal users can't get to the reports menu page """
+        response = self.client.get('/reports/')
+        self.failUnlessEqual(response.status_code, 403)
+    def test_reports_per_status(self):
+        """ Make sure normal users can't get to the Per Status report page """
+        response = self.client.get('/reports/per_status/')
+        self.failUnlessEqual(response.status_code, 403)
+    def test_reports_books_sold_within_date(self):
+        """
+        Make sure normal users can't get to the
+        Books Sold Within Date report page
+        """
+        response = self.client.post('/reports/books_sold_within_date/')
+        self.failUnlessEqual(response.status_code, 403)
+    def test_reports_user(self):
+        """ Make sure normal users can't get to the User report page """
+        response = self.client.get('/reports/user/1/')
+        self.failUnlessEqual(response.status_code, 403)
+    def test_reports_book(self):
+        """ Make sure normal users can't get to the Book report page """
+        response = self.client.get('/reports/book/1/')
+        self.failUnlessEqual(response.status_code, 403)
+    def test_reports_metabook(self):
+        """ Make sure normal users can't get to the MetaBook report page """
+        response = self.client.get('/reports/metabook/1/')
+        self.failUnlessEqual(response.status_code, 403)
+    def test_reports_holds_by_user(self):
+        """
+        Make sure normal users can't get to the Holds by User report page
+        """
+        response = self.client.get('/reports/holds_by_user/')
+        self.failUnlessEqual(response.status_code, 403)
+

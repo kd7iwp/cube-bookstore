@@ -43,6 +43,10 @@ def create_email(subj, html_content, owner):
     return msg
 
 def send_missing_emails(books):
+    """
+    Sends an email to the owners of books which have gone missing
+    Tests: EmailTest
+    """
     t = loader.get_template('email/missing.html')
     missing = index_by_owner(books)
     for owner, books in missing.items():
@@ -54,6 +58,10 @@ def send_missing_emails(books):
         msg.send()
 
 def send_sold_emails(books):
+    """
+    Sends an email to the owners of books which have been sold
+    Tests: EmailTest
+    """
     t = loader.get_template('email/sold.html')
     sold = index_by_owner(books)
     for owner, books in sold.items():
@@ -65,6 +73,11 @@ def send_sold_emails(books):
         msg.send()
 
 def send_tbd_emails(books):
+    """
+    Sends an email to the owners of books which have been
+    marked as 'To Be Deleted'
+    Tests: EmailTest
+    """
     t = loader.get_template('email/to_be_deleted.html')
     to_be_deleted = index_by_owner(books)
     for owner, books in to_be_deleted.items():
