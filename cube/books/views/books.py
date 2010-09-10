@@ -30,6 +30,8 @@ def book_list(request):
     """
     Shows a list of all the books listed.
     Does pagination, sorting and filtering.
+    
+    Tests: SimpleTest.test_my_books
     """
     house_cleaning()
     # Filter for the search box
@@ -305,6 +307,8 @@ def my_books(request):
     """
     Displays books the user has on hold
     and is selling, sorts by search box, filters, calculates total prices
+    
+    Tests: SimpleTest.test_book_list
     """
     #gets users books
     selling = Book.objects.filter(seller = request.user)  
