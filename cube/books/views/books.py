@@ -71,6 +71,7 @@ def book_list(request):
         'dir' : dir
     }
     return rtr('books/book_list.html', vars, context_instance=RC(request))
+
 @login_required()
 def update_book(request):
     """
@@ -202,6 +203,7 @@ def update_book(request):
         vars = {'action' : action}
         template = 'books/update_book/error.html'
         return rtr(template, vars, context_instance=RC(request))
+
 @login_required()
 def update_book_edit(request):
     """

@@ -22,8 +22,16 @@
     <tr>
       <td><a href="{% url book log.book.id %}">{{ log.book.id }}</a></td>
       <td>{{ log.book.metabook.title }}</td>
-      <td><a href="{% url user log.book.seller.id %}">{{ log.book.seller.get_full_name}}</a></td>
-      <td><a href="{% url user log.book.holder.id %}">{{ log.book.holder.get_full_name}}</a></td>
+      <td>
+          {% if log.book.seller %}
+          <a href="{% url user log.book.seller.id %}">{{ log.book.seller.get_full_name}}</a>
+          {% endif %}
+      </td>
+      <td>
+        {% if log.book.holder %}
+        <a href="{% url user log.book.holder.id %}">{{ log.book.holder.get_full_name}}</a>
+        {% endif %}
+      </td>
       <td title="{{ log.book.sell_date }}">{{ log.book.sell_date|naturalday }}</td>
     </tr>
     {% endfor %}
