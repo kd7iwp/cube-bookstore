@@ -152,9 +152,9 @@ class Book(models.Model):
     """
     For when a student lists a particular copy of a book.
     Keeps track of 
-        * when and who listed (is selling) it
-        * if and who is currently holding it
-        * when it was last put on hold
+    * when and who listed (is selling) it
+    * if and who is currently holding it
+    * when it was last put on hold
     * when it finally got sold
     * whether the book is flagged for deletion or not
     """
@@ -181,7 +181,7 @@ class Book(models.Model):
 
     def __unicode__(self):
         return "%s listed by %s on %s" % (self.metabook, self.seller,
-                               self.list_date.date())
+                                          self.list_date.date())
 class Log(models.Model):
     """
     Keeps track of all actions taken on Books

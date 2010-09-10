@@ -60,7 +60,7 @@ def user(request, user_id):
         user_obj = User.objects.get(id=user_id)
     except User.DoesNotExist:
         user_obj = import_user(user_id)
-    if user == None:
+    if user_obj == None:
         message = "Invalid Student ID: %s" % user_id
         return tidy_error(request, message)
     logs_of_books_for_sale = Log.objects.filter(book__seller=user_obj).filter(action='A')
