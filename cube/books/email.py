@@ -87,22 +87,3 @@ def send_tbd_emails(books):
         subj = 'Your book%s not sold at the Cube' % p
         msg = create_email(subj, t.render(c), owner)
         msg.send()
-
-def send_error_email(request, bunch_count, iter_value, bunch):
-    # TODO TEMPORARY DEBUGGING
-    t = loader.get_template('email/error.html')
-    c = Context({
-        'request' : request,
-        'bunch_count' : bunch_count,
-        'iter_value' : iter_value,
-        'bunch' : bunch,
-    })
-    subj = "CUBE ERROR: Over 30 books"
-    frm = "noreply@twusa.ca"
-    to = ["davidkazuhiro@gmail.com"]
-    html_content = t.render(c)
-    text_content = strip_html(html_content)
-    msg = EmailMultiAlternatives(subj, text_content, frm, to)
-    msg.attach_alternative(html_content, "text/html")
-    msg.send()
-

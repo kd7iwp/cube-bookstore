@@ -123,6 +123,26 @@ class GETTest(TestCase):
         response = self.client.get('/reports/holds_by_user/')
         self.failUnlessEqual(response.status_code, 200)
 
+class HoldGlitchTest(TestCase):
+    """
+    This test case arose from the bug which wreaked havock
+    upon the website. Very infrequently, all of the books
+    would be placed on hold. This test case attempts to
+    make sure that doesn't happen again.
+    """
+    fixtures = ['test_3_for_sale.json']
+    def setUp(self):
+        self.client.login(username=TEST_USERNAME, password=PASSWORD)
+    def test_empty_value(self):
+        """ Make sure nothing happens when placing 'nothing' on hold """
+        old_hold_count = Book.objects.filter(status='O').count()
+        post_data = {'Action' : 'Place On Hold'}
+        response = self.client.post('/books/update/book/', post_data)
+        new_hold_count = Book.objects.filter(status='O').count()
+        self.assertEquals(new_hold_count, old_hold_count)
+        self.failUnlessEqual(response.status_code, 400)
+
+
 
 from django.core import mail
 class EmailTest(TestCase):
