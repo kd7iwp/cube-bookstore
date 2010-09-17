@@ -58,6 +58,11 @@ urlpatterns = patterns('',
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     (r'^admin/(.*)', admin.site.root),
 
+
+    # Cube Admin
+    url(r'^books/admin/dumpdata/$', 'cube.books.views.admin.dumpdata',
+        name='dumpdata'),
+
     # TODO remove this for live server
     (r'^site_media/(?P<path>.*)$', 'django.views.static.serve',
         {'document_root': '/home/david/code/cube-bookstore/media/'}),
