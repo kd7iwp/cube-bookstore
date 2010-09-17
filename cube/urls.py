@@ -62,6 +62,8 @@ urlpatterns = patterns('',
     # Cube Admin
     url(r'^books/admin/dumpdata/$', 'cube.books.views.admin.dumpdata',
         name='dumpdata'),
+    url(r'^books/admin/bad_unholds/$', 'cube.books.views.admin.bad_unholds',
+        name='bad_unholds'),
 
     # TODO remove this for live server
     (r'^site_media/(?P<path>.*)$', 'django.views.static.serve',

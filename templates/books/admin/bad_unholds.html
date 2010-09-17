@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Bad Unholds{% endblock %}
+
+{% block content %}
+
+{% for entry in entries %}
+    <h1>Entry</h1>
+    <table>
+    {% for log, isrlog in entry %}
+      <tr>
+        <td {% if isrlog %}style="color:red"{% endif %}>
+          <a href="{% url book log.book.id %}">{{ log.book.id }}</a>
+          {{ log.get_action_display }}
+          <a href="{% url user log.who.id %}">{{ log.who.get_full_name }}</a>
+          {{ log.when }}
+        </td>
+      </tr>
+    {% endfor %}
+    </table>
+{% endfor %}
+
+{% endblock %}
