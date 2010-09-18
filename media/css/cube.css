@@ -317,3 +317,5 @@ table.FormTable tr td {
 #user{
     text-align: right;
 }
+
+p.error {color:red}

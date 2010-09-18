@@ -3,11 +3,12 @@
 from cube.books.models import MetaBook, Course
 from cube.books.forms import MetaBookForm, CourseForm
 from cube.books.views.tools import metabook_sort, get_number
+from cube.books.http import HttpResponseNotAllowed
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
-from django.http import HttpResponseNotAllowed, HttpResponseForbidden
+from django.http import HttpResponseForbidden
 from django.shortcuts import render_to_response as rtr
-from django.template import RequestContext as RC
+from django.template import loader, RequestContext as RC
 
 # pagination defaults
 PER_PAGE = '30'
@@ -23,7 +24,10 @@ def metabook_list(request):
         - SecurityTest
     """
     # User must be staff or admin to get to this page
-    if not request.user.is_staff: return HttpResponseForbidden()
+    if not request.user.is_staff:
+        t = loader.get_template('403.html')
+        c = RC(request)
+        return HttpResponseForbidden(t.render(c))
     if request.GET.has_key("sort_by") and request.GET.has_key("dir"):
         metabooks = metabook_sort(request.GET["sort_by"], request.GET["dir"])
     else: metabooks = MetaBook.objects.all()
@@ -41,7 +45,7 @@ def metabook_list(request):
     # Template time
     if request.GET.get('dir', '') == 'asc': dir = 'desc'
     else: dir = 'asc'
-    vars = {
+    var_dict = {
         'metabooks' : page_of_metabooks,
         'per_page' : metabooks_per_page,
         'page' : page_num,
@@ -49,7 +53,7 @@ def metabook_list(request):
     }
 
     template = 'books/list_metabooks.html'
-    return rtr(template, vars, context_instance=RC(request))
+    return rtr(template, var_dict, context_instance=RC(request))
 
 @login_required()
 def update(request):
@@ -59,10 +63,17 @@ def update(request):
     Tests:
         - GETTest
         - SecurityTest
+        - NotAllowedTest
     """
-    if not request.method == "POST": return HttpResponseNotAllowed(['POST'])
+    if not request.method == "POST":
+        t = loader.get_template('405.html')
+        c = RC(request)
+        return HttpResponseNotAllowed(t.render(c), ['POST'])
     # User must be staff or admin to get to this page
-    if not request.user.is_staff: return HttpResponseForbidden()
+    if not request.user.is_staff:
+        t = loader.get_template('403.html')
+        c = RC(request)
+        return HttpResponseForbidden(t.render(c))
 
     bunch = MetaBook.objects.none()
     action = request.POST.get("Action", '')
@@ -72,10 +83,10 @@ def update(request):
             
     if action == "Delete":
         bunch = bunch.exclude(status='D')
-        vars = {'num_deleted': bunch.count()}
+        var_dict = {'num_deleted': bunch.count()}
         bunch.update(status='D')
         template = 'books/update_book/deleted.html'
-        return rtr(template, vars, context_instance=RC(request))
+        return rtr(template, var_dict, context_instance=RC(request))
     elif action == "Edit":
         if bunch.count() > 1: too_many = True
         else: too_many = False
@@ -83,14 +94,14 @@ def update(request):
         metabook_form = MetaBookForm(instance=item)
         course = item.courses.all()[0]
         course_form = CourseForm(instance=course)
-        vars = {
+        var_dict = {
             'metabook_form' : metabook_form,
             'course_form' : course_form,
             'metabook_id' : item.id,
             'course_id' : course.id,
         }
         template = 'books/edit_metabook.html'
-        return rtr(template, vars, context_instance=RC(request))
+        return rtr(template, var_dict, context_instance=RC(request))
     elif action == "Save":
         metabook_id = request.POST.get('metabook_id', '')
         course_id = request.POST.get('course_id', '')
@@ -106,19 +117,19 @@ def update(request):
             metabook = metabook_form.save()
             metabook.courses.add(course)
 
-            vars={'metabook': metabook}
+            var_dict={'metabook': metabook}
             template = 'books/update_metabook/saved.html'
-            return rtr(template, vars, context_instance=RC(request))
+            return rtr(template, var_dict, context_instance=RC(request))
         # the form isn't valid. send the user back
-        vars = {
+        var_dict = {
             'metabook_form' : metabook_form,
             'course_form' : course_form,
             # TODO need to check for metabook id before hitting here
             'metabook_id' : metabook_id,
         }
         template = 'books/edit_metabook.html'
-        return rtr(template, vars, context_instance=RC(request))
+        return rtr(template, var_dict, context_instance=RC(request))
     else:
-        vars = {'action' : action}
+        var_dict = {'action' : action}
         template = 'books/update_book/error.html'
-        return rtr(template, vars, context_instance=RC(request))
+        return rtr(template, var_dict, context_instance=RC(request))

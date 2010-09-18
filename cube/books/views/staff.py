@@ -1,13 +1,14 @@
 # Copyright (C) 2010  Trinity Western University
 
 from django.contrib.auth.models import User
-from django.http import HttpResponseForbidden, HttpResponseNotAllowed
+from django.http import HttpResponseForbidden
 from cube.books.views.tools import get_number, tidy_error
 from cube.twupass.backend import TWUPassBackend
+from cube.books.http import HttpResponseNotAllowed
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response as rtr
-from django.template import RequestContext as RC
+from django.template import loader, RequestContext as RC
 
 # pagination defaults
 PAGE_NUM = '1'
@@ -21,7 +22,10 @@ def staff_list(request):
         - SecurityTest
     """
     # User must be staff or admin to get to this page
-    if not request.user.is_staff: return HttpResponseForbidden()
+    if not request.user.is_staff:
+        t = loader.get_template('403.html')
+        c = RC(request, {})
+        return HttpResponseForbidden(t.render(c))
     users = User.objects.filter(is_staff = True)
     page_num = get_number(request.GET, 'page', PAGE_NUM)
     users_per_page = get_number(request.GET, 'per_page', PER_PAGE)
@@ -32,7 +36,7 @@ def staff_list(request):
         page_of_users = paginator.page(paginator.num_pages)
     if request.GET.get('dir', '') == 'asc': dir = 'desc'
     else: dir = 'asc'
-    vars = {
+    var_dict = {
         'users' : page_of_users,
         'per_page' : users_per_page,
         'page' : page_num,
@@ -41,7 +45,7 @@ def staff_list(request):
         'dir' : dir, 
     }
     template = 'books/staff.html'
-    return rtr(template, vars,  context_instance=RC(request))
+    return rtr(template, var_dict,  context_instance=RC(request))
 
 @login_required()
 def update_staff(request):
@@ -49,7 +53,10 @@ def update_staff(request):
     
     Tests: GETTest
     """
-    if not request.method == 'POST': return HttpResponseNotAllowed(['POST'])
+    if not request.method == 'POST':
+        t = loader.get_template('405.html')
+        c = RC(request)
+        return HttpResponseNotAllowed(t.render(c), ['POST'])
     student_id = request.POST.get("student_id", '')
     action = request.POST.get('Action')
     # Delete User
@@ -60,9 +67,9 @@ def update_staff(request):
             user.is_superuser = False
             user.is_staff = False
             user.save()
-            vars = { 'num_deleted' : 1 }
+            var_dict = { 'num_deleted' : 1 }
             template = 'books/update_staff/deleted.html'
-            return rtr(template, vars,  context_instance=RC(request))
+            return rtr(template, var_dict,  context_instance=RC(request))
         except User.DoesNotExist:
             return tidy_error(request, "Invalid Student ID: %s" % student_id)
     elif action == "Delete":
@@ -76,9 +83,9 @@ def update_staff(request):
                     user.is_staff = False
                     user.save()
                     num_deleted += 1
-            vars = { 'num_deleted' : num_deleted }
+            var_dict = { 'num_deleted' : num_deleted }
             template = 'books/update_staff/deleted.html'
-            return rtr(template, vars,  context_instance=RC(request))
+            return rtr(template, var_dict,  context_instance=RC(request))
         except User.DoesNotExist:
             if num_deleted == 1: p = ' was'
             else: p = 's were'
@@ -99,12 +106,12 @@ def update_staff(request):
         elif request.POST.get("role", '') == 'staff':
             user.is_staff = True
         user.save()
-        vars = {
+        var_dict = {
             'user_name' : user.get_full_name(),
             'administrator': user.is_superuser
         }
         template = 'books/update_staff/saved.html'
-        return rtr(template, vars,  context_instance=RC(request))
+        return rtr(template, var_dict,  context_instance=RC(request))
 
 @login_required()
 def staff_edit(request):
@@ -119,7 +126,10 @@ def staff_edit(request):
         - SecurityTest
     """
     # User must be staff or admin to get to this page
-    if not request.user.is_staff: return HttpResponseForbidden()
+    if not request.user.is_staff:
+        t = loader.get_template('403.html')
+        c = RC(request, {})
+        return HttpResponseForbidden(t.render(c))
     if request.method == "POST":
         users = []
         too_many = False
@@ -142,7 +152,7 @@ def staff_edit(request):
         too_many = False
         users = [User()]
         edit = False
-    vars = {
+    var_dict = {
         'edit' : edit,
         'too_many' : too_many,
         'name' : users[0].get_full_name(),
@@ -150,4 +160,4 @@ def staff_edit(request):
         'current_role' : 'admin' if users[0].is_superuser else 'staff' 
     }
     template = 'books/staff_edit.html'
-    return rtr(template, vars, context_instance=RC(request))
+    return rtr(template, var_dict, context_instance=RC(request))

@@ -123,6 +123,17 @@ class GETTest(TestCase):
         response = self.client.get('/reports/holds_by_user/')
         self.failUnlessEqual(response.status_code, 200)
 
+    # /cube/books/views/admin.py
+    def test_dumpdata(self):
+        """ Ensure the dumpdata page displays without errors """
+        response = self.client.get('/books/admin/dumpdata/')
+        self.failUnlessEqual(response.status_code, 200)
+
+    def test_bad_unholds(self):
+        """ Ensure the bad_unholds page displays without errors """
+        response = self.client.get('/books/admin/bad_unholds/')
+        self.failUnlessEqual(response.status_code, 200)
+
 class HoldGlitchTest(TestCase):
     """
     This test case arose from the bug which wreaked havock
@@ -140,9 +151,8 @@ class HoldGlitchTest(TestCase):
         response = self.client.post('/books/update/book/', post_data)
         new_hold_count = Book.objects.filter(status='O').count()
         self.assertEquals(new_hold_count, old_hold_count)
-        self.failUnlessEqual(response.status_code, 400)
-
-
+        self.assertContains(response, "Didn&#39;t get any books to process",
+                            status_code=400)
 
 from django.core import mail
 class EmailTest(TestCase):
@@ -497,3 +507,48 @@ class SecurityTest(TestCase):
         response = self.client.get('/reports/holds_by_user/')
         self.failUnlessEqual(response.status_code, 403)
 
+    def test_dumpdata(self):
+        """
+        Make sure normal users can't get to the dumpdata page
+        """
+        response = self.client.get('/books/admin/dumpdata/')
+        self.failUnlessEqual(response.status_code, 403)
+
+    def test_bad_unholds(self):
+        """
+        Make sure normal users can't get to the bad_unholds page
+        """
+        response = self.client.get('/books/admin/bad_unholds/')
+        self.failUnlessEqual(response.status_code, 403)
+
+class NotAllowedTest(TestCase):
+    """
+    Makes sure that 405 Errors are served properly
+    """
+    fixtures = ['test_empty.json']
+    def setUp(self):
+        self.client.login(username=ADMIN_USERNAME, password=PASSWORD)
+
+    def test_update_book(self):
+        response = self.client.get('/books/update/book/')
+        self.assertContains(response, 'which is not allowed.', status_code=405)
+
+    def test_update_book_edit(self):
+        response = self.client.get('/books/update/book/edit/')
+        self.assertContains(response, 'which is not allowed.', status_code=405)
+
+    def test_attach_book(self):
+        response = self.client.get('/attach_book/')
+        self.assertContains(response, 'which is not allowed.', status_code=405)
+
+    def test_add_new_book(self):
+        response = self.client.get('/add_new_book/')
+        self.assertContains(response, 'which is not allowed.', status_code=405)
+
+    def test_remove_holds_by_user(self):
+        response = self.client.get('/books/update/remove_holds_by_user/')
+        self.assertContains(response, 'which is not allowed.', status_code=405)
+
+    def test_metabooks_update(self):
+        response = self.client.get('/metabooks/update/')
+        self.assertContains(response, 'which is not allowed.', status_code=405)

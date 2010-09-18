@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %}Request Method Not Allowed{% endblock %}
+
+{% block content %}
+
+<p class="error">You requested this page with {{ request.method }}, which is not allowed.</p>
+
+{% endblock %}
