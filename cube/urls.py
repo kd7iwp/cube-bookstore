@@ -62,11 +62,20 @@ urlpatterns = patterns('',
     # Cube Admin
     url(r'^books/admin/dumpdata/$', 'cube.books.views.admin.dumpdata',
         name='dumpdata'),
+
     url(r'^books/admin/bad_unholds/$', 'cube.books.views.admin.bad_unholds',
         name='bad_unholds'),
 
+    url(r'^books/admin/duplicate_metabooks/$',
+         'cube.books.views.admin.duplicate_metabooks',
+         name='duplicate_metabooks'),
+
+    url(r'books/admin/delete_duplicate_metabooks/$',
+        'cube.books.views.admin.delete_duplicate_metabooks',
+        name='delete_duplicate_metabooks'),
+
     # TODO remove this for live server
-    (r'^site_media/(?P<path>.*)$', 'django.views.static.serve',
-        {'document_root': '/home/david/code/cube-bookstore/media/'}),
+    (r'^site-media/(?P<path>.*)$', 'django.views.static.serve',
+        {'document_root': 'C:/Code Projects/cube-bookstore/media/'}),
     
 )

@@ -1,4 +1,4 @@
-from cube.books.models import Book, Log
+from cube.books.models import Book, Log, MetaBook
 
 from django.db.models import get_models, get_app
 from django.core import serializers
@@ -8,7 +8,7 @@ from django.http import HttpResponseForbidden, HttpResponse
 from django.shortcuts import render_to_response as rtr
 from django.template import loader, RequestContext as RC
 
-@login_required
+@login_required()
 def dumpdata(request):
     """
     Written so that you don't have to have shell access
@@ -33,7 +33,7 @@ def dumpdata(request):
     serialized = serializers.serialize('json', objects, indent=True)
     return HttpResponse(serialized, mimetype="application/json")
 
-@login_required
+@login_required()
 def bad_unholds(request):
     """
     Tests:
@@ -61,3 +61,38 @@ def bad_unholds(request):
         'entries' : entries,
     }
     return rtr('books/admin/bad_unholds.html', var_dict, context_instance=RC(request)) 
+
+def get_orphandupe_metabooks():
+    """
+    Returns all metabooks which have duplicate barcodes and which are not
+    attached to any book
+    """
+    dupes = []
+    for metabook in MetaBook.objects.all():
+        if MetaBook.objects.filter(barcode=metabook.barcode).count() > 1 and\
+           Book.objects.filter(metabook=metabook).count() == 0:
+            dupes.append(metabook)
+    return dupes
+
+@login_required()
+def duplicate_metabooks(request):
+    # TODO bad method of identifying the superuser. Start using django's groups
+    if not request.user == User.objects.get(pk=1):
+        t = loader.get_template('403.html')
+        c = RC(request, {})
+        return HttpResponseForbidden(t.render(c))
+    var_dict = {
+        'dupes' : get_orphandupe_metabooks(),
+    }
+    return rtr('books/admin/duplicate_metabooks.html', var_dict,
+                context_instance=RC(request))
+@login_required()
+def delete_duplicate_metabooks(request):
+    # TODO bad method of identifying the superuser. Start using django's groups
+    if not request.user == User.objects.get(pk=1):
+        t = loader.get_template('403.html')
+        c = RC(request, {})
+        return HttpResponseForbidden(t.render(c))
+    for dupe in get_orphandupe_metabooks():
+        dupe.delete()
+    return HttpResponse('Deleted')

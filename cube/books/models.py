@@ -128,7 +128,7 @@ class MetaBook(models.Model):
     """
     title = models.CharField(max_length=250)
     author = models.CharField(max_length=70)
-    barcode = models.CharField(max_length=50)
+    barcode = models.CharField(max_length=50, unique=True)
     edition = models.PositiveSmallIntegerField()
     courses = models.ManyToManyField(Course)
 
