@@ -218,6 +218,29 @@ class AddNewBookTest(TestCase):
         self.assertContains(response, title)
         self.assertContains(response, '">%s</a>' % book_id)
 
+class EditMetaBookTest(TestCase):
+    fixtures = ['test_3_for_sale.json']
+    def setUp(self):
+        self.client.login(username=STAFF_USERNAME, password=PASSWORD)
+    def test_change_course_number(self):
+       """ Make sure the edit course number feature works """
+       metabook = MetaBook.objects.all()[0]
+       course = metabook.courses.all()[0]
+       new_num = str(int(course.number)+1)
+       post_data = {
+           'metabook_id' : metabook.id,
+           'course_id' : course.id,
+           'author' : metabook.author,
+           'title' : metabook.title,
+           'barcode' : metabook.barcode,
+           'edition' : metabook.edition,
+           'department' : course.department,
+           'number' : new_num, 
+           'Action' : 'Save',
+       }
+       response = self.client.post('/metabooks/update/', post_data)
+       self.assertContains(response, "%s %s" % (course.department, new_num) )
+
 class StaffTest(TestCase):
     fixtures = ['test_empty.json']
     def setUp(self):
@@ -552,3 +575,5 @@ class NotAllowedTest(TestCase):
     def test_metabooks_update(self):
         response = self.client.get('/metabooks/update/')
         self.assertContains(response, 'which is not allowed.', status_code=405)
+
+
