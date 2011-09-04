@@ -217,6 +217,19 @@ class AddNewBookTest(TestCase):
         self.assertContains(response, author)
         self.assertContains(response, title)
         self.assertContains(response, '">%s</a>' % book_id)
+class DeleteBookTest(TestCase):
+    fixtures = ['test_3_for_sale.json']
+    def setUp(self):
+        self.client.login(username=STAFF_USERNAME, password=PASSWORD)
+    def test_delete_book(self):
+        """ Make sure deleting a book actually deletes a book """
+        book = Book.objects.filter(status='F')[0]
+        post_data = {
+            'book' : book.id,
+            'action' : 'delete'
+        }
+        response = self.client.post('/book/delete/', post_data)
+        self.failUnlessEqual(Book.objects.get(pk=book.id).status, 'D')
 
 class EditMetaBookTest(TestCase):
     fixtures = ['test_3_for_sale.json']

@@ -79,6 +79,42 @@ def book_list(request):
     return rtr('books/book_list.html', var_dict, context_instance=RC(request))
 
 @login_required()
+def delete_book(request):
+    """
+    This view deletes a book passed to it
+
+    Takes values
+        - book
+        - action = delete
+    """
+    if not request.user.is_staff:
+        t = loader.get_template('403.html')
+        c = RC(request)
+        return HttpResponseForbidden(t.render(c))
+    for key in ['book', 'action']:
+        if not request.POST.has_key(key):
+            var_dict = {
+                'message' : "Missing key %s" % key
+            }
+            t = loader.get_template('400.html')
+            c = RC(request, var_dict)
+            return HttpResponseBadRequest(t.render(c))
+        id_to_edit = request.POST.get('IdToEdit')
+    try:
+        book = Book.objects.get(id=request.POST.get('book'))
+    except Book.DoesNotExist:
+        message = 'Book with ref# "%s" does not exist' % id_to_edit
+        return tidy_error(request, message)
+    Log(action='D', book=book, who=request.user).save()
+    book.status='D'
+    book.save()
+    var_dict = { 
+        'refno': book.id
+    }
+    template = 'books/deleted.html'
+    return rtr(template, var_dict, context_instance=RC(request))
+
+@login_required()
 def update_book(request):
     """
     This view is used to update book data

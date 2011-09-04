@@ -22,6 +22,9 @@ urlpatterns = patterns('',
     url(r'^books/update/book/edit/$', 'cube.books.views.books.update_book_edit',
         name="update_book_edit"),
     url(r'books/update/remove_holds_by_user/$', 'cube.books.views.books.remove_holds_by_user', name="remove_holds_by_user"),
+
+    # books
+    url(r'^book/delete/$', 'cube.books.views.books.delete_book', name='delete_book'),
     
     # reports
     url(r'^reports/$', 'cube.books.views.reports.menu', name="reports_menu"),
