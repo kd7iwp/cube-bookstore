@@ -2,7 +2,7 @@ Dear {{name}},
 {# Unfortunately I can't use newlines otherwise they will end up in the email #}<br /><br />
 Your book{{ num_books|pluralize }} {% for book_title in book_titles %}{% if not forloop.first %}, {% endif %}{% if forloop.last %}{% ifnotequal num_books 1 %}and {% endifnotequal %}{% endif %}"{{ book_title }}"{% endfor %} ha{{ num_books|pluralize:"s,ve" }} been sold. Please come to the TWUSA Office in the Douglas Centre to pick up your money.
 <br /><br />
-You can pick up your money on Tuesdays between 9:30-11 and 11:30-1 or Wednesday at 11:30-1. Your money must be picked up within the next 30 days.
+You can pick up your money on Tuesdays and Thursdays from 11:45am to 1pm. Your money must be picked up within the next 30 days.
 <br /><br />
 If you have any questions please e-mail <a href="mailto:{{ admin_email }}">{{ admin_email }}</a>.<br />
 <br />
