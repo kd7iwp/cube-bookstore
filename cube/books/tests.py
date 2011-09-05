@@ -239,10 +239,12 @@ class EditMetaBookTest(TestCase):
        """ Make sure the edit course number feature works """
        metabook = MetaBook.objects.all()[0]
        course = metabook.courses.all()[0]
+       course_count = metabook.courses.count()
        new_num = str(int(course.number)+1)
        post_data = {
            'metabook_id' : metabook.id,
-           'course_id' : course.id,
+            # sometimes this value is missing
+           'course_id' : '',
            'author' : metabook.author,
            'title' : metabook.title,
            'barcode' : metabook.barcode,
@@ -253,6 +255,7 @@ class EditMetaBookTest(TestCase):
        }
        response = self.client.post('/metabooks/update/', post_data)
        self.assertContains(response, "%s %s" % (course.department, new_num) )
+       self.failUnlessEqual(course_count, metabook.courses.count())
 
 class StaffTest(TestCase):
     fixtures = ['test_empty.json']

@@ -104,17 +104,16 @@ def update(request):
         return rtr(template, var_dict, context_instance=RC(request))
     elif action == "Save":
         metabook_id = request.POST.get('metabook_id', '')
-        course_id = request.POST.get('course_id', '')
         metabook = MetaBook.objects.get(pk=metabook_id)
-        course = Course.objects.get(pk=course_id)
         metabook_form = MetaBookForm(request.POST, instance=metabook)
-        course_form = CourseForm(request.POST, instance=course)
+        course_form = CourseForm(request.POST)
         if metabook_form.is_valid() and course_form.is_valid():
             dept = course_form.cleaned_data['department']
             num = course_form.cleaned_data['number']
             tpl = Course.objects.get_or_create(department=dept, number=num)
             course = tpl[0]
             metabook = metabook_form.save()
+            metabook.courses.clear()
             metabook.courses.add(course)
 
             var_dict={'metabook': metabook}
