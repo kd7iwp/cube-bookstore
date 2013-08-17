@@ -217,45 +217,6 @@ class AddNewBookTest(TestCase):
         self.assertContains(response, author)
         self.assertContains(response, title)
         self.assertContains(response, '">%s</a>' % book_id)
-class DeleteBookTest(TestCase):
-    fixtures = ['test_3_for_sale.json']
-    def setUp(self):
-        self.client.login(username=STAFF_USERNAME, password=PASSWORD)
-    def test_delete_book(self):
-        """ Make sure deleting a book actually deletes a book """
-        book = Book.objects.filter(status='F')[0]
-        post_data = {
-            'book' : book.id,
-            'action' : 'delete'
-        }
-        response = self.client.post('/book/delete/', post_data)
-        self.failUnlessEqual(Book.objects.get(pk=book.id).status, 'D')
-
-class EditMetaBookTest(TestCase):
-    fixtures = ['test_3_for_sale.json']
-    def setUp(self):
-        self.client.login(username=STAFF_USERNAME, password=PASSWORD)
-    def test_change_course_number(self):
-       """ Make sure the edit course number feature works """
-       metabook = MetaBook.objects.all()[0]
-       course = metabook.courses.all()[0]
-       course_count = metabook.courses.count()
-       new_num = str(int(course.number)+1)
-       post_data = {
-           'metabook_id' : metabook.id,
-            # sometimes this value is missing
-           'course_id' : '',
-           'author' : metabook.author,
-           'title' : metabook.title,
-           'barcode' : metabook.barcode,
-           'edition' : metabook.edition,
-           'department' : course.department,
-           'number' : new_num, 
-           'Action' : 'Save',
-       }
-       response = self.client.post('/metabooks/update/', post_data)
-       self.assertContains(response, "%s %s" % (course.department, new_num) )
-       self.failUnlessEqual(course_count, metabook.courses.count())
 
 class StaffTest(TestCase):
     fixtures = ['test_empty.json']
@@ -591,5 +552,3 @@ class NotAllowedTest(TestCase):
     def test_metabooks_update(self):
         response = self.client.get('/metabooks/update/')
         self.assertContains(response, 'which is not allowed.', status_code=405)
-
-

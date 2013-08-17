@@ -6,19 +6,14 @@
 {% endif %}
 <div id="admin_form">
     <form method="post" action="{% url update_book_edit %}">
-        <input type="hidden" name="IdToEdit" value="{{ id }}" />
-        {% include "form.html" %}
-        <p class="submit_options">
-            <input type="submit" value="Save" name="Action" />
-        </p>
+            <input type="hidden" name="IdToEdit" value="{{ id }}" />
+            {% include "form.html" %}
+            <p class="submit_options">
+                <input type="submit" value="Save" name="Action" />
+                <input type="submit" name="Action" value="Delete" onclick="DeleteButton='delete'; return confirm('This will permanently delete this item, are you sure?')" />
+            </p>
+        </div>
     </form>
-    <form method="post" action="{% url delete_book %}">
-        <p class="submit_options">
-            <input type="hidden" name="book" value="{{ id }}" />
-            <input type="submit" name="action" value="Delete" onclick="DeleteButton='delete'; return confirm('This will permanently delete this item, are you sure?')" />
-        </p>
-    </form>
-</div>
     <p>History of this item</p>
     <ol id="HistoryOfBook">
     {% for log in logs %}
