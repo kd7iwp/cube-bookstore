@@ -1,0 +1,16 @@
+{# Copyright (C) 2010  Trinity Western University #}
+
+{% extends "base.html" %}
+
+{% block title %} Edit Profile {% endblock title %}
+
+{% block content %}
+<h4>Edit Profile</h4>
+<form method="post" action="{% url edit_profile %}">
+    {% include "form.html" %}
+    <p class="submit_options">
+      <input class="submit" type="submit" value="Save" name="Action" />
+    </p>
+</form>
+{% endblock %}
+

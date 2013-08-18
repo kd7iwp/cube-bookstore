@@ -1,0 +1,22 @@
+{# Copyright (C) 2010  Trinity Western University #}
+
+{% extends "base.html" %}
+
+{% block title %} Profile {% endblock title %}
+
+{% block content %}
+<h4>Profile</h4>
+<table cellspacing="0" class="FormTable">
+    <tbody>
+        <tr>
+            <td>Email</td>
+            <td>{{ request.user.email }}</td>
+        </tr>
+    </tbody>
+</table>
+<form method="link" action="{% url edit_profile %}">
+    <p class="submit_options">
+        <input class="submit" type="submit" value="Edit Profile" name="Action">
+    </p>
+</form>
+{% endblock %}
