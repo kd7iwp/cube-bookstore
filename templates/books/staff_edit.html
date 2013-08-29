@@ -17,13 +17,22 @@
                     {{ name }}
                 </td>
             </tr>
+            <tr>
+                <td>
+                    Email:
+                </td>
+                <td>
+                    {% if not edit %}{{ email }}{% endif %}
+                    <input type="{% if edit %}text{% else %}hidden{% endif %}" id="email" class="InputField" name="email" value="{% if edit %}{{ email }}{% endif %}" />
+                </td>
+            </tr>
         {% endif %}
             <tr>
                 <td class="TableLabel">
                     Student ID:
                 </td>
                 <td>
-                    {% if edit %}{{student_id}}{% endif %}
+                    {% if edit %}{{ student_id }}{% endif %}
                     <input type="{% if edit %}hidden{% else %}text{% endif %}" id="student_id" class="InputField" name="student_id" value="{% if edit %}{{ student_id }}{% endif %}" maxlength="10" tabindex="2" />
                 </td>
             </tr>
