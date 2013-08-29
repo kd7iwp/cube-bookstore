@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Add User {% endblock title %}
+
+{% load selected %}
+{% block content %}
+<h4>{% if edit %}Edit a{% else %}Add a New{% endif %} User</h4>
+<form method ="post" action = "{% url update_staff %}">
+    <table cellspacing="0" class="FormTable" id="FormFunctions">
+        <tbody>
+        {% if edit %}
+            <tr>
+                <td>
+                    Name:
+                </td>
+                <td>
+                    {{ name }}
+                </td>
+            </tr>
+        {% endif %}
+            <tr>
+                <td> 
+                    Email:
+                </td>
+                <td>
+                    {% if edit %}{{ email }}{% endif %}
+                    <input type="{% if edit %}hidden{% else %}text{% endif %}" id="email" class="InputField" name="email" value="{% if edit %}{{ email }}{% endif %}" maxlength="10" tabindex="2" />
+                </td>
+            </tr>
+            <tr>
+                <td class="TableLabel">
+                    Student ID:
+                </td>
+                <td>
+                    {% if edit %}{{student_id}}{% endif %}
+                    <input type="{% if edit %}hidden{% else %}text{% endif %}" id="student_id" class="InputField" name="student_id" value="{% if edit %}{{ student_id }}{% endif %}" maxlength="10" tabindex="2" />
+                </td>
+            </tr>
+            <tr>
+                <td class="TableLabel">
+                    Permission Level
+                </td>
+                <td class="role">
+                    <select name="role" />
+                        <option {% selected current_role "staff" %}>Staff</option> 
+                        <option {% selected current_role "admin" %}>Administrator</option>
+                    </select>
+                </td>
+	        </tr>
+        </tbody>
+    </table>
+    <p class="submit_options">
+        <input class="submit" type="submit" value="Save" name="Action" />
+        <input class="submit" type="submit" value="Delete" name="Action" onclick="return confirm('This will permanently delete these items, are you sure?')" />	
+    </p>
+</form>
+{% endblock %} 
