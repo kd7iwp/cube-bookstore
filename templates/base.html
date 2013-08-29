@@ -68,7 +68,13 @@
                         <span>Reports</span>
                     </a>
                 </li>
-
+                {% endspaceless %}
+                {% spaceless %}
+                <li id="settings">
+                    <a href="{% url settings %}" class="{% tab_active request settings %}">
+                        <span>Settings</span>
+                    </a>
+                </li>
                 {% endspaceless %}
                 {% endif %}
 

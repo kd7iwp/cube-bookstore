@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+{% if user.is_staff %} 
+<form method ="post" action = "{% url update_staff %}">
+{% if settings.object_list %}
+        {% if users.has_other_pages %}
+            <div class="PageCounterNav">
+                <p>
+                {% if settings.has_previous %}
+                    <a href="?page={{ settings.previous_page_number }}&amp;per_page={{ per_page }}">
+                        <img src="{{ MEDIA_URL }}images/pagenav_prev.gif" alt="Previous Page" />
+                    </a>
+                {% else %}
+                    <img src="{{ MEDIA_URL }}images/pagenav_prev_faded.gif" alt="No Previous Page" />
+                {% endif %}
+                Pages: ({{ settings.number }} of {{ settings.paginator.num_pages }})
+                {% if settings.has_next %}
+                    <a href="?page={{ users.next_page_number }}&amp;per_page={{ per_page }}">
+                        <img src="{{ MEDIA_URL }}images/pagenav_next.gif" alt="Next Page" />
+                    </a>
+                {% else %}
+                    <img src="{{ MEDIA_URL }}images/pagenav_next_faded.gif" alt="No Next Page" />
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Enter all of the settings here -->
+        <table cellspacing='0'>
+            <thead>
+                <tr>
+                    <th>Setting</th>
+                    <th>Value</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for setting in settings.object_list %}
+                <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
+                    <td>{{ setting.get_setting_name }}</td>
+                    <td><input type="text" name="{{ setting.get_setting_name }}" value="{{ setting.get_setting_value }}" /></td>
+                    <td>{{ setting.get_setting_description }}</td>
+                </tr>
+            </tbody>
+        </table>
+    {% else %}
+        <p class='noresults'>There are no settings.</p>
+    {% endif %}
+</form>
+
+{% else %}
+<p>You do not have permission to view this page</p>
+{% endif %}
+
+{% endblock %}
