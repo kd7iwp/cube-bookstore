@@ -1,0 +1,5 @@
+**.pyc
+**.sqlite3
+cube/twupass/
+cube/settings.py
+cube/logs/
