@@ -5,20 +5,20 @@
 {% block content %}
 {% if user.is_staff %} 
 <form method ="post" action = "{% url update_staff %}">
-{% if settings.object_list %}
-        {% if users.has_other_pages %}
+{% if appsettings.object_list %}
+        {% if appsettings.has_other_pages %}
             <div class="PageCounterNav">
                 <p>
-                {% if settings.has_previous %}
-                    <a href="?page={{ settings.previous_page_number }}&amp;per_page={{ per_page }}">
+                {% if appsettings.has_previous %}
+                    <a href="?page={{ appsettings.previous_page_number }}&amp;per_page={{ per_page }}">
                         <img src="{{ MEDIA_URL }}images/pagenav_prev.gif" alt="Previous Page" />
                     </a>
                 {% else %}
                     <img src="{{ MEDIA_URL }}images/pagenav_prev_faded.gif" alt="No Previous Page" />
                 {% endif %}
-                Pages: ({{ settings.number }} of {{ settings.paginator.num_pages }})
-                {% if settings.has_next %}
-                    <a href="?page={{ users.next_page_number }}&amp;per_page={{ per_page }}">
+                Pages: ({{ appsettings.number }} of {{ appsettings.paginator.num_pages }})
+                {% if appsettings.has_next %}
+                    <a href="?page={{ appsettings.next_page_number }}&amp;per_page={{ per_page }}">
                         <img src="{{ MEDIA_URL }}images/pagenav_next.gif" alt="Next Page" />
                     </a>
                 {% else %}
@@ -37,7 +37,7 @@
                 </tr>
             </thead>
             <tbody>
-            {% for setting in settings.object_list %}
+            {% for setting in appsettings.object_list %}
                 <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
                     <td>{{ setting.get_setting_name }}</td>
                     <td><input type="text" name="{{ setting.get_setting_name }}" value="{{ setting.get_setting_value }}" /></td>
