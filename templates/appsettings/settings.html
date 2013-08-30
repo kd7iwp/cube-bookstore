@@ -43,6 +43,7 @@
                     <td><input type="text" name="{{ setting.get_setting_name }}" value="{{ setting.get_setting_value }}" /></td>
                     <td>{{ setting.get_setting_description }}</td>
                 </tr>
+            {% endfor %}
             </tbody>
         </table>
     {% else %}
