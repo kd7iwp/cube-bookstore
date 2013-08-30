@@ -39,9 +39,9 @@
             <tbody>
             {% for setting in appsettings.object_list %}
                 <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
-                    <td>{{ setting.get_setting_name }}</td>
-                    <td><input type="text" name="{{ setting.get_setting_name }}" value="{{ setting.get_setting_value }}" /></td>
-                    <td>{{ setting.get_setting_description }}</td>
+                    <td>{{ setting.name }}</td>
+                    <td><textarea name="{{ setting.name }}" cols="25" rows="3">{{ setting.value }}</textarea></td>
+                    <td>{{ setting.description }}</td>
                 </tr>
             {% endfor %}
             </tbody>
