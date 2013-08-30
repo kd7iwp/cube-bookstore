@@ -90,6 +90,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'cube.books',
+    'cube.appsettings',
 )
 
 LOGIN_URL = "" # The url where the login view can be accessed
