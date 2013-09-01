@@ -4,7 +4,7 @@
 
 {% block content %}
 {% if user.is_staff %} 
-<form method ="post" action = "{% url update_staff %}">
+<form method ="post" action = "{% url update_settings %}">
 {% if appsettings.object_list %}
         {% if appsettings.has_other_pages %}
             <div class="PageCounterNav">
@@ -31,6 +31,7 @@
         <table cellspacing='0'>
             <thead>
                 <tr>
+                    <th></th>
                     <th>Setting</th>
                     <th>Value</th>
                     <th>Description</th>
@@ -39,13 +40,21 @@
             <tbody>
             {% for setting in appsettings.object_list %}
                 <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
+                    <td class="row_check">
+                        <input type="checkbox" name="idToEdit{{ forloop.counter }}" value="{{ setting.id }}" />
+                    </td>
                     <td>{{ setting.name }}</td>
-                    <td><textarea name="{{ setting.name }}" cols="25" rows="3">{{ setting.value }}</textarea></td>
+                    <td>{{ setting.value }}</td>
                     <td>{{ setting.description }}</td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
+
+        <p class="submit_options">
+            <input type="submit" name="Action" value="Edit" />
+            <input type="submit" name="Action" value="Delete" />
+        </p>
     {% else %}
         <p class='noresults'>There are no settings.</p>
     {% endif %}
