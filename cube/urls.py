@@ -71,4 +71,5 @@ urlpatterns += patterns('cube.users.views',
 
 urlpatterns += patterns('cube.appsettings.views',
     url(r'^appsettings/$', 'setting_list', name='appsettings'),
+    url(r'^update_setting/$', 'update_settings', name='update_settings'),
 )

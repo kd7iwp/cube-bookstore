@@ -75,7 +75,7 @@ def setting_list(request):
         'filter_text' : request.GET.get('filter', ''),
         'dir' : dir
     }
-    return rtr('appsettings/settings.html', var_dict, context_instance=RC(request))
+    return rtr('appsettings/settings_list.html', var_dict, context_instance=RC(request))
 
 @login_required()
 def update_settings(request):
@@ -112,31 +112,29 @@ def update_settings(request):
 # Probably can remove the next few lines at some point since we don't care about tracking deletions
         var_dict = { 'num_deleted': bunch.count() }
         bunch.update(status='D')
-        template = 'appsettings/deleted.html'
+        template = 'appsettings/update/deleted.html'
         return rtr(template, var_dict, context_instance=RC(request))
     elif action == "Edit":
         if bunch.count() > 1: too_many = True
         else: too_many = False
         item = bunch[0]
-        initial = {
+#        form = AppSettingForm(initial=initial)
+        logs = Log.objects.filter(book=item)
+        var_dict = {
+#            'form' : form,
             'name' : item.name,
             'value' : item.value,
             'description' : item.description,
-        }
-        form = AppSettingForm(initial=initial)
-        logs = Log.objects.filter(book=item)
-        var_dict = {
-            'form' : form,
             'too_many' : too_many,
             'id' : item.id,
             'logs' : logs,
         }
-        template = 'appsettings/setting_edit.html'
+        template = 'appsettings/update/edit.html'
         return rtr(template, var_dict, context_instance=RC(request))
     else:
         var_dict = {'action' : action}
 # Need to redirect to an AppSettings error page
-        template = 'books/update_book/error.html'
+        template = 'appsettings/update/error.html'
         return rtr(template, var_dict, context_instance=RC(request))
 
 @login_required()
