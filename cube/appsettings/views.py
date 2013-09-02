@@ -3,6 +3,7 @@
 # django imports
 from cube.appsettings.models import AppSetting
 from cube.books.models import MetaBook, Course, Book, Log
+from cube.appsettings.forms import SettingForm
 from cube.books.forms import NewBookForm, BookForm, FilterForm 
 from cube.books.views.tools import book_filter,\
                                   book_sort, get_number, tidy_error,\
@@ -78,43 +79,55 @@ def setting_list(request):
     return rtr('appsettings/settings_list.html', var_dict, context_instance=RC(request))
 
 @login_required()
-def edit_setting(request):
+def edit_setting(request, setting_id):
     """
     This view is used to update the values for an Application Setting
     
     Tests:
+        - GETTest
+        - SecurityTest
     """
-    if not request.method == "POST":
+        
+    if request.method == "POST":
         t = loader.get_template('405.html')
         c = RC(request)
         return HttpResponseNotAllowed(t.render(c), ['POST'])
-    action = request.POST.get("Action", '')
 
-    # We need at least 1 thing to edit, otherwise bad things can happen
-    if not request.POST.has_key('idToEdit1'):
+    # User must be staff or admin to get to this page
+    if not request.user.is_staff:
+        t = loader.get_template('403.html')
+        c = RC(request, {})
+        return HttpResponseForbidden(t.render(c))
+    try:
+        setting_obj = AppSetting.objects.get(id=setting_id)
+    except AppSetting.DoesNotExist:
+        # We need at least 1 thing to edit, otherwise bad things can happen
         var_dict = {
             'message' : "Didn't get any settings to process",
         }
         t = loader.get_template('400.html')
         c = RC(request, var_dict)
         return HttpResponseBadRequest(t.render(c))
-    else: 
-        specified_id = request.POST['idToEdit1']
-        item = get_object_or_404(AppSetting, pk=int(specified_id))
     
-        var_dict = {
-            'name' : item.name,
-            'value' : item.value,
-            'description' : item.description,
-            'too_many' : too_many,
-            'id' : item.id,
-            'logs' : logs,
-        }
-        template = 'appsettings/update/edit.html'
-        return rtr(template, var_dict, context_instance=RC(request))
+    initial = {
+        'name' : setting_obj.name,
+        'value' : setting_obj.value,
+        'description' : setting_obj.description,
+    }
+
+    form = SettingForm(initial)
+    var_dict = {
+        'form' : form,
+        'name' : setting_obj.name,
+        'value' : setting_obj.value,
+        'description' : setting_obj.description,
+        'id' : setting_obj.id,
+    }
+    template = 'appsettings/update/edit.html'
+    return rtr(template, var_dict, context_instance=RC(request))
 
 @login_required()
-def save_setting_edit(request):
+def save_setting(request):
     """
     Applies changes to an AppSetting on the edit page
     
