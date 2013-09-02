@@ -78,9 +78,9 @@ def setting_list(request):
     return rtr('appsettings/settings_list.html', var_dict, context_instance=RC(request))
 
 @login_required()
-def update_settings(request):
+def edit_setting(request):
     """
-    This view is used to update setting data
+    This view is used to update the values for an Application Setting
     
     Tests:
     """
@@ -88,7 +88,6 @@ def update_settings(request):
         t = loader.get_template('405.html')
         c = RC(request)
         return HttpResponseNotAllowed(t.render(c), ['POST'])
-    bunch = AppSetting.objects.none()
     action = request.POST.get("Action", '')
 
     # We need at least 1 thing to edit, otherwise bad things can happen
@@ -99,29 +98,11 @@ def update_settings(request):
         t = loader.get_template('400.html')
         c = RC(request, var_dict)
         return HttpResponseBadRequest(t.render(c))
-    for key, value in request.POST.items():
-        if "idToEdit" in key:
-            bunch = bunch | AppSetting.objects.filter(pk=int(value))
-            
-    if action == "Delete":
-        bunch = bunch.exclude(status='D')
-
-# We should check to see if there is a log function that is more extensible than just books        
-        for setting in bunch:
-            Log(action='D', book=setting, who=request.user).save()
-# Probably can remove the next few lines at some point since we don't care about tracking deletions
-        var_dict = { 'num_deleted': bunch.count() }
-        bunch.update(status='D')
-        template = 'appsettings/update/deleted.html'
-        return rtr(template, var_dict, context_instance=RC(request))
-    elif action == "Edit":
-        if bunch.count() > 1: too_many = True
-        else: too_many = False
-        item = bunch[0]
-#        form = AppSettingForm(initial=initial)
-        logs = Log.objects.filter(book=item)
+    else: 
+        specified_id = request.POST['idToEdit1']
+        item = get_object_or_404(AppSetting, pk=int(specified_id))
+    
         var_dict = {
-#            'form' : form,
             'name' : item.name,
             'value' : item.value,
             'description' : item.description,
@@ -130,11 +111,6 @@ def update_settings(request):
             'logs' : logs,
         }
         template = 'appsettings/update/edit.html'
-        return rtr(template, var_dict, context_instance=RC(request))
-    else:
-        var_dict = {'action' : action}
-# Need to redirect to an AppSettings error page
-        template = 'appsettings/update/error.html'
         return rtr(template, var_dict, context_instance=RC(request))
 
 @login_required()
