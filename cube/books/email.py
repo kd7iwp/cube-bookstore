@@ -2,6 +2,7 @@
 
 from cube.settings import DEBUG, ADMINS as admin_emails
 from cube.books.models import Book
+from cube.appsettings.models import AppSetting
 from django.core.mail import EmailMultiAlternatives
 from django.template import loader, Context
 from re import sub
@@ -87,3 +88,13 @@ def send_tbd_emails(books):
         subj = 'Your book%s not sold at the Cube' % p
         msg = create_email(subj, t.render(c), owner)
         msg.send()
+
+def get_setting_message():
+    """
+    Grabs the contents of the AppSetting which contains a
+    static message for insertion into emails. Staff/Administrators
+    can define this message at anytime through the settings page.
+    """
+
+    message_setting = AppSetting.objects.filter(name="Money Collection Hours")[:1]
+    return message_setting.value
