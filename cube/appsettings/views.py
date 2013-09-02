@@ -142,7 +142,7 @@ def save_setting(request):
         t = loader.get_template('403.html')
         c = RC(request)
         return HttpResponseForbidden(t.render(c))
-    form = BookForm(request.POST)
+    form = SettingForm(request.POST)
     if form.is_valid():
         id_to_edit = request.POST.get('IdToEdit')
         try:
@@ -150,18 +150,29 @@ def save_setting(request):
         except AppSetting.DoesNotExist:
             message = 'Application Setting with ref# "%s" does not exist' % id_to_edit
             return tidy_error(request, message)
+
+        setting.name = form.cleaned_data['name']
+        setting.value = form.cleaned_data['value']
+        setting.description = form.cleaned_data['description']
+        setting.save()
+
+        var_dict = { 'appsetting' : setting }
+        template = 'appsettings/update/edited.html'
+        return rtr(template, var_dict, context_instance=RC(request))
+
     elif request.POST.get('IdToEdit'):
         # form isn't valid, but we have an id to work with. send user back
         id_to_edit = request.POST.get('IdToEdit')
         var_dict = {
             'form' : form,
-            'too_many' : False,
+#            'too_many' : False,
             'id' : id_to_edit,
             'logs' : Log.objects.filter(setting=id_to_edit),
         }
-# Need the URL for the setting edit page        
+        
         template = 'appsettings/setting_edit.html'
         return rtr(template, var_dict, context_instance=RC(request))
+
 
 @login_required()
 def add_book(request):
@@ -203,7 +214,6 @@ def add_book(request):
                     return tidy_error(request, message)
             book = Book(price=price, status="F", metabook=metabook, seller=seller)
             book.save()
-            Log(book=book, who=request.user, action='A').save()
             var_dict = {
                 'title' : metabook.title,
                 'book_id' : book.id
@@ -268,7 +278,6 @@ def add_new_book(request):
             book = Book(seller=seller, price=Decimal(price), metabook=metabook)
             book.status = 'F'
             book.save()
-            Log(book=book, who=request.user, action='A').save()
 
             var_dict = {
                 'title' : metabook.title,
@@ -281,32 +290,3 @@ def add_new_book(request):
         var_dict = {'form' : form}
         template = 'books/add_new_book.html'
         return rtr(template, var_dict, context_instance=RC(request))
-
-@login_required()
-def remove_holds_by_user(request):
-    """
-    Tests:
-        - GETTest
-        - SecurityTest
-        - NotAllowedTest
-    """
-    if not request.method == "POST":
-        t = loader.get_template('405.html')
-        c = RC(request)
-        return HttpResponseNotAllowed(t.render(c), ['POST'])
-    # User must be staff or admin to get to this page
-    if not request.user.is_staff:
-        t = loader.get_template('403.html')
-        c = RC(request)
-        return HttpResponseForbidden(t.render(c))
-    for key, value in request.POST.items():
-        if "holder_id" == key:
-            holder = User.objects.get(pk=int(value))
-            break
-    books = Book.objects.filter(holder=holder, status='O')
-    for book in books:
-        Log(action='R', book=book, who=request.user).save()
-    var_dict = {'removed' : books.count()}
-    books.update(status='F', hold_date=None, holder=None)
-    template = 'books/update_book/remove_holds.html'
-    return rtr(template, var_dict, context_instance=RC(request))
