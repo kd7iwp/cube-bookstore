@@ -117,12 +117,16 @@ p{
     border-right: 1px solid #C1DAD7;
     }   
 
+#navigation ul li#settings a{
+    background: url(../images/edit.png) 0 0 no-repeat;
+    }
+
 #navigation ul li#list a:hover, #navigation ul li#my a:hover, #navigation ul li#add a:hover, #navigation ul li#staff a:hover, #navigation ul li#reports a:hover, #navigation ul li#help a:hover, #navigation ul li#log a:hover{
     color: #797268;
     background-position: 0 -34px;
     }
 
-#navigation li#list a.tab_active, #navigation li#my a.tab_active, #navigation li#add a.tab_active, #navigation li#staff a.tab_active, #navigation li#reports a.tab_active, #navigation li#help a.tab_active, #navigation li#log a.tab_active{
+#navigation li#list a.tab_active, #navigation li#my a.tab_active, #navigation li#add a.tab_active, #navigation li#staff a.tab_active, #navigation li#reports a.tab_active, #navigation li#settings a.tab_active, #navigation li#help a.tab_active, #navigation li#log a.tab_active{
     color: #797268;
     background-position: 0 -68px;
     }
