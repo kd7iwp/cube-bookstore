@@ -246,7 +246,7 @@ def update_book_edit(request):
         return HttpResponseForbidden(t.render(c))
     form = BookForm(request.POST)
     if form.is_valid():
-        id_to_edit = request.POST.get('IdToEdit')
+        id_to_edit = request.POST.get('idToEdit')
         try:
             book = Book.objects.get(id=id_to_edit)
         except Book.DoesNotExist:
@@ -284,9 +284,9 @@ def update_book_edit(request):
         template = 'books/update_book/edited.html'
         return rtr(template, var_dict, context_instance=RC(request))
             
-    elif request.POST.get('IdToEdit'):
+    elif request.POST.get('idToEdit'):
         # form isn't valid, but we have an id to work with. send user back
-        id_to_edit = request.POST.get('IdToEdit')
+        id_to_edit = request.POST.get('idToEdit')
         var_dict = {
             'form' : form,
             'too_many' : False,
