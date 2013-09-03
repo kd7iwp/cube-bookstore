@@ -26,6 +26,7 @@
 {% url help as help_url %}
 {% url reports_menu as reports_url %}
 {% url add_book as add_url %} 
+{% url appsettings as appsettings_url %}
 
         <div id="navigation">
             <ul>
@@ -68,7 +69,13 @@
                         <span>Reports</span>
                     </a>
                 </li>
-
+                {% endspaceless %}
+                {% spaceless %}
+                <li id="settings">
+                    <a href="{% url appsettings %}" class="{% tab_active request appsettings_url %}">
+                        <span>Settings</span>
+                    </a>
+                </li>
                 {% endspaceless %}
                 {% endif %}
 

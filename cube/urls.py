@@ -68,3 +68,9 @@ urlpatterns += patterns('cube.users.views',
     url(r'^profile/$', 'profile', name='profile'),
     url(r'^profile/edit/$', 'edit_profile', name='edit_profile')
 )
+
+urlpatterns += patterns('cube.appsettings.views',
+    url(r'^appsettings/$', 'setting_list', name='appsettings'),
+    url(r'^appsettings/(\d+)/$', 'edit_setting', name='edit_setting'),
+    url(r'^appsettings/save/$', 'save_setting', name="save_setting"),
+)

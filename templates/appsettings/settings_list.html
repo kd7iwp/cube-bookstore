@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+{% if user.is_staff %} 
+
+{% if appsettings.object_list %}
+        {% if appsettings.has_other_pages %}
+            <div class="PageCounterNav">
+                <p>
+                {% if appsettings.has_previous %}
+                    <a href="?page={{ appsettings.previous_page_number }}&amp;per_page={{ per_page }}">
+                        <img src="{{ MEDIA_URL }}images/pagenav_prev.gif" alt="Previous Page" />
+                    </a>
+                {% else %}
+                    <img src="{{ MEDIA_URL }}images/pagenav_prev_faded.gif" alt="No Previous Page" />
+                {% endif %}
+                Pages: ({{ appsettings.number }} of {{ appsettings.paginator.num_pages }})
+                {% if appsettings.has_next %}
+                    <a href="?page={{ appsettings.next_page_number }}&amp;per_page={{ per_page }}">
+                        <img src="{{ MEDIA_URL }}images/pagenav_next.gif" alt="Next Page" />
+                    </a>
+                {% else %}
+                    <img src="{{ MEDIA_URL }}images/pagenav_next_faded.gif" alt="No Next Page" />
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Enter all of the settings here -->
+        <table cellspacing='0'>
+            <thead>
+                <tr>
+                    <th>Setting</th>
+                    <th>Value</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for setting in appsettings.object_list %}
+                <tr class="{% cycle 'bgcolor_odd' 'bgcolor_even' %}">
+                    <td><a href="{% url edit_setting setting.id %}">{{ setting.name }}</a></td>
+                    <td>{{ setting.value }}</td>
+                    <td>{{ setting.description }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class='noresults'>There are no settings.</p>
+    {% endif %}
+
+{% else %}
+<p>You do not have permission to view this page</p>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<p>Your changes to <em>{{ appsetting.name }}</em> were successfully saved</p>
+<p>
+    <ul>
+        <li>Name: {{ appsetting.name }}</li>
+        <li>Value: {{ appsetting.value }}</li>
+        <li>Description: {{ appsetting.description }}</li>
+    </ul>
+</p>
+{% endblock %}

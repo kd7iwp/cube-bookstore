@@ -26,7 +26,7 @@ def staff_list(request):
         t = loader.get_template('403.html')
         c = RC(request, {})
         return HttpResponseForbidden(t.render(c))
-    users = User.objects.filter(is_staff = True)
+    users = User.objects.all().order_by('last_name')
     page_num = get_number(request.GET, 'page', PAGE_NUM)
     users_per_page = get_number(request.GET, 'per_page', PER_PAGE)
     paginator = Paginator(users, users_per_page)
@@ -100,6 +100,7 @@ def update_staff(request):
             user = twupass_backend.import_user(student_id)
             if user == None:
                 return tidy_error(request, "Invalid Student ID: %s" % student_id)
+        user.email = request.POST.get("email", '')
         if request.POST.get("role", '') == 'admin':
             user.is_superuser = True
             user.is_staff = True
@@ -157,6 +158,7 @@ def staff_edit(request):
         'too_many' : too_many,
         'name' : users[0].get_full_name(),
         'student_id' : users[0].id,
+        'email' : users[0].email,
         'current_role' : 'admin' if users[0].is_superuser else 'staff' 
     }
     template = 'books/staff_edit.html'

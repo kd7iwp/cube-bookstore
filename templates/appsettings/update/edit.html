@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h4>Edit an Application Setting</h4>
+{% if too_many %}
+    <p><em>You selected more than one item to edit. You can only edit 1 item at a time.</em></p>
+{% endif %}
+<div id="admin_form">
+    <form method="post" action="{% url save_setting %}">
+        <div>
+            <input type="hidden" name="IdToEdit" value="{{ id }}" />
+            {% include "form.html" %}
+            <p class="submit_options">
+                <input type="submit" value="Save" name="Action" />
+                <input type="submit" name="Action" value="Delete" onclick="DeleteButton='delete'; return confirm('This will permanently delete this item, are you sure?')" />
+            </p>
+        </div>
+    </form>
+{% endblock %}
