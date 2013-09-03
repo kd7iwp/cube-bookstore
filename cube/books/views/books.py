@@ -97,7 +97,7 @@ def update_book(request):
     action = request.POST.get("Action", '')
 
     # We need at least 1 thing to edit, otherwise bad things can happen
-    if not request.POST.has_key('idToEdit1'):
+    if not request.POST.has_key('idToEdit'):
         var_dict = {
             'message' : "Didn't get any books to process",
         }
