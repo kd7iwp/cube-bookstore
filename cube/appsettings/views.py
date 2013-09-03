@@ -167,10 +167,10 @@ def save_setting(request):
             'form' : form,
 #            'too_many' : False,
             'id' : id_to_edit,
-            'logs' : Log.objects.filter(setting=id_to_edit),
+#            'logs' : Log.objects.filter(setting=id_to_edit),
         }
         
-        template = 'appsettings/setting_edit.html'
+        template = 'appsettings/update/edit.html'
         return rtr(template, var_dict, context_instance=RC(request))
 
 
