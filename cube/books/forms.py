@@ -9,7 +9,7 @@ from decimal import Decimal
 
 class CourseNumberField(forms.IntegerField):
     # TODO this doesn't seem to be working
-    def validate(value):
+    def validate(self, value):
         if len(str(value)) < 2:
             raise ValidationError("The Course Number %d is too short" % value)
         if len(str(value)) > 3:
