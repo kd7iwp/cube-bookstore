@@ -9,5 +9,5 @@ from decimal import Decimal
 
 class SettingForm(forms.Form):
     name = forms.CharField(max_length=200)
-    value = forms.CharField(max_length=2000)
-    description = forms.CharField(max_length=2000)
+    value = forms.CharField(widget=forms.Textarea)
+    description = forms.CharField(widget=forms.Textarea)
