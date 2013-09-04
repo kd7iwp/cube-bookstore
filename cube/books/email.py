@@ -21,7 +21,11 @@ def index_by_owner(books):
     return items
 
 def create_context(owner, books):
+    custom_msg = get_setting_message()
+    if not len(custom_msg) > 1:
+        custom_msg = ''
     return Context({
+        'custom_msg' : custom_msg,
         'name' : owner.first_name,
         'num_books' : len(books),
         'book_titles' : map(lambda x: x.metabook.title, books),
@@ -96,5 +100,5 @@ def get_setting_message():
     can define this message at anytime through the settings page.
     """
 
-    message_setting = AppSetting.objects.filter(name="Money Collection Hours")[:1]
+    message_setting = AppSetting.objects.filter(name="Money Collection Hours")[0]
     return message_setting.value
