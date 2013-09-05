@@ -93,7 +93,8 @@ INSTALLED_APPS = (
     'cube.appsettings',
 )
 
-LOGIN_URL = "" # The url where the login view can be accessed
+LOGIN_URL = "" # The url where the login view can be accessed. Typically this can be a slash (/) as 
+               # the urls.py file redirects this to the login_cube view
 LOGIN_REDIRECT_URL = "books" #Where the login view should send users by default after authentication
 
 AUTHENTICATION_BACKENDS = (
