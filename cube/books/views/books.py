@@ -54,6 +54,12 @@ def book_list(request):
     if not request.user.is_staff:
         # Non staff can only see books which are for sale.
         books = filter(lambda x: x.status == 'F', books)
+    # Staff want to see the unsold books first so if we sort them ascending, that should do
+    else:
+        # This alphabet is the order in which book statuses should be displayed
+        alphabet = "FTSD"
+        # Sort by the index value of the book status in the alphabet
+        books = sorted(books, key=lambda book: [alphabet.index(book.status)])
 
     # Pagination
     page_num = get_number(request.GET, 'page', PAGE_NUM)
