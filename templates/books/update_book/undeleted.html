@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+    <p>{{ num_undeleted }} item{{ num_undeleted|pluralize:" has,s have" }} been
+        undeleted.
+    </p>
+{% endblock %}

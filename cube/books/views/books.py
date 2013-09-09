@@ -57,7 +57,7 @@ def book_list(request):
     # Staff want to see the unsold books first so if we sort them ascending, that should do
     else:
         # This alphabet is the order in which book statuses should be displayed
-        alphabet = "FTSD"
+        alphabet = "AFOPMTSD"
         # Sort by the index value of the book status in the alphabet
         books = sorted(books, key=lambda book: [alphabet.index(book.status)])
 
@@ -224,6 +224,23 @@ def update_book(request):
         }
         template = 'books/update_book/edit.html'
         return rtr(template, var_dict, context_instance=RC(request))
+    elif action == "Undelete":
+        # only staff can do this
+        if not request.user.is_staff: 
+            bunch = Book.objects.none()
+
+        # Filter out any books that aren't deleted
+        bunch = bunch.filter(status='D') 
+
+        # For each book revert to what its previous status was before being deleted
+        for book in bunch:
+            book.status = book.previous_status()
+            book.save()
+            Log(action='U', book=book, who=request.user).save()
+        var_dict = {'num_undeleted' : bunch.count()}
+        template = 'books/update_book/undeleted.html'
+        return rtr(template, var_dict, context_instance=RC(request))
+        
     else:
         var_dict = {'action' : action}
         template = 'books/update_book/error.html'
