@@ -184,29 +184,29 @@ class Book(models.Model):
    
     # Looks in the logs to find the last status that this book had
     def previous_status(self):
-         action_to_choice = {
-            'A' : 'F', # -> For Sale
-            'M' : 'M', # -> Missing
-            'O' : 'O', # -> On Hold
-            'X' : 'O', # -> On Hold
-            'R' : 'F', # -> For Sale
-            'P' : 'P', # -> Seller Paid
-            'S' : 'S', # -> Sold
-            'T' : 'T', # -> To Be Deleted
-            'D' : 'D', # -> Deleted
-        }
+		action_to_choice = {
+			'A' : 'F', # -> For Sale
+			'M' : 'M', # -> Missing
+			'O' : 'O', # -> On Hold
+			'X' : 'O', # -> On Hold
+			'R' : 'F', # -> For Sale
+			'P' : 'P', # -> Seller Paid
+			'S' : 'S', # -> Sold
+			'T' : 'T', # -> To Be Deleted
+			'D' : 'D', # -> Deleted
+		}
 
-        # There are some log actions that don't correspond to a book status, if the previous
-        # action is one of these, discard it and go to the action before that, etc...
-        history = Log.objects.all()
-        #history = Log.objects.filter(book=self.id).exclude(action_in['D', 'E', 'U']).order_by('when')
-        #history = Log.objects.filter(book=self.id).exclude(action='D').exclude(action='E').exclude(action='U').order_by('when').reverse()
+		# There are some log actions that don't correspond to a book status, if the previous
+		# action is one of these, discard it and go to the action before that, etc...
+		history = Log.objects.all()
+		#history = Log.objects.filter(book=self.id).exclude(action_in['D', 'E', 'U']).order_by('when')
+		#history = Log.objects.filter(book=self.id).exclude(action='D').exclude(action='E').exclude(action='U').order_by('when').reverse()
         
         # Loop through previous logs and return it if it is in our STATUS_CHOICES
-        for log_point in history:
-            if log_point.action in action_to_choice.keys():
-                return action_to_choice[log_point.action]
-        return ''
+		for log_point in history:
+			if log_point.action in action_to_choice.keys():
+				return action_to_choice[log_point.action]
+		return ''
 
 class Log(models.Model):
     """
