@@ -173,8 +173,7 @@ class Book(models.Model):
     list_date = models.DateTimeField('Date Listed', default=datetime.now)
     seller = models.ForeignKey(User, related_name="selling")
     sell_date = models.DateTimeField('Date Sold', blank=True, null=True)
-    holder = models.ForeignKey(User, related_name="holding",
-                               blank=True, null=True)
+    holder = models.ForeignKey(User, related_name="holding", blank=True, null=True)
     hold_date = models.DateTimeField('Date Held', blank=True, null=True)
     price = models.DecimalField(max_digits=7, decimal_places=2)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='F')
