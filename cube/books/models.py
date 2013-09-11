@@ -173,16 +173,40 @@ class Book(models.Model):
     list_date = models.DateTimeField('Date Listed', default=datetime.now)
     seller = models.ForeignKey(User, related_name="selling")
     sell_date = models.DateTimeField('Date Sold', blank=True, null=True)
-    holder = models.ForeignKey(User, related_name="holding",
-                               blank=True, null=True)
+    holder = models.ForeignKey(User, related_name="holding", blank=True, null=True)
     hold_date = models.DateTimeField('Date Held', blank=True, null=True)
     price = models.DecimalField(max_digits=7, decimal_places=2)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='F')
     is_legacy = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return "%s listed by %s on %s" % (self.metabook, self.seller,
-                                          self.list_date.date())
+        return "%s listed by %s on %s" % (self.metabook, self.seller, self.list_date.date())
+
+    def previous_status(self):
+        # Map the various log actions to their equivalent book status
+        action_to_choice = {
+            'A' : 'F', # -> For Sale
+            'M' : 'M', # -> Missing
+            'O' : 'O', # -> On Hold
+            'X' : 'O', # -> On Hold
+            'R' : 'F', # -> For Sale
+            'P' : 'P', # -> Seller Paid
+            'S' : 'S', # -> Sold
+            'T' : 'T', # -> To Be Deleted
+            'D' : 'D', # -> Deleted
+        }
+
+        # There are some log actions that don't correspond to a book status, if the previous
+        # action is one of these, discard it and go to the action before that, etc...
+        # For example, we don't want to revert to a deleted or undeleted status
+        history = Log.objects.filter(book=self.id).exclude(action='D').exclude(action='E').exclude(action='U').order_by('when').reverse()
+
+        # Loop through previous logs and return it if it is in our action_to_choice mapping 
+        for log_point in history:
+            if log_point.action in action_to_choice.keys():
+                return action_to_choice[log_point.action]
+        return ''
+
 class Log(models.Model):
     """
     Keeps track of all actions taken on Books
@@ -198,6 +222,7 @@ class Log(models.Model):
         (u'T', u'Marked as To Be Deleted'), # -> To Be Deleted
         (u'D', u'Deleted'), # -> Deleted
         (u'E', u'Edited'), # -> Same Status
+        (u'U', u'Undeleted'), # -> Previous non-deleted status 
     )
     action = models.CharField(max_length=1, choices=ACTION_CHOICES)
     when = models.DateTimeField(default=datetime.now)
