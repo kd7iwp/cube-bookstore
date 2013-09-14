@@ -11,6 +11,7 @@ from django.shortcuts import render_to_response as rtr
 from django.template import loader, RequestContext as RC
 from django.http import HttpResponseForbidden
 from django.contrib.auth.models import User
+from django.db.models import Sum
 
 @login_required()
 def menu(request):
@@ -82,8 +83,16 @@ def books_sold_within_date(request):
     to_date = date_range_form.cleaned_data['to_date']
     from_date = date_range_form.cleaned_data['from_date']
     book_sale_logs = Log.objects.filter(action='S', when__gte=from_date).exclude(when__gt=to_date)
+
+    # Find all the books for the related Logs
+    books_sold = Book.objects.filter(id__in=book_sale_logs.values('book_id'))
+    
+    # Sum up the price of all the books retrieved previously
+    total_money = books_sold.aggregate(total=Sum('price'))['total']
+
     var_dict = {
         'book_sale_logs' : book_sale_logs.order_by('book__sell_date'),
+        'total_money' : total_money,
         'from_date' : from_date,
         'to_date' : to_date,
     }
