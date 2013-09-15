@@ -104,18 +104,17 @@ def update_book(request):
 
     # We need at least 1 thing to edit, otherwise bad things can happen
     # Since the keys have to be unique, the template appends a number to each idToEdit
-    if not request.POST.has_key('idToEdit1'):
+    if not request.POST.has_key('idToEdit'):
         var_dict = {
             'message' : "Didn't get any books to process",
         }
         t = loader.get_template('400.html')
         c = RC(request, var_dict)
         return HttpResponseBadRequest(t.render(c))
-    for key, value in request.POST.items():
-        # If the key has idToEdit somewhere in it then we can take its value and process it
-        if "idToEdit" in key:
-            bunch = bunch | Book.objects.filter(pk=int(value))
-            
+    # For each form key of idToEdit add its value to our list of items to process
+    for value in request.POST.getlist('idToEdit'):
+        bunch = bunch | Book.objects.filter(pk=int(value))
+        
     if action == "Delete":
         bunch = bunch.exclude(status='D')
         for book in bunch:
